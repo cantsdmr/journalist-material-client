@@ -37,7 +37,7 @@ const CreatePoll: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container>
       <Typography variant="h4" gutterBottom>
         Create a Poll
       </Typography>
@@ -48,6 +48,12 @@ const CreatePoll: React.FC = () => {
         onChange={(e) => setQuestion(e.target.value)}
         margin="normal"
       />
+      <hr />
+      <br />
+      <br />
+      <Typography variant="h6" gutterBottom>
+        Options for the poll
+      </Typography>
       {options.map((option, index) => (
         <Card key={option.id} sx={{ mt: 2 }}>
           <CardContent>

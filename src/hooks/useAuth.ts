@@ -1,30 +1,23 @@
-import { useState } from "react";
-import { Auth, UserCredential, signInWithEmailAndPassword } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { Auth, AuthProvider, User, signInWithEmailAndPassword, signInWithPopup, signOut as signOutFromFirebase } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 
+export interface AuthType {
+    user: User | null;
+    signIn: (email: string, password: string) => void;
+    signInWithProvider: (provider: AuthProvider) => void;
+    signOut: () => void;
+}
+
 export const useAuth = (firebaseAuth : Auth) => {
-    const [user, setUser] = useState<any>(null)
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [user, setUser] = useState<User | null>(null)
 
-    onAuthStateChanged(firebaseAuth, (firebaseUser) => {
-        if (firebaseUser) {
-            setUser(firebaseUser as any)
-        }
-    });
+    const signIn = async (email: string, password: string) => {
+        await signInWithEmailAndPassword(firebaseAuth, email, password);
+    };
 
-    const signIn = async () => {
-        const user = firebaseAuth.currentUser;
-
-        signInWithEmailAndPassword(firebaseAuth, 'userNew@example.com', 'your_password')
-        .then((user: UserCredential) => {
-            setUser(user as any);
-            setIsAuthenticated(true);
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // ..
-        });
+    const signInWithProvider = async (provider: AuthProvider) => {
+        await signInWithPopup(firebaseAuth, provider);
     };
 
     // const signUp = async (data) => {
@@ -40,10 +33,20 @@ export const useAuth = (firebaseAuth : Auth) => {
     //     }
     // };
 
-    const signOut = () => {
+    const signOut = async () => {
+        await signOutFromFirebase(firebaseAuth);
         setUser(null);
-        setIsAuthenticated(false);
     };
 
-    return { user, isAuthenticated, signIn, signOut };
+
+    useEffect(() => {
+        onAuthStateChanged(firebaseAuth, (firebaseUser) => {
+            // implement signup mechanism
+            if (firebaseUser) {
+                setUser(firebaseUser)
+            }
+        });
+    }, [])
+    
+    return { user, signIn, signInWithProvider, signOut } ;
 };

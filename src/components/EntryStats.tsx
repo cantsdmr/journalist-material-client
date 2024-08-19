@@ -3,13 +3,13 @@ import { Box, IconButton, Typography, Rating } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { Video } from '../constants/videos';
+import { News } from '../APIs/NewsAPI';
 
 interface EntryStatsProps {
-  video: Video;
+  news: News;
 }
 
-const EntryStats: React.FC<EntryStatsProps> = ({ video }) => {
+const EntryStats: React.FC<EntryStatsProps> = ({ news }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
       <IconButton aria-label="like">
@@ -25,16 +25,16 @@ const EntryStats: React.FC<EntryStatsProps> = ({ video }) => {
         <Typography variant="body2" sx={{ mr: 1 }}>
           Ethic Value:
         </Typography>
-        <Rating name="ethic-value" value={video.ethicValue} precision={0.5} readOnly />
+        {/* <Rating name="ethic-value" value={news.ethicValue} precision={0.5} readOnly /> */}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
         <Typography variant="body2" sx={{ mr: 1 }}>
           Fund:
         </Typography>
-        <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+        {/* <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
           <AttachMoneyIcon sx={{ fontSize: 'inherit' }} />
-          {video.fund}
-        </Typography>
+          {news.fund}
+        </Typography> */}
       </Box>
     </Box>
   );

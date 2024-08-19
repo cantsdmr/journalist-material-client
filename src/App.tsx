@@ -1,5 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import { AuthProvider } from './contexts/AuthContext';
+import PrivateRoute from './navigation/PrivateRoute';
+import { ApiProvider } from './contexts/ApiContext';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
+import MainLayout from './navigation/MainLayout';
 import Feed from './pages/Feed';
 import Subscriptions from './pages/Subscriptions';
 import Explore from './pages/Explore';
@@ -8,35 +15,29 @@ import Reels from './pages/Reels';
 import CreatePoll from './components/CreatePoll';
 import Polls from './pages/Polls';
 import DivisionProfile from './pages/DivisionProfile';
-import LandingPage from './pages/LandingPage';
-import { AuthProvider, useAuthContext } from './contexts/AuthContext';
-import PrivateRoute from './navigation/PrivateRoute';
-import { ApiProvider } from './contexts/ApiContext';
-import Login from './pages/Login';
-import NotFound from './pages/NotFound';
-import MainLayout from './navigation/MainLayout';
+import CreateOrEditNews from './components/CreateNews';
+import { UserProvider } from './contexts/UserContext';
 
-const App: React.FC = () => {
-  const auth = useAuthContext();
-  
+const App: React.FC = () => {  
   return (
-    <ApiProvider>
-      <AuthProvider>
-        <Router>
+    <AuthProvider>
+      <ApiProvider>
+        <UserProvider>
           <Routes>
             <Route
-              path="/"
+              path=""
               element={
-                auth?.isAuthenticated ? <Navigate to="/app/feed" replace /> : <LandingPage />
+                <LandingPage />
               }
             />
-            <Route path="/login" element={<Login />} />
-            <Route path="/app" element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+            <Route path="login" element={<Login />} />
+            <Route path="app/*" element={<PrivateRoute><MainLayout /></PrivateRoute>} >
               <Route path="feed" element={<Feed />} />
               <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="explore" element={<Explore />} />
               <Route path="entry/:id" element={<EntryDetails />} />
               <Route path="reels" element={<Reels />} />
+              <Route path="create-news" element={<CreateOrEditNews />} />
               <Route path="create-poll" element={<CreatePoll />} />
               <Route path="polls" element={<Polls />} />
               <Route path="profile/:creatorId" element={<DivisionProfile />} />
@@ -44,9 +45,9 @@ const App: React.FC = () => {
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Router>
-      </AuthProvider>
-    </ApiProvider>
+          </UserProvider>
+      </ApiProvider>
+    </AuthProvider>
   );
 };
 

@@ -1,82 +1,172 @@
-import React, { useState } from 'react';
-import { Container, Box, TextField, Button, Typography } from '@mui/material';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { firebaseAuth, googleProvider, twitterProvider } from '../util/firebase';
+import React, { Provider, useEffect, useState } from 'react';
+import { Container, Box, TextField, Button, Typography, Divider, Link, IconButton, ButtonProps } from '@mui/material';
+import { AuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { firebaseAuth, googleProvider, twitterProvider, facebookProvider, appleProvider } from '../util/firebase';
 import { useNavigate } from 'react-router-dom';
+import GoogleIcon from '@mui/icons-material/Google';
+import XIcon from '@mui/icons-material/X';
+import FacebookIcon from '@mui/icons-material/Facebook';
+import AppleIcon from '@mui/icons-material/Apple';
+import { styled } from '@mui/material/styles';
+import { useAuth } from '../hooks/useAuth';
+
+interface SocialButtonProps {
+  bgcolor: string;
+}
+
+const SocialButton = styled(Button)<SocialButtonProps>(({ theme, bgcolor }) => ({
+  color: '#fff',
+  backgroundColor: bgcolor,
+  boxShadow: `0 2px 4px 0 ${bgcolor}80`, // Add transparency to the color for the shadow
+  '&:hover': {
+    backgroundColor: theme.palette.augmentColor({ color: { main: bgcolor } }).dark,
+  },
+  '& .MuiButton-startIcon': {
+    marginRight: theme.spacing(1),
+  },
+}));
+
+// const GoogleButton = styled(IconButton)(({ theme }) => ({
+//   color: '#DB4437',
+//   boxShadow: '0 2px 4px 0 rgba(219, 68, 55, 0.3)',
+//   '&:hover': {
+//     backgroundColor: 'rgba(219, 68, 55, 0.1)',
+//   },
+// }));
+
+// const TwitterButton = styled(IconButton)(({ theme }) => ({
+//   color: '#1DA1F2',
+//   boxShadow: '0 2px 4px 0 rgba(29, 161, 242, 0.3)',
+//   '&:hover': {
+//     backgroundColor: 'rgba(29, 161, 242, 0.1)',
+//   },
+// }));
+
+// const FacebookButton = styled(IconButton)(({ theme }) => ({
+//   color: '#1877F2',
+//   boxShadow: '0 2px 4px 0 rgba(24, 119, 242, 0.3)',
+//   '&:hover': {
+//     backgroundColor: 'rgba(24, 119, 242, 0.1)',
+//   },
+// }));
+
+// const AppleButton = styled(IconButton)(({ theme }) => ({
+//   color: '#000000',
+//   boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.3)',
+//   '&:hover': {
+//     backgroundColor: 'rgba(0, 0, 0, 0.1)',
+//   },
+// }));
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const auth = useAuth(firebaseAuth);
   const navigate = useNavigate();
 
   const handleEmailLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      await signInWithEmailAndPassword(firebaseAuth, email, password);
-      navigate('/feed');
+      await auth.signIn(email, password);
     } catch (error) {
       setError('Failed to login with email and password');
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleProviderLogin = async (provider: AuthProvider) => {
     try {
-      await signInWithPopup(firebaseAuth, googleProvider);
-      navigate('/feed');
+      await auth.signInWithProvider(provider);
     } catch (error) {
       setError('Failed to login with Google');
     }
   };
 
-  const handleTwitterLogin = async () => {
-    try {
-      await signInWithPopup(firebaseAuth, twitterProvider);
-      navigate('/feed');
-    } catch (error) {
-      setError('Failed to login with Twitter');
+  useEffect(() => {
+    if (auth?.user) {
+      navigate('/app/feed')
     }
-  };
+  }, [auth?.user != null])
+  
 
   return (
-    <Container maxWidth="xs">
-      <Box sx={{ mt: 8, textAlign: 'center' }}>
+    <Container maxWidth="xs" sx={{ mt: 8 }}>
+      <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Login
+          Welcome back!
         </Typography>
-        {error && (
-          <Typography variant="body2" color="error" gutterBottom>
-            {error}
-          </Typography>
-        )}
-        <Box component="form" onSubmit={handleEmailLogin} sx={{ mt: 2 }}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            variant="outlined"
-            fullWidth
-            type="password"
-            margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-            Login with Email
-          </Button>
+      </Box>
+      {error && (
+        <Typography variant="body2" color="error" gutterBottom>
+          {error}
+        </Typography>
+      )}
+      <Box component="form" onSubmit={handleEmailLogin} sx={{ mb: 2 }}>
+        <TextField
+          label="Email"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          label="Password"
+          variant="outlined"
+          fullWidth
+          type="password"
+          margin="normal"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Box sx={{ textAlign: 'right', mb: 2 }}>
+          <Link href="#" variant="caption">
+            Did you forget your password?
+          </Link>
         </Box>
-        <Button onClick={handleGoogleLogin} variant="contained" color="secondary" fullWidth sx={{ mt: 2 }}>
-          Sign In with Google
+        <Button type="submit" variant="outlined" color="secondary" fullWidth sx={{ mb: 2 }}>
+          Log In
         </Button>
-        <Button onClick={handleTwitterLogin} variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
-          Sign In with Twitter
-        </Button>
+      </Box>
+      <Divider sx={{ my: 2 }}>OR</Divider>
+      <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <Typography variant="body2" gutterBottom>
+          You can log in our application with following providers
+        </Typography>
+      </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <SocialButton
+            variant="contained"
+            startIcon={<GoogleIcon />}
+            bgcolor="#DB4437"
+            onClick={handleProviderLogin.bind(this, googleProvider)}
+          >
+            Sign in with Google
+          </SocialButton>
+          <SocialButton
+            variant="contained"
+            startIcon={<XIcon />}
+            bgcolor="#1DA1F2"
+            onClick={handleProviderLogin.bind(this, twitterProvider)}
+          >
+            Sign in with X
+          </SocialButton>
+          <SocialButton
+            variant="contained"
+            startIcon={<FacebookIcon />}
+            bgcolor="#1877F2"
+            onClick={handleProviderLogin.bind(this, facebookProvider)}
+          >
+            Sign in with Facebook
+          </SocialButton>
+          <SocialButton
+            variant="contained"
+            startIcon={<AppleIcon />}
+            bgcolor="#000000"
+            onClick={handleProviderLogin.bind(this, appleProvider)}
+          >
+            Sign in with Apple
+          </SocialButton>
       </Box>
     </Container>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, IconButton, Box, Drawer, InputBase, CssBaseline } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
@@ -21,9 +21,9 @@ const Search = styled('div')(({ theme }) => ({
       marginLeft: theme.spacing(3),
       width: 'auto',
     },
-  }));
+}));
   
-  const SearchIconWrapper = styled('div')(({ theme }) => ({
+const SearchIconWrapper = styled('div')(({ theme }) => ({
     padding: theme.spacing(0, 2),
     height: '100%',
     position: 'absolute',
@@ -31,9 +31,9 @@ const Search = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  }));
+}));
   
-  const StyledInputBase = styled(InputBase)(({ theme }) => ({
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
     color: 'inherit',
     width: '100%',
     '& .MuiInputBase-input': {
@@ -45,17 +45,16 @@ const Search = styled('div')(({ theme }) => ({
         width: '20ch',
       },
     },
-  }));
+}));
 
-const MainLayout: React.FC = () => {
-    const [isSidebarOpen, setSidebarOpen] = useState(true);
+const SideBarwithPage: React.FC = () => {
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   
-    const toggleSidebar = () => {
+  const toggleSidebar = () => {
       setSidebarOpen(!isSidebarOpen);
-    };
-  
-    return (
-      <Box sx={{ display: 'flex' }}>
+  };
+
+  return <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar>
@@ -63,7 +62,7 @@ const MainLayout: React.FC = () => {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div">
-              YouTube
+              Journalist Land
             </Typography>
             <Box sx={{ flexGrow: 1 }} />
             <Search>
@@ -86,8 +85,8 @@ const MainLayout: React.FC = () => {
           }}
         >
           <Toolbar />
-          <Box sx={{ overflow: 'auto' }}>
-            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          <Box sx={{ overflowX: 'hidden' }}>
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
           </Box>
         </Drawer>
         <Box
@@ -97,7 +96,12 @@ const MainLayout: React.FC = () => {
           <Toolbar />
           <Outlet />
         </Box>
-      </Box>
+    </Box>;
+}
+
+const MainLayout: React.FC = () => {  
+  return (
+      <SideBarwithPage />
     );
 };
   

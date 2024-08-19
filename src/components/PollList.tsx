@@ -86,7 +86,7 @@ const PollList: React.FC = () => {
       </Typography>
       {isCreator && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button variant="contained" color="primary" onClick={() => navigate('/create-poll')}>
+          <Button variant="contained" color="primary" onClick={() => navigate('/app/create-poll')}>
             Create Poll
           </Button>
         </Box>

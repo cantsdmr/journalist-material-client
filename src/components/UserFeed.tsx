@@ -1,40 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Grid } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Entry from '../components/Entry';
-import { allVideos, Video } from '../constants/videos';
+import { News } from '../APIs/NewsAPI';
+import { useApiContext } from '../contexts/ApiContext';
 
 const UserFeed: React.FC = () => {
-  const [videos, setVideos] = useState<Video[]>(allVideos.slice(0, 5));
+  const [allNews, setAllNews] = useState<News[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const { api, isAuthenticated } = useApiContext();
 
   const fetchMoreData = () => {
-    if (videos.length >= allVideos.length) {
-      setHasMore(false);
-      return;
-    }
-    // Simulate an API call to fetch more data
-    setTimeout(() => {
-      setVideos(videos.concat(allVideos.slice(videos.length, videos.length + 5)));
-    }, 1500);
+    getNews(page + 1)
   };
+
+  const getNews = async (_page: number = page) => {
+    const newsResult = await api?.newsApi.list({
+      page: _page,
+      limit
+    });
+    setAllNews(allNews.concat(newsResult?.data ?? []));
+    setPage(newsResult?._meta.currentPage ?? 1)
+    setLimit(newsResult?._meta.limit ?? 1)
+    setHasMore(newsResult?._meta.hasNext === true)
+  }
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getNews()
+    }
+  }, [api?.newsApi != null, isAuthenticated])
+  
 
   return (
     <Container maxWidth="md">
       <InfiniteScroll
-        dataLength={videos.length}
+        dataLength={allNews.length}
         next={fetchMoreData}
         hasMore={hasMore}
         loader={<h4>Loading...</h4>}
         endMessage={
           <p style={{ textAlign: 'center' }}>
-            <b>Yay! You have seen it all</b>
+            <b>No more records to display.</b>
           </p>
         }
       >
         <Grid container spacing={2}>
-          {videos.map((video) => (
-            <Entry key={video.id} video={video} />
+          {allNews.map((video) => (
+            <Entry key={video.id} news={video} />
           ))}
         </Grid>
       </InfiniteScroll>

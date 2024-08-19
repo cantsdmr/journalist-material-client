@@ -1,22 +1,23 @@
-import React, { createContext, ReactNode, useContext } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { AuthType, useAuth } from '../hooks/useAuth';
 import { firebaseAuth } from '../util/firebase';
 
-interface AuthContextProps {
-  isAuthenticated: boolean;
-  user: any;
-  login: (token: string, userData: any) => void;
-  logout: () => void;
-}
-
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+const AuthContext = createContext<AuthType | undefined>(undefined);
 const useAuthContext = () => useContext(AuthContext);
 
 const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const auth = useAuth(firebaseAuth)
+  const [value, setValue] = useState<AuthType | undefined>(undefined);
 
+  useEffect(() => {
+    if (auth?.user) {
+      setValue(auth)
+    }
+  
+  }, [auth?.user])
+  
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

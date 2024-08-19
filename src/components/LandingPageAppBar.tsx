@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { AppBar, Toolbar, Button, InputBase, Box } from '@mui/material';
 import { styled, alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from 'react-router-dom';
 import logoURL from '../assets/logo.png'
+import { useAuthContext } from '../contexts/AuthContext';
+import { useUserInfoContext } from '../contexts/UserContext';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -45,6 +47,23 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const LandingPageAppBar: React.FC = () => {
+  const auth = useAuthContext();
+  const userInfo = useUserInfoContext();
+  const [signedIn, setSignedIn] = useState<boolean>(false);
+
+  const logout = async () => {
+    await auth?.signOut()
+    setSignedIn(false)
+  }
+
+  useEffect(() => {
+      if (auth?.user) {
+        setSignedIn(true)
+        userInfo
+      }
+
+  }, [auth?.user])
+
   return (
     <AppBar position="absolute" sx={{ background: '#f0e8e861', boxShadow: 'none' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -62,7 +81,10 @@ const LandingPageAppBar: React.FC = () => {
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Button color="primary" variant="outlined" size="large" component={Link} style={{ marginRight: 30 }} to="/login">
-            Log in
+            {!signedIn ? "Log in" : "Explore" }
+          </Button>
+          <Button color="primary" variant="outlined" size="large" disabled={!signedIn} onClick={logout} style={{ marginRight: 30 }}>
+            Log out
           </Button>
           <Button color="secondary" variant="outlined" size="large" component={Link} to="/get-started">
             Get Started
