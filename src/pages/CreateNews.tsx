@@ -3,7 +3,7 @@ import { Box, TextField, Button, Typography, Divider, MenuItem, Select, InputLab
 import { CreateNewsData } from '../APIs/NewsAPI';
 import { useApiContext } from '../contexts/ApiContext';
 
-const CreateOrEditNews: React.FC = () => {
+const CreateNews: React.FC = () => {
     const [newsData, setNewsData] = useState<CreateNewsData>({
         division_id: '',
         title: '',
@@ -163,4 +163,4 @@ const CreateOrEditNews: React.FC = () => {
     );
 };
 
-export default CreateOrEditNews;
+export default CreateNews;

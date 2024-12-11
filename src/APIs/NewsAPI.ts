@@ -1,5 +1,5 @@
 import { AxiosJournalist } from "../util/axios";
-import { HTTPApi } from "../util/http";
+import { Collection, HTTPApi } from "../util/http";
 
 export type News = {
     id: string;
@@ -24,5 +24,14 @@ const API_PATH = '/api/news'
 export class NewsAPI extends HTTPApi<News, CreateNewsData, EditNewsData> {
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
+    }
+
+    // get most popular news
+    public getMostPopular = async (): Promise<Collection<News>> => {
+        return this.list({
+            sort: 'views',
+            order: 'desc',
+            limit: 10
+        });
     }
 }

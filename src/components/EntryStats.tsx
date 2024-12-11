@@ -3,7 +3,7 @@ import { Box, IconButton, Typography, Rating } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { News } from '../APIs/NewsAPI';
+import { News } from '@APIs/NewsAPI';
 
 interface EntryStatsProps {
   news: News;

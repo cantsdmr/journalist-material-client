@@ -17,11 +17,11 @@ const UserFeed: React.FC = () => {
   };
 
   const getNews = async (_page: number = page) => {
-    const newsResult = await api?.newsApi.list({
+    const newsResult = await api?.newsApi.list(`most-popular`, {
       page: _page,
       limit
     });
-    setAllNews(allNews.concat(newsResult?.data ?? []));
+    setAllNews(allNews.concat(newsResult?.items ?? []));
     setPage(newsResult?._meta.currentPage ?? 1)
     setLimit(newsResult?._meta.limit ?? 1)
     setHasMore(newsResult?._meta.hasNext === true)
@@ -32,7 +32,7 @@ const UserFeed: React.FC = () => {
       getNews()
     }
   }, [api?.newsApi != null, isAuthenticated])
-  
+
 
   return (
     <Container maxWidth="md">

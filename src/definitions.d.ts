@@ -3,3 +3,5 @@
 //       "#1877F2": true;
 //     }
 //   }
+
+type Nullable<T> = T | null | undefined;

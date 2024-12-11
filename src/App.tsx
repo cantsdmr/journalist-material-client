@@ -15,10 +15,16 @@ import Reels from './pages/Reels';
 import CreatePoll from './components/CreatePoll';
 import Polls from './pages/Polls';
 import DivisionProfile from './pages/DivisionProfile';
-import CreateOrEditNews from './components/CreateNews';
 import { UserProvider } from './contexts/UserContext';
+import PublicRoute from './navigation/PublicRoute';
+import DemoLayout from './navigation/DemoLayout';
+import DemoCreatorProfile from './demo/DemoCreatorProfile';
+import DemoExploreCreators from './demo/DemoExploreCreators';
+import DemoNewsFeed from './demo/DemoNewsFeed';
+import DemoSupporterDashboard from './demo/DemoSupporterDashboard';
+import DemoPoll from './demo/DemoPoll';
 
-const App: React.FC = () => {  
+const App: React.FC = () => {
   return (
     <AuthProvider>
       <ApiProvider>
@@ -31,13 +37,20 @@ const App: React.FC = () => {
               }
             />
             <Route path="login" element={<Login />} />
+            <Route path="demo/*" element={<PublicRoute><DemoLayout /></PublicRoute>} >
+              <Route path="creator-profile" element={<DemoCreatorProfile />} />
+              <Route path="explore-creators" element={<DemoExploreCreators />} />
+              <Route path="news-feed" element={<DemoNewsFeed />} />
+              <Route path="demo-poll" element={<DemoPoll />} />
+              <Route path="supporter-dashboard" element={<DemoSupporterDashboard />} />
+            </Route>
             <Route path="app/*" element={<PrivateRoute><MainLayout /></PrivateRoute>} >
               <Route path="feed" element={<Feed />} />
               <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="explore" element={<Explore />} />
               <Route path="entry/:id" element={<EntryDetails />} />
               <Route path="reels" element={<Reels />} />
-              <Route path="create-news" element={<CreateOrEditNews />} />
+              {/* <Route path="create-news" element={<CreateOrEditNews />} /> */}
               <Route path="create-poll" element={<CreatePoll />} />
               <Route path="polls" element={<Polls />} />
               <Route path="profile/:creatorId" element={<DivisionProfile />} />
@@ -45,7 +58,7 @@ const App: React.FC = () => {
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </UserProvider>
+        </UserProvider>
       </ApiProvider>
     </AuthProvider>
   );

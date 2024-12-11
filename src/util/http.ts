@@ -1,17 +1,19 @@
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { AxiosJournalist } from './axios';
 
+export interface Meta {
+  offset: number
+  limit: number
+  total: number
+  pageCount: number
+  currentPage: number
+  hasPrev: boolean
+  hasNext: boolean
+}
+
 export interface Collection<T>{
-  data: T[]
-  _meta: {
-    offset: number
-    limit: number
-    total: number
-    pageCount: number
-    currentPage: number
-    hasPrev: boolean
-    hasNext: boolean
-  }
+  items: T[]
+  _meta: Meta
 }
 
 export class HTTPApi<T, P, R> {
@@ -23,10 +25,10 @@ export class HTTPApi<T, P, R> {
     this.apiPath = apiPath
   }
 
-  public list = async (query?: Record<string, any> , config?: AxiosRequestConfig): Promise<Collection<T>> => {
+  public list = async (path: string, query?: Record<string, any> , config?: AxiosRequestConfig): Promise<Collection<T>> => {
     const params = new URLSearchParams(query);
     const paramString = params.size === 0 ? '' : `?${params.toString()}`
-    return this._list(`${this.apiPath}${paramString}`, config);
+    return this._list(`${this.apiPath}${path}${paramString}`, config);
   };
 
   public get = async (id: string, config?: AxiosRequestConfig): Promise<T> => {

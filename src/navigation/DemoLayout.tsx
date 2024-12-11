@@ -5,8 +5,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 import { styled, alpha } from '@mui/material/styles';
 import Sidebar from './Sidebar';
-import { useApiContext } from '../contexts/ApiContext';
-
+import DemoSidebar from './DemoSidebar';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -87,7 +86,7 @@ const SideBarwithPage: React.FC = () => {
     >
       <Toolbar />
       <Box sx={{ overflowX: 'hidden' }}>
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        <DemoSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       </Box>
     </Drawer>
     <Box
@@ -100,26 +99,8 @@ const SideBarwithPage: React.FC = () => {
   </Box>;
 }
 
-const MainLayout: React.FC = () => {
-  const [renderLayout, setRenderLayout] = useState<boolean>(false);
-  const { isAuthenticated } = useApiContext();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      setRenderLayout(true)
-    }
-  }, [isAuthenticated])
-
-  const getLayout = () => {
-    if (renderLayout) {
-      return <SideBarwithPage />
-    }
-
-    return <></>;
-  }
-
-
-  return getLayout();
+const DemoLayout: React.FC = () => {
+  return <SideBarwithPage />;
 };
 
-export default MainLayout;
+export default DemoLayout;

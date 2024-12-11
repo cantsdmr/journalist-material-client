@@ -6,7 +6,7 @@ import XIcon from '@mui/icons-material/X';
 import TwitchIcon from '@mui/icons-material/Interests';
 import LanguageIcon from '@mui/icons-material/Language';
 import { Link as RouterLink } from 'react-router-dom';
-import { News } from '../APIs/NewsAPI';
+import { News } from '@APIs/NewsAPI';
 
 interface EntryProps {
   news: News;
