@@ -8,6 +8,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import AppleIcon from '@mui/icons-material/Apple';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../hooks/useAuth';
+import { UserRole } from '../enums/UserEnums';
 import { AuthProvider } from 'firebase/auth';
 import { useApiContext } from '../contexts/ApiContext';
 
@@ -59,7 +60,7 @@ const SocialButton = styled(Button)<SocialButtonProps>(({ theme, bgcolor }) => (
 //   },
 // }));
 
-const Login: React.FC = () => {
+const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -67,24 +68,26 @@ const Login: React.FC = () => {
   const { api } = useApiContext();
   const navigate = useNavigate();
 
-  const handleEmailLogin = async (event: React.FormEvent) => {
+  const handleEmailSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const token = await auth.signIn(email, password);
-      await api?.userApi.signIn({
-        idToken: token
+      const userCredential = await auth.signUp(email, password);
+
+      await api?.userApi.signUp({
+        external_id: userCredential.user.uid,
+        email: userCredential.user.email,   
+        display_name: userCredential.user.displayName,
+        photo_url: userCredential.user.photoURL,
+        role_id: UserRole.REGULAR_USER
     });
     } catch (error) {
-      setError('Failed to login with email and password');
+      setError('Failed to sign up with email and password');
     }
   };
 
   const handleProviderLogin = async (provider: AuthProvider) => {
     try {
-      const token = await auth.signInWithProvider(provider);
-      await api?.userApi.signIn({
-        idToken: token
-      });
+      await auth.signInWithProvider(provider);
     } catch (error) {
       setError('Failed to login with Google');
     }
@@ -109,7 +112,7 @@ const Login: React.FC = () => {
           {error}
         </Typography>
       )}
-      <Box component="form" onSubmit={handleEmailLogin} sx={{ mb: 2 }}>
+      <Box component="form" onSubmit={handleEmailSignUp} sx={{ mb: 2 }}>
         <TextField
           label="Email"
           variant="outlined"
@@ -180,4 +183,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default SignUp;

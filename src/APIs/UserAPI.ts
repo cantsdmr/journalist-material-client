@@ -4,21 +4,59 @@ import { Membership } from "./MembershipAPI";
 
 export type User = {
     id: string;
-    username: string;
-    email: string;
+    display_name: string | null;
+    email: string | null;
     created_at: Date;
-    role_id: string;
-    external_id: string;
+    photo_url: string | null;
+    role_id: number;
+    external_id: string | null;
     memberships: Membership[];
 }
 
-export type CreateUserData = Omit<User, "id" | "created_at" | "created_by">
-export type EditUserData = Omit<User, "id" | "created_at" | "created_by" | "external_id">
+export type CreateUserData = Omit<User, "id" | "created_at" | "created_by" | "memberships">
+export type EditUserData = Omit<User, "id" | "created_at" | "created_by" | "external_id" | "memberships">
 
 const API_PATH = 'api/users'
+const SUB_PATH = {
+    PROFILE: 'profile',
+    SIGN_IN: 'sign-in',
+    SIGN_UP: 'sign-up'
+}
 
 export class UserAPI extends HTTPApi<User, CreateUserData, EditUserData> {
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
+    }
+
+    public signUp = async ({
+        external_id,
+        email,
+        display_name,
+        photo_url,
+        role_id
+    }: {
+        external_id: string | null,
+        email: string | null,
+        display_name: string | null,
+        photo_url: string | null,
+        role_id: number
+    }) => {
+        return this._post(`${this.apiPath}/${SUB_PATH.SIGN_UP}`, { external_id, email, display_name, photo_url, role_id });
+    }
+
+    public signIn = async ({
+        idToken
+    }: {
+        idToken: string
+    }) => {
+        return this._post(`${this.apiPath}/${SUB_PATH.SIGN_IN}`, { idToken });
+    }
+
+    public getUserInfo = async () => {
+        return this._get(`${this.apiPath}/${SUB_PATH.PROFILE}`);
+    }
+
+    public getUserInfoByExternalId = async (externalId: string) => {
+        return this._get(`${this.apiPath}/${SUB_PATH.PROFILE}/${externalId}`);
     }
 }

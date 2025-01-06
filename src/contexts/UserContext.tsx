@@ -2,7 +2,17 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { useApiContext } from "./ApiContext";
 import { useAuthContext } from "./AuthContext";
 
-const UserContext = createContext(null as any)
+export interface UserInfoType {
+  id: string;
+  email: string;
+  externalId: string;
+  displayName: string;
+  photoUrl: string;
+  roleId: number;
+  statusId: number;
+}
+
+const UserContext = createContext<UserInfoType | undefined>(undefined)
 const useUserInfoContext = () => useContext(UserContext)
 
 const UserProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -10,17 +20,17 @@ const UserProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     const authContext = useAuthContext();
     const [value, setValue] = useState<any | undefined>(undefined);
 
-    const getUserInfo = async (userId: string) => {
-      if (userId == null) {
+    const getUserInfo = async (externalId: string | undefined) => {
+      if (externalId == null) {
         return;
       }
 
-      const userInfo = await apiContext?.api?.userApi.get(userId);
+      const userInfo = await apiContext?.api?.userApi.getUserInfoByExternalId(externalId);
       setValue(userInfo)
     }
   
     useEffect(() => {
-      if (authContext?.user?.uid == null || !apiContext.isAuthenticated) {
+      if (!apiContext?.isAuthenticated || authContext?.user == null) {
           return;
       }
 

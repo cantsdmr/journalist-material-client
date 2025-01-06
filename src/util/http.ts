@@ -11,24 +11,34 @@ export interface Meta {
   hasNext: boolean
 }
 
+export interface PaginatedCollection<T>{
+  items: T[]
+  metadata: Meta
+}
+
 export interface Collection<T>{
   items: T[]
-  _meta: Meta
 }
 
 export class HTTPApi<T, P, R> {
-  private axiosJ;
-  private apiPath;
+  protected axiosJ: AxiosJournalist;
+  protected apiPath: string;
 
   constructor(axiosJ: AxiosJournalist, apiPath: string) {
     this.axiosJ = axiosJ
     this.apiPath = apiPath
   }
 
-  public list = async (path: string, query?: Record<string, any> , config?: AxiosRequestConfig): Promise<Collection<T>> => {
+  public list = async (subPath: string, query?: Record<string, any> , config?: AxiosRequestConfig): Promise<PaginatedCollection<T>> => {
     const params = new URLSearchParams(query);
     const paramString = params.size === 0 ? '' : `?${params.toString()}`
-    return this._list(`${this.apiPath}${path}${paramString}`, config);
+    return this._list(`${this.apiPath}/${subPath}${paramString}`, config);
+  };
+
+  public listAll = async (subPath: string, query?: Record<string, any> , config?: AxiosRequestConfig): Promise<Collection<T>> => {
+    const params = new URLSearchParams(query);
+    const paramString = params.size === 0 ? '' : `?${params.toString()}`
+    return this._list(`${this.apiPath}/${subPath}${paramString}`, config);
   };
 
   public get = async (id: string, config?: AxiosRequestConfig): Promise<T> => {
@@ -52,9 +62,9 @@ export class HTTPApi<T, P, R> {
   };
 
   // HTTP GET request
-  private _list = async (url: string, config?: AxiosRequestConfig): Promise<Collection<T>> => {
+  protected _list = async (url: string, config?: AxiosRequestConfig): Promise<PaginatedCollection<T>> => {
     try {
-      const response: AxiosResponse<Collection<T>> = await this.axiosJ.axiosInstance.get(url, config);
+      const response: AxiosResponse<PaginatedCollection<T>> = await this.axiosJ.axiosInstance.get(url, config);
       return response.data;
     } catch (error) {
       throw this.axiosJ.handleAxiosError(error as AxiosError);
@@ -72,7 +82,7 @@ export class HTTPApi<T, P, R> {
   };
 
   // HTTP POST request
-  protected _post = async (url: string, data: P, config?: AxiosRequestConfig): Promise<T> => {
+  protected _post = async (url: string, data: any, config?: AxiosRequestConfig): Promise<T> => {
     try {
       const response: AxiosResponse<T> = await this.axiosJ.axiosInstance.post(url, data, config);
       return response.data;

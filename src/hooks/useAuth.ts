@@ -1,37 +1,69 @@
 import { useEffect, useState } from "react";
-import { Auth, AuthProvider, User, signInWithEmailAndPassword, signInWithPopup, signOut as signOutFromFirebase } from "firebase/auth";
+import { Auth, AuthProvider, User, UserCredential, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signOut as signOutFromFirebase } from "firebase/auth";
 import { onAuthStateChanged } from "firebase/auth";
 
 export interface AuthType {
     user: User | null;
-    signIn: (email: string, password: string) => void;
-    signInWithProvider: (provider: AuthProvider) => void;
+    signIn: (email: string, password: string) => Promise<string>;
+    signInWithProvider: (provider: AuthProvider) => Promise<string>;
+    signUp: (email: string, password: string) => Promise<UserCredential>;
+    signUpWithProvider: (provider: AuthProvider) => Promise<UserCredential>;
     signOut: () => void;
 }
 
 export const useAuth = (firebaseAuth : Auth) => {
     const [user, setUser] = useState<User | null>(null)
+    const [registerHandled, setRegisterHandled] = useState<boolean>(false)
 
     const signIn = async (email: string, password: string) => {
-        await signInWithEmailAndPassword(firebaseAuth, email, password);
+        try {
+            // 1. Sign in with Firebase
+            const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
+            
+            // 2. Get ID token
+            const idToken = await userCredential.user.getIdToken();
+
+            return idToken;
+        } catch (error) {
+            console.error('Sign in error:', error);
+            throw error;
+        }
     };
 
     const signInWithProvider = async (provider: AuthProvider) => {
-        await signInWithPopup(firebaseAuth, provider);
+        try {
+            const userCredential = await signInWithPopup(firebaseAuth, provider);
+            
+            const idToken = await userCredential.user.getIdToken();
+
+            return idToken;
+        } catch (error) {
+            console.error('Sign in with provider error:', error);
+            throw error;
+        }
     };
 
-    // const signUp = async (data) => {
-    //     try {
-    //         let authresult = await axios.post('/api/auth/signup', data);
-    //         let userObj = { ...authresult.data?.createdUser };
-    //         userObj.token = authresult.data?.encodedToken;
-    //         setUser(userObj);
-    //         toastsuccess("Sign Up Successfull")
-    //     } catch (err) {
-    //         console.error(err);
-    //         toasterror("An Error Occuered")
-    //     }
-    // };
+    const signUpWithProvider = async (provider: AuthProvider) => {
+        try {
+            const userCredential = await signInWithPopup(firebaseAuth, provider);
+            
+            return userCredential;
+        } catch (error) {
+            console.error('Sign in with provider error:', error);
+            throw error;
+        }
+    };
+
+    const signUp = async (email: string, password: string) => {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+            
+            return userCredential;
+          } catch (error) {
+            console.error('Sign up error:', error);
+            throw error;
+          }
+    };
 
     const signOut = async () => {
         await signOutFromFirebase(firebaseAuth);
@@ -40,13 +72,18 @@ export const useAuth = (firebaseAuth : Auth) => {
 
 
     useEffect(() => {
+        if (registerHandled) {
+            return;
+        }
+
         onAuthStateChanged(firebaseAuth, (firebaseUser) => {
             // implement signup mechanism
             if (firebaseUser) {
                 setUser(firebaseUser)
             }
         });
-    }, [])
+        setRegisterHandled(true);
+    }, [registerHandled])
     
-    return { user, signIn, signInWithProvider, signOut } ;
+    return { user, signUp, signIn, signInWithProvider, signUpWithProvider, signOut } ;
 };

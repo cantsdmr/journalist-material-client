@@ -11,7 +11,10 @@ const ApiContext = createContext(null as any)
 const useApiContext = () => useContext<ApiContextType>(ApiContext)
 
 const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-    const [value, setValue] = useState<ApiContextType>();
+    const [value, setValue] = useState<ApiContextType>({
+        api: new AppAPI(),
+        isAuthenticated: false
+    });
     const auth = useAuthContext();
 
     const getToken = async () => {
@@ -26,17 +29,10 @@ const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     }
 
     useEffect(() => {
-        getToken();
-    }, [auth?.user, value?.api])
-
-    useEffect(() => {
-        const newApi = new AppAPI();
-        setValue({
-            api: newApi,
-            isAuthenticated: false
-        })
-    }, [])
-    
+        if (auth?.user) {
+            getToken();
+        }
+    }, [auth?.user])
 
     return <ApiContext.Provider value={value}>
         {children}

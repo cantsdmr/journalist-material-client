@@ -7,7 +7,7 @@ import { ApiProvider } from './contexts/ApiContext';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import MainLayout from './navigation/MainLayout';
-import Feed from './pages/Feed';
+import Feed from './pages/news/PublicNews';
 import Subscriptions from './pages/Subscriptions';
 import Explore from './pages/Explore';
 import EntryDetails from './pages/EntryDetails';
@@ -23,10 +23,11 @@ import DemoExploreCreators from './demo/DemoExploreCreators';
 import DemoNewsFeed from './demo/DemoNewsFeed';
 import DemoSupporterDashboard from './demo/DemoSupporterDashboard';
 import DemoPoll from './demo/DemoPoll';
+import SignUp from './pages/SignUp';
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
+    <AuthProvider>–
       <ApiProvider>
         <UserProvider>
           <Routes>
@@ -37,6 +38,7 @@ const App: React.FC = () => {
               }
             />
             <Route path="login" element={<Login />} />
+            <Route path="get-started" element={<SignUp />} />
             <Route path="demo/*" element={<PublicRoute><DemoLayout /></PublicRoute>} >
               <Route path="creator-profile" element={<DemoCreatorProfile />} />
               <Route path="explore-creators" element={<DemoExploreCreators />} />
