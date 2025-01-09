@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { UserInfoType, useUserInfoContext } from "@/contexts/UserContext";
+import { UserInfoType, useUserInfoContext } from "../contexts/UserContext";
 
 export const useUserInfo = () => {
     const [userInfo, setUserInfo] = useState<UserInfoType | undefined>(undefined)

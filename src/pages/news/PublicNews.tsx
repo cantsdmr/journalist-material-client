@@ -3,7 +3,7 @@ import { Container } from '@mui/material';
 import NewsFeed from '../../components/NewsFeed';
 import NewsTags from '../../components/NewsTags';
 
-const Feed: React.FC = () => {
+const PublicNews: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState<string>('all');
 
   const handleTagSelect = (tagId: string) => {
@@ -24,4 +24,4 @@ const Feed: React.FC = () => {
   );
 };
 
-export default Feed;
+export default PublicNews;

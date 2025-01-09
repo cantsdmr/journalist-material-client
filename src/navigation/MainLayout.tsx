@@ -92,9 +92,8 @@ const SideBarwithPage: React.FC = () => {
     </Drawer>
     <Box
       component="main"
-      sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}
+      sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 3 }}
     >
-      <Toolbar />
       <Outlet />
     </Box>
   </Box>;

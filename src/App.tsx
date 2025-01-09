@@ -7,14 +7,12 @@ import { ApiProvider } from './contexts/ApiContext';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import MainLayout from './navigation/MainLayout';
-import Feed from './pages/news/PublicNews';
+import PublicNews from './pages/news/PublicNews';
 import Subscriptions from './pages/Subscriptions';
 import Explore from './pages/Explore';
-import EntryDetails from './pages/EntryDetails';
-import Reels from './pages/Reels';
+import NewsDetail from './pages/news/NewsDetail';
 import CreatePoll from './components/CreatePoll';
-import Polls from './pages/Polls';
-import DivisionProfile from './pages/DivisionProfile';
+import Polls from './pages/poll/Polls';
 import { UserProvider } from './contexts/UserContext';
 import PublicRoute from './navigation/PublicRoute';
 import DemoLayout from './navigation/DemoLayout';
@@ -24,6 +22,9 @@ import DemoNewsFeed from './demo/DemoNewsFeed';
 import DemoSupporterDashboard from './demo/DemoSupporterDashboard';
 import DemoPoll from './demo/DemoPoll';
 import SignUp from './pages/SignUp';
+import SubscribedNews from './pages/news/SubscribedNews';
+import Channels from './pages/channel/Channels';
+import ChannelDetail from './pages/channel/ChannelDetail';
 
 const App: React.FC = () => {
   return (
@@ -47,15 +48,15 @@ const App: React.FC = () => {
               <Route path="supporter-dashboard" element={<DemoSupporterDashboard />} />
             </Route>
             <Route path="app/*" element={<PrivateRoute><MainLayout /></PrivateRoute>} >
-              <Route path="feed" element={<Feed />} />
+              <Route path="public-news" element={<PublicNews />} />
+              <Route path="channels" element={<Channels />} />
+              <Route path="subscribed-news" element={<SubscribedNews />} />
               <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="explore" element={<Explore />} />
-              <Route path="entry/:id" element={<EntryDetails />} />
-              <Route path="reels" element={<Reels />} />
-              {/* <Route path="create-news" element={<CreateOrEditNews />} /> */}
+              <Route path="entry/:id" element={<NewsDetail />} />
               <Route path="create-poll" element={<CreatePoll />} />
               <Route path="polls" element={<Polls />} />
-              <Route path="profile/:creatorId" element={<DivisionProfile />} />
+              <Route path="channels/:channelId" element={<ChannelDetail />} />
               <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="*" element={<NotFound />} />

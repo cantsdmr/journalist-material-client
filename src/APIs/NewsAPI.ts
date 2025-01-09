@@ -27,8 +27,9 @@ export interface NewsTag {
 const API_PATH = '/api/news'
 const SUB_PATH = {
     MOST_POPULAR: 'most-popular',
-    NEWS_TAGS: 'news-tags',
-    SUBSCRIBED_CHANNEL_NEWS: 'subscribed-channel-news'
+    TAGS: 'tags',
+    FOLLOWED: 'followed',
+    SUBSCRIBED: 'subscribed'
 }
 
 export class NewsAPI extends HTTPApi<News, CreateNewsData, EditNewsData> {
@@ -39,16 +40,24 @@ export class NewsAPI extends HTTPApi<News, CreateNewsData, EditNewsData> {
     // get most popular news
     public getMostPopular = async (page: number = 1, limit: number = 10): Promise<PaginatedCollection<News>> => {
         return this.list(SUB_PATH.MOST_POPULAR, {
-            order: 'desc',
+            // order: 'desc',
             limit: limit,
             page: page
         });
     }
 
     // get subscribed channel news
-    public getSubscribedChannelNews = async (page: number = 1, limit: number = 10): Promise<PaginatedCollection<News>> => {
-        return this.list(SUB_PATH.SUBSCRIBED_CHANNEL_NEWS, {
-            order: 'desc',
+    public getSubscribed = async (page: number = 1, limit: number = 10): Promise<PaginatedCollection<News>> => {
+        return this.list(SUB_PATH.SUBSCRIBED, {
+            // order: 'desc',
+            limit: limit,
+            page: page
+        });
+    }
+
+    public getFollowed = async (page: number = 1, limit: number = 10): Promise<PaginatedCollection<News>> => {
+        return this.list(SUB_PATH.FOLLOWED, {
+            // order: 'desc',
             limit: limit,
             page: page
         });
@@ -56,6 +65,6 @@ export class NewsAPI extends HTTPApi<News, CreateNewsData, EditNewsData> {
 
     // get news tags
     public getNewsTags = async (): Promise<Collection<NewsTag>> => {
-        return this.listAll(SUB_PATH.NEWS_TAGS);
+        return this.listAll(SUB_PATH.TAGS);
     }
 }

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Typography, Box, Chip, Avatar, Card, CardContent, Grid, Table, TableBody, TableCell, TableHead, TableRow, Divider, Button } from '@mui/material';
-import { allVideos } from '../constants/videos';
-import EntryStats from '../components/EntryStats';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useApiContext } from '../contexts/ApiContext';
-import { News } from '../APIs/NewsAPI';
+import { Container, Typography, Box, Chip, Avatar, Card, CardContent, Grid, Divider, Button } from '@mui/material';
+import { allVideos } from '../../constants/videos';
+import EntryStats from '../../components/EntryStats';
+import { useApiContext } from '../../contexts/ApiContext';
+import { News } from '../../APIs/NewsAPI';
 
 interface Transaction {
   id: number;
@@ -24,9 +23,9 @@ const transactions: Transaction[] = [
   { id: 6, type: 'expense', amount: 100, title: 'Hosting', reason: 'Annual web hosting fee' },
 ];
 
-const EntryDetails: React.FC = () => {
+const NewsDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { api, isAuthenticated } = useApiContext();
+  const { api } = useApiContext();
   const [entry, setEntry] = useState<Nullable<News>>(null);
 
   // const totalFund = transactions.filter(t => t.type === 'contribution').reduce((acc, t) => acc + t.amount, 0);
@@ -189,4 +188,4 @@ const EntryDetails: React.FC = () => {
   );
 };
 
-export default EntryDetails;
+export default NewsDetail;

@@ -76,8 +76,8 @@ const SignUp: React.FC = () => {
       await api?.userApi.signUp({
         external_id: userCredential.user.uid,
         email: userCredential.user.email,   
-        display_name: userCredential.user.displayName,
-        photo_url: userCredential.user.photoURL,
+        display_name: userCredential.user.displayName ?? '',
+        photo_url: userCredential.user.photoURL ?? '',
         role_id: UserRole.REGULAR_USER
     });
     } catch (error) {
@@ -95,7 +95,7 @@ const SignUp: React.FC = () => {
 
   useEffect(() => {
     if (auth?.user) {
-      navigate('/app/feed')
+      navigate('/app/public-news')
     }
   }, [auth?.user != null])
   

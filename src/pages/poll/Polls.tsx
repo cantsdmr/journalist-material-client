@@ -1,5 +1,5 @@
 import React from 'react';
-import PollList from '../components/PollList';
+import PollList from '../../components/PollList';
 
 const Polls: React.FC = () => {
   return (

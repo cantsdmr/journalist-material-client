@@ -19,9 +19,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
       <IconButton onClick={toggleSidebar} sx={{ display: isOpen ? 'none' : 'block', ml: 1 }}>
       </IconButton>
       <List>
-        <ListItem button component={Link} to={`${appPath}/feed`}>
+        <ListItem button component={Link} to={`${appPath}/public-news`}>
           <ListItemIcon><HomeIcon /></ListItemIcon>
           {isOpen && <ListItemText primary="Feed" />}
+        </ListItem>
+        <ListItem button component={Link} to={`${appPath}/subscribed-news`}>
+          <ListItemIcon><HomeIcon /></ListItemIcon>
+          {isOpen && <ListItemText primary="Subscribed News" />}
+        </ListItem>
+        <ListItem button component={Link} to={`${appPath}/channels`}>
+          <ListItemIcon><HomeIcon /></ListItemIcon>
+          {isOpen && <ListItemText primary="Channels" />}
         </ListItem>
         <ListItem button component={Link} to={`${appPath}/subscriptions`}>
           <ListItemIcon><SubscriptionsIcon /></ListItemIcon>

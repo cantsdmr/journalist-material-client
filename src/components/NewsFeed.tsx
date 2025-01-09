@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Grid
+  Grid,
+  Card,
+  CardContent,
+  Skeleton,
+  Box,
+  Typography
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Entry from './Entry';
@@ -9,12 +14,12 @@ import { useApiContext } from '../contexts/ApiContext';
 
 interface NewsFeedProps {
   selectedTag: string;
-  isSubscribed?: boolean; // Optional prop to determine if it's subscribed feed
+  isSubscribed?: boolean;
 }
 
 const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }) => {
   const [allNews, setAllNews] = useState<News[]>([]);
-  const [firstLoad, setFirstLoad] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -29,7 +34,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
       let newsResult;
       
       if (isSubscribed) {
-        newsResult = await api?.newsApi.getSubscribedChannelNews(_page, limit);
+        newsResult = await api?.newsApi.getFollowed(_page, limit);
       } else {
         newsResult = await api?.newsApi.getMostPopular(_page, limit);
       }
@@ -45,26 +50,63 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
       setHasMore(newsResult?.metadata.hasNext === true);
     } catch (error) {
       console.error('Failed to fetch news:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (isAuthenticated && !firstLoad) {
-      getNews(page);
-      setFirstLoad(true);
+    if (isAuthenticated) {
+      getNews(1);
     }
-  }, [firstLoad]);
+  }, [api?.newsApi, isAuthenticated, selectedTag]);
+
+  if (loading) {
+    return (
+      <Grid container spacing={3}>
+        {[...Array(12)].map((_, index) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+            <Card>
+              <Skeleton variant="rectangular" height={140} />
+              <CardContent>
+                <Skeleton variant="circular" width={40} height={40} />
+                <Skeleton variant="text" width="80%" />
+                <Skeleton variant="text" width="60%" />
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
 
   return (
     <InfiniteScroll
       dataLength={allNews.length}
       next={fetchMoreData}
       hasMore={hasMore}
-      loader={<h4>Loading...</h4>}
+      loader={
+        <Grid container spacing={3}>
+          {[...Array(4)].map((_, index) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={`loading-${index}`}>
+              <Card>
+                <Skeleton variant="rectangular" height={140} />
+                <CardContent>
+                  <Skeleton variant="circular" width={40} height={40} />
+                  <Skeleton variant="text" width="80%" />
+                  <Skeleton variant="text" width="60%" />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      }
       endMessage={
-        <p style={{ textAlign: 'center' }}>
-          <b>No more news to display.</b>
-        </p>
+        <Box sx={{ textAlign: 'center', mt: 2, mb: 2 }}>
+          <Typography color="text.secondary">
+            No more news to display
+          </Typography>
+        </Box>
       }
     >
       <Grid container spacing={2}>

@@ -92,7 +92,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (auth?.user) {
-      navigate('/app/feed')
+      navigate('/app/public-news')
     }
   }, [auth?.user != null])
   

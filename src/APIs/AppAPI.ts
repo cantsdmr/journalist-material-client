@@ -1,21 +1,15 @@
 import { AxiosJournalist } from "../util/axios";
-import { DivisionAPI } from "./DivisionAPI";
-import { MembershipAPI } from "./MembershipAPI";
+import { ChannelAPI } from "./ChannelAPI";
 import { NewsAPI } from "./NewsAPI";
 import { PollAPI } from "./PollAPI";
-import { PublisherAPI } from "./PublisherAPI";
-import { SupporterAPI } from "./SupporterAPI";
 import { UserAPI } from "./UserAPI";
 
 export class AppAPI {
     private axiosJ: AxiosJournalist
     public userApi: UserAPI;
-    public supporterApi: SupporterAPI;
     public pollApi: PollAPI;
     public newsApi: NewsAPI;
-    public membershipApi: MembershipAPI;
-    public publisherApi: PublisherAPI;
-    public divisionApi: DivisionAPI;
+    public channelApi: ChannelAPI;
 
     constructor() {
         this.axiosJ = new AxiosJournalist()
@@ -33,12 +27,9 @@ export class AppAPI {
 
     public setApis = () => {
         this.userApi = new UserAPI(this.axiosJ)
-        this.supporterApi = new SupporterAPI(this.axiosJ)
         this.pollApi = new PollAPI(this.axiosJ)
         this.newsApi = new NewsAPI(this.axiosJ)
-        this.membershipApi = new MembershipAPI(this.axiosJ)
-        this.publisherApi = new PublisherAPI(this.axiosJ)
-        this.divisionApi = new DivisionAPI(this.axiosJ)
+        this.channelApi = new ChannelAPI(this.axiosJ)
 
         return this
     }

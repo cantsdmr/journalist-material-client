@@ -39,7 +39,7 @@ const Subscriptions: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Find creators
+        Find Channels
       </Typography>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <TextField
