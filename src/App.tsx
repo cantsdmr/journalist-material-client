@@ -7,7 +7,6 @@ import { ApiProvider } from './contexts/ApiContext';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import MainLayout from './navigation/MainLayout';
-import PublicNews from './pages/news/PublicNews';
 import Subscriptions from './pages/Subscriptions';
 import Explore from './pages/Explore';
 import NewsDetail from './pages/news/NewsDetail';
@@ -22,9 +21,9 @@ import DemoNewsFeed from './demo/DemoNewsFeed';
 import DemoSupporterDashboard from './demo/DemoSupporterDashboard';
 import DemoPoll from './demo/DemoPoll';
 import SignUp from './pages/SignUp';
-import SubscribedNews from './pages/news/SubscribedNews';
 import Channels from './pages/channel/Channels';
 import ChannelDetail from './pages/channel/ChannelDetail';
+import NewsList from './pages/news/NewsList';
 
 const App: React.FC = () => {
   return (
@@ -48,15 +47,16 @@ const App: React.FC = () => {
               <Route path="supporter-dashboard" element={<DemoSupporterDashboard />} />
             </Route>
             <Route path="app/*" element={<PrivateRoute><MainLayout /></PrivateRoute>} >
-              <Route path="public-news" element={<PublicNews />} />
+              <Route path="public-news" element={<NewsList isSubscribed={false} />} />
+              <Route path="subscribed-news" element={<NewsList isSubscribed={true} />} />
+              <Route path="news/:id" element={<NewsDetail />} />
               <Route path="channels" element={<Channels />} />
-              <Route path="subscribed-news" element={<SubscribedNews />} />
+              <Route path="channels/:channelId" element={<ChannelDetail />} />
               <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="explore" element={<Explore />} />
               <Route path="entry/:id" element={<NewsDetail />} />
               <Route path="create-poll" element={<CreatePoll />} />
               <Route path="polls" element={<Polls />} />
-              <Route path="channels/:channelId" element={<ChannelDetail />} />
               <Route path="*" element={<NotFound />} />
             </Route>
             <Route path="*" element={<NotFound />} />

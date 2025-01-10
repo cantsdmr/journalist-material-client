@@ -4,17 +4,18 @@ import { Membership } from "./MembershipAPI";
 
 export type User = {
     id: string;
-    display_name: string | null;
+    displayName: string | null;
     email: string | null;
-    created_at: Date;
-    photo_url: string | null;
-    role_id: number;
-    external_id: string | null;
+    createdAt: Date;
+    photoUrl: string | null;
+    roleId: number;
+    statusId: number;
+    externalId: string | null;
     memberships: Membership[];
 }
 
-export type CreateUserData = Omit<User, "id" | "created_at" | "created_by" | "memberships">
-export type EditUserData = Omit<User, "id" | "created_at" | "created_by" | "external_id" | "memberships">
+export type CreateUserData = Omit<User, "id" | "createdAt" | "memberships">
+export type EditUserData = Omit<User, "id" | "createdAt" | "externalId" | "memberships">
 
 const API_PATH = 'api/users'
 const SUB_PATH = {

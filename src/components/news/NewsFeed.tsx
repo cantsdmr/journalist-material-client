@@ -8,9 +8,9 @@ import {
   Typography
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Entry from './Entry';
-import { News } from '../APIs/NewsAPI';
-import { useApiContext } from '../contexts/ApiContext';
+import { News } from '../../APIs/NewsAPI';
+import { useApiContext } from '../../contexts/ApiContext';
+import NewsEntry from './NewsEntry';
 
 interface NewsFeedProps {
   selectedTag: string;
@@ -111,7 +111,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
     >
       <Grid container spacing={2}>
         {allNews.map((news) => (
-          <Entry key={news.id} news={news} />
+          <NewsEntry key={news.id} news={news} />
         ))}
       </Grid>
     </InfiniteScroll>

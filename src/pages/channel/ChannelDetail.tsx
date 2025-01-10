@@ -10,7 +10,8 @@ import {
   CardContent,
   Skeleton,
   Divider,
-  Stack
+  Stack,
+  CircularProgress
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { Channel } from '../../APIs/ChannelAPI';
@@ -19,6 +20,9 @@ import { useApiContext } from '../../contexts/ApiContext';
 const ChannelDetail: React.FC = () => {
   const [channel, setChannel] = useState<Channel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
   const { channelId } = useParams();
   const { api } = useApiContext();
 
@@ -46,19 +50,23 @@ const ChannelDetail: React.FC = () => {
   const handleFollow = async () => {
     try {
       if (!channel) return;
+      setFollowLoading(true);
       await api?.channelApi.follow(channel.id);
       setChannel(prev => prev ? { 
         ...prev, 
-        followers: [{ userId: 'current-user' }] // Simplified example
+        followers: [{ userId: 'current-user' }]
       } : null);
     } catch (error) {
       console.error('Failed to follow channel:', error);
+    } finally {
+      setFollowLoading(false);
     }
   };
 
   const handleUnfollow = async () => {
     try {
       if (!channel) return;
+      setFollowLoading(true);
       await api?.channelApi.unfollow(channel.id);
       setChannel(prev => prev ? { 
         ...prev, 
@@ -66,25 +74,31 @@ const ChannelDetail: React.FC = () => {
       } : null);
     } catch (error) {
       console.error('Failed to unfollow channel:', error);
+    } finally {
+      setFollowLoading(false);
     }
   };
 
   const handleJoin = async (tierId: string) => {
     try {
       if (!channel) return;
+      setLoadingTierId(tierId);
       await api?.channelApi.join(channel.id, tierId);
       setChannel(prev => prev ? { 
         ...prev, 
-        subscriptions: [{ tierId, userId: 'current-user' }] // Simplified example
+        subscriptions: [{ tierId, userId: 'current-user' }]
       } : null);
     } catch (error) {
       console.error('Failed to join channel:', error);
+    } finally {
+      setLoadingTierId(null);
     }
   };
 
   const handleChangeTier = async (tierId: string) => {
     try {
       if (!channel) return;
+      setLoadingTierId(tierId);
       await api?.channelApi.changeSubscriptionTier(channel.id, tierId);
       setChannel(prev => prev ? { 
         ...prev, 
@@ -92,12 +106,15 @@ const ChannelDetail: React.FC = () => {
       } : null);
     } catch (error) {
       console.error('Failed to change subscription tier:', error);
+    } finally {
+      setLoadingTierId(null);
     }
   };
 
   const handleCancelSubscription = async () => {
     try {
       if (!channel) return;
+      setCancelLoading(true);
       await api?.channelApi.leave(channel.id);
       setChannel(prev => prev ? { 
         ...prev, 
@@ -105,6 +122,8 @@ const ChannelDetail: React.FC = () => {
       } : null);
     } catch (error) {
       console.error('Failed to cancel subscription:', error);
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -173,16 +192,20 @@ const ChannelDetail: React.FC = () => {
           <Button 
             variant={isFollowing ? "outlined" : "contained"}
             onClick={isFollowing ? handleUnfollow : handleFollow}
+            disabled={followLoading}
+            startIcon={followLoading && <CircularProgress size={20} color="inherit" />}
           >
-            {isFollowing ? 'Unfollow' : 'Follow'}
+            {followLoading ? 'Processing...' : (isFollowing ? 'Unfollow' : 'Follow')}
           </Button>
           {currentSubscription && (
             <Button 
               variant="outlined"
               color="error"
               onClick={handleCancelSubscription}
+              disabled={cancelLoading}
+              startIcon={cancelLoading && <CircularProgress size={20} color="inherit" />}
             >
-              Cancel Subscription
+              {cancelLoading ? 'Canceling...' : 'Cancel Subscription'}
             </Button>
           )}
         </Stack>
@@ -217,10 +240,12 @@ const ChannelDetail: React.FC = () => {
                   variant="contained" 
                   fullWidth
                   onClick={() => currentSubscription ? handleChangeTier(tier.id) : handleJoin(tier.id)}
-                  disabled={currentTierId === tier.id}
+                  disabled={currentTierId === tier.id || loadingTierId === tier.id}
+                  startIcon={loadingTierId === tier.id && <CircularProgress size={20} color="inherit" />}
                 >
-                  {currentTierId === tier.id ? 'Current Plan' : 
-                   currentSubscription ? 'Switch to This Plan' : 'Subscribe'}
+                  {loadingTierId === tier.id ? 'Processing...' :
+                    currentTierId === tier.id ? 'Current Plan' : 
+                    currentSubscription ? 'Switch to This Plan' : 'Subscribe'}
                 </Button>
               </CardContent>
             </Card>

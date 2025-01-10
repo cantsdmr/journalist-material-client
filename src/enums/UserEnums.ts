@@ -1,4 +1,4 @@
-export const UserStatus = {
+export const USER_STATUS = {
     ACTIVE: 1,
     INACTIVE: 2,
     PENDING: 3,
@@ -10,7 +10,7 @@ export const UserStatus = {
   } as const;
 
 
-export const UserRole = {
+export const USER_ROLE = {
     SUPER_ADMIN: 1,
     ADMIN: 2,
     MODERATOR: 3,

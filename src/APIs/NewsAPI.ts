@@ -1,28 +1,62 @@
+import { NEWS_STATUS } from "@/enums/NewsEnums";
 import { AxiosJournalist } from "../util/axios";
 import { PaginatedCollection, HTTPApi, Collection } from "../util/http";
+import { Channel } from "./ChannelAPI";
+import { User } from "./UserAPI";
 
 export type News = {
     id: string;
-    division_id: string;
-    fund_id: string;
     title: string;
-    description: string;
-    body: string;
-    image_url: string;
-    video_url: string;
-    start_at: Date;
-    end_at: Date;
-    created_by: string;
-    tags: string[];
+    content: string;
+    channelId: string;
+    status: keyof typeof NEWS_STATUS;
+    newsFund: any;
+    creator: User;
+    channel: Channel;
+    qualityMetrics: QualityMetrics;
+    tags: NewsTag[];
+    socialLinks: SocialLink[];
+    media: NewsMedia[];
+    publishedAt: string;
+    createdAt: string;
+    updatedAt: string;
 }
+
+export type QualityMetrics = {
+    id: string;
+    correctnessScore: number;
+    objectivityScore: number;
+    ethicalValueScore: number;
+    sourcingQualityScore: number;
+    relevanceScore: number;
+    clarityScore: number;
+    timelinessScore: number;
+    overallQualityScore: number;
+}
+
+export type SocialLink = {
+    id: string;
+    newsId: string;
+    platform: number;
+    url: string;
+}
+
+export type NewsMedia = {
+    id: string;
+    newsId: string;
+    type: number;
+    format: number;
+    url: string;
+}
+
+export interface NewsTag {
+    id: string;
+    tagId: string;
+    title: string;
+  }
 
 export type CreateNewsData = Omit<News, "id" | "fund_id" | "created_by">
 export type EditNewsData = Omit<News, "id" | "fund_id" | "created_by">
-
-export interface NewsTag {
-  id: string;
-  title: string;
-}
 
 const API_PATH = '/api/news'
 const SUB_PATH = {

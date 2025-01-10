@@ -8,7 +8,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import AppleIcon from '@mui/icons-material/Apple';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../hooks/useAuth';
-import { UserRole } from '../enums/UserEnums';
+import { USER_ROLE } from '../enums/UserEnums';
 import { AuthProvider } from 'firebase/auth';
 import { useApiContext } from '../contexts/ApiContext';
 
@@ -78,7 +78,7 @@ const SignUp: React.FC = () => {
         email: userCredential.user.email,   
         display_name: userCredential.user.displayName ?? '',
         photo_url: userCredential.user.photoURL ?? '',
-        role_id: UserRole.REGULAR_USER
+        role_id: USER_ROLE.REGULAR_USER
     });
     } catch (error) {
       setError('Failed to sign up with email and password');
