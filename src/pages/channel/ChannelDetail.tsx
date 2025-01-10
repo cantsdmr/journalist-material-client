@@ -9,10 +9,11 @@ import {
   Card, 
   CardContent,
   Skeleton,
-  Divider
+  Divider,
+  Stack
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { Channel, SubscriptionTier } from '../../APIs/ChannelAPI';
+import { Channel } from '../../APIs/ChannelAPI';
 import { useApiContext } from '../../contexts/ApiContext';
 
 const ChannelDetail: React.FC = () => {
@@ -20,6 +21,10 @@ const ChannelDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { channelId } = useParams();
   const { api } = useApiContext();
+
+  const isFollowing = channel?.followers && channel.followers.length > 0;
+  const currentSubscription = channel?.subscriptions?.[0];
+  const currentTierId = currentSubscription?.tierId;
 
   useEffect(() => {
     const fetchChannel = async () => {
@@ -42,7 +47,10 @@ const ChannelDetail: React.FC = () => {
     try {
       if (!channel) return;
       await api?.channelApi.follow(channel.id);
-      setChannel(prev => prev ? { ...prev, isFollowing: true } : null);
+      setChannel(prev => prev ? { 
+        ...prev, 
+        followers: [{ userId: 'current-user' }] // Simplified example
+      } : null);
     } catch (error) {
       console.error('Failed to follow channel:', error);
     }
@@ -52,7 +60,10 @@ const ChannelDetail: React.FC = () => {
     try {
       if (!channel) return;
       await api?.channelApi.unfollow(channel.id);
-      setChannel(prev => prev ? { ...prev, isFollowing: false } : null);
+      setChannel(prev => prev ? { 
+        ...prev, 
+        followers: [] 
+      } : null);
     } catch (error) {
       console.error('Failed to unfollow channel:', error);
     }
@@ -62,19 +73,38 @@ const ChannelDetail: React.FC = () => {
     try {
       if (!channel) return;
       await api?.channelApi.join(channel.id, tierId);
-      setChannel(prev => prev ? { ...prev, isSubscribed: true } : null);
+      setChannel(prev => prev ? { 
+        ...prev, 
+        subscriptions: [{ tierId, userId: 'current-user' }] // Simplified example
+      } : null);
     } catch (error) {
       console.error('Failed to join channel:', error);
     }
   };
 
-  const handleLeave = async () => {
+  const handleChangeTier = async (tierId: string) => {
+    try {
+      if (!channel) return;
+      await api?.channelApi.changeSubscriptionTier(channel.id, tierId);
+      setChannel(prev => prev ? { 
+        ...prev, 
+        subscriptions: [{ tierId, userId: 'current-user' }]
+      } : null);
+    } catch (error) {
+      console.error('Failed to change subscription tier:', error);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
     try {
       if (!channel) return;
       await api?.channelApi.leave(channel.id);
-      setChannel(prev => prev ? { ...prev, isSubscribed: false } : null);
+      setChannel(prev => prev ? { 
+        ...prev, 
+        subscriptions: [] 
+      } : null);
     } catch (error) {
-      console.error('Failed to leave channel:', error);
+      console.error('Failed to cancel subscription:', error);
     }
   };
 
@@ -134,23 +164,28 @@ const ChannelDetail: React.FC = () => {
         <Typography variant="body1" sx={{ mb: 3 }}>
           {channel.description}
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
+        <Stack 
+          direction="row" 
+          spacing={2} 
+          justifyContent="center"
+          sx={{ mb: 4 }}
+        >
           <Button 
-            variant={channel.isFollowing ? "outlined" : "contained"}
-            onClick={channel.isFollowing ? handleUnfollow : handleFollow}
+            variant={isFollowing ? "outlined" : "contained"}
+            onClick={isFollowing ? handleUnfollow : handleFollow}
           >
-            {channel.isFollowing ? 'Unfollow' : 'Follow'}
+            {isFollowing ? 'Unfollow' : 'Follow'}
           </Button>
-          {channel.isSubscribed && (
+          {currentSubscription && (
             <Button 
               variant="outlined"
-              color="secondary"
-              onClick={handleLeave}
+              color="error"
+              onClick={handleCancelSubscription}
             >
-              Leave Channel
+              Cancel Subscription
             </Button>
           )}
-        </Box>
+        </Stack>
         <Divider sx={{ mb: 4 }} />
       </Box>
 
@@ -160,7 +195,13 @@ const ChannelDetail: React.FC = () => {
       <Grid container spacing={3}>
         {channel.tiers?.map((tier) => (
           <Grid item xs={12} md={4} key={tier.id}>
-            <Card sx={{ height: '100%' }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                border: currentTierId === tier.id ? 2 : 0,
+                borderColor: 'primary.main'
+              }}
+            >
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   {tier.name}
@@ -175,10 +216,11 @@ const ChannelDetail: React.FC = () => {
                 <Button 
                   variant="contained" 
                   fullWidth
-                  onClick={() => handleJoin(tier.id)}
-                  disabled={channel.isSubscribed}
+                  onClick={() => currentSubscription ? handleChangeTier(tier.id) : handleJoin(tier.id)}
+                  disabled={currentTierId === tier.id}
                 >
-                  {channel.isSubscribed ? 'Current Tier' : 'Join'}
+                  {currentTierId === tier.id ? 'Current Plan' : 
+                   currentSubscription ? 'Switch to This Plan' : 'Subscribe'}
                 </Button>
               </CardContent>
             </Card>

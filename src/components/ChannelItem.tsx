@@ -5,9 +5,8 @@ import {
   Typography, 
   Box,
   Avatar,
-  Button,
-  Stack,
-  IconButton
+  IconButton,
+  Stack
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Channel } from '../APIs/ChannelAPI';
@@ -28,6 +27,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
   onUnfollow
 }) => {
   const navigate = useNavigate();
+  const isFollowing = channel.followers && channel.followers.length > 0;
 
   const handleClick = () => {
     navigate(`/app/channels/${channel.id}`);
@@ -35,7 +35,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
 
   const handleFollow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (channel.isFollowing) {
+    if (isFollowing) {
       onUnfollow(channel.id);
     } else {
       onFollow(channel.id);
@@ -83,16 +83,16 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
           size="small"
           onClick={handleFollow}
           sx={{ 
-            backgroundColor: channel.isFollowing ? 'success.main' : 'primary.main',
+            backgroundColor: isFollowing ? 'success.main' : 'primary.main',
             color: 'white',
             width: 32,
             height: 32,
             '&:hover': {
-              backgroundColor: channel.isFollowing ? 'success.dark' : 'primary.dark',
+              backgroundColor: isFollowing ? 'success.dark' : 'primary.dark',
             }
           }}
         >
-          {channel.isFollowing ? <CheckIcon /> : <AddIcon />}
+          {isFollowing ? <CheckIcon /> : <AddIcon />}
         </IconButton>
       </Box>
 
@@ -124,7 +124,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
                 variant="body2" 
                 color="text.secondary"
               >
-                {channel.followers?.toLocaleString() || 0} followers
+                {channel.followers?.length.toLocaleString() || 0} followers
               </Typography>
             </Stack>
           </Box>
@@ -145,22 +145,24 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             {channel.description}
           </Typography>
 
-          <Button
-            variant="text"
-            color="primary"
-            size="small"
-            endIcon={<ArrowForwardIcon />}
+          <Box 
             onClick={handleClick}
             sx={{ 
-              alignSelf: 'flex-start',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              color: 'primary.main',
+              cursor: 'pointer',
               '&:hover': {
-                backgroundColor: 'transparent',
-                color: 'primary.main'
+                textDecoration: 'underline'
               }
             }}
           >
-            View Channel
-          </Button>
+            <Typography variant="button">
+              View Channel
+            </Typography>
+            <ArrowForwardIcon fontSize="small" />
+          </Box>
         </Stack>
       </CardContent>
     </Card>

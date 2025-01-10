@@ -55,4 +55,8 @@ export class ChannelAPI extends HTTPApi<Channel, CreateChannelData, EditChannelD
     public leave = (channelId: string) => {
         return this._remove(`${API_PATH}/${channelId}/subscriber`)
     }
+
+    public changeSubscriptionTier = (channelId: string, tierId: string) => {
+        return this._patch(`${API_PATH}/${channelId}/subscriber`, { tierId })
+    }
 }

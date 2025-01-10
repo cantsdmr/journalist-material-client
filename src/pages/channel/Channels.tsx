@@ -14,7 +14,6 @@ import ChannelItem from '../../components/ChannelItem';
 
 const Channels: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -44,8 +43,6 @@ const Channels: React.FC = () => {
       setHasMore(result?.metadata.hasNext === true);
     } catch (error) {
       console.error('Failed to fetch channels:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -58,7 +55,7 @@ const Channels: React.FC = () => {
       await api?.channelApi.follow(channelId);
       setChannels(prev => prev.map(channel => 
         channel.id === channelId 
-          ? { ...channel, isFollowing: true }
+          ? { ...channel, followers: [{ userId: 'current-user' }] }
           : channel
       ));
     } catch (error) {
@@ -71,7 +68,7 @@ const Channels: React.FC = () => {
       await api?.channelApi.unfollow(channelId);
       setChannels(prev => prev.map(channel => 
         channel.id === channelId 
-          ? { ...channel, isFollowing: false }
+          ? { ...channel, followers: [] }
           : channel
       ));
     } catch (error) {

@@ -101,8 +101,8 @@ export class HTTPApi<T, P, R> {
     }
   };
 
-  // HTTP PUT request
-  protected _patch = async (url: string, data: T, config?: AxiosRequestConfig): Promise<T> => {
+  // HTTP PATCH request
+  protected _patch = async (url: string, data: any, config?: AxiosRequestConfig): Promise<T> => {
     try {
       const response: AxiosResponse<T> = await this.axiosJ.axiosInstance.patch(url, data, config);
       return response.data;
