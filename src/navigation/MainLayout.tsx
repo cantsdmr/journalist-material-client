@@ -1,124 +1,256 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, IconButton, Box, Drawer, InputBase, CssBaseline } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
-import { styled, alpha } from '@mui/material/styles';
+import { 
+  AppBar, 
+  Toolbar, 
+  IconButton, 
+  Typography, 
+  Box,
+  useTheme as useMuiTheme,
+  InputBase,
+  alpha,
+  useMediaQuery,
+  Drawer
+} from '@mui/material';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useTheme as useAppTheme } from '../contexts/ThemeContext';
 import Sidebar from './Sidebar';
-import { useApiContext } from '../contexts/ApiContext';
-
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
-
-const SideBarwithPage: React.FC = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
-
-  return <Box sx={{ display: 'flex' }}>
-    <CssBaseline />
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar>
-        <IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={toggleSidebar}>
-          <MenuIcon />
-        </IconButton>
-        <Typography variant="h6" noWrap component="div">
-          Journalist Land
-        </Typography>
-        <Box sx={{ flexGrow: 1 }} />
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Search…"
-            inputProps={{ 'aria-label': 'search' }}
-          />
-        </Search>
-      </Toolbar>
-    </AppBar>
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: isSidebarOpen ? 240 : 60,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { width: isSidebarOpen ? 240 : 60, boxSizing: 'border-box', transition: 'width 0.3s' },
-      }}
-    >
-      <Toolbar />
-      <Box sx={{ overflowX: 'hidden' }}>
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      </Box>
-    </Drawer>
-    <Box
-      component="main"
-      sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3, mt: 3 }}
-    >
-      <Outlet />
-    </Box>
-  </Box>;
-}
+import SearchIcon from '@mui/icons-material/Search';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 const MainLayout: React.FC = () => {
-  const [renderLayout, setRenderLayout] = useState<boolean>(false);
-  const { isAuthenticated } = useApiContext();
+  const isMobile = useMediaQuery('(max-width:600px)');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const { isDarkMode, toggleTheme } = useAppTheme();
+  const muiTheme = useMuiTheme();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      setRenderLayout(true)
+    if (isMobile) {
+      setIsSidebarOpen(false);
     }
-  }, [isAuthenticated])
+  }, [isMobile]);
 
-  const getLayout = () => {
-    if (renderLayout) {
-      return <SideBarwithPage />
-    }
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
-    return <></>;
-  }
+  return (
+    <Box sx={{ 
+      display: 'flex', 
+      minHeight: '100vh',
+      bgcolor: 'background.default'
+    }}>
+      <AppBar 
+        position="fixed" 
+        elevation={0}
+        sx={{ 
+          zIndex: muiTheme.zIndex.drawer + 1,
+          bgcolor: 'background.default',
+          color: 'text.primary',
+          boxShadow: 'none',
+          borderBottom: 'none'
+        }}
+      >
+        <Toolbar sx={{ px: '8px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 200 }}>
+            <IconButton
+              color="inherit"
+              aria-label="toggle sidebar"
+              onClick={toggleSidebar}
+              sx={{ 
+                minWidth: 40,
+                ml: 0.5,
+                mr: 1.5,
+                '& .MuiSvgIcon-root': {
+                  fontSize: 24,
+                  filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))'
+                }
+              }}
+            >
+              <MenuRoundedIcon />
+            </IconButton>
+            
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontWeight: 700,
+                display: 'block',
+                letterSpacing: '.1rem',
+                fontFamily: "'Inter', -apple-system, sans-serif"
+              }}
+            >
+              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                <span style={{ 
+                  color: '#2196F3',
+                  textTransform: 'uppercase',
+                  fontWeight: 800
+                }}>Meta</span>
+                <span style={{ 
+                  color: '#1976D2',
+                  fontWeight: 600
+                }}>Journo</span>
+              </Box>
+              <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                <span style={{ 
+                  color: '#2196F3',
+                  textTransform: 'uppercase',
+                  fontWeight: 800
+                }}>M</span>
+                <span style={{ 
+                  color: '#1976D2',
+                  fontWeight: 600
+                }}>Journo</span>
+              </Box>
+            </Typography>
+          </Box>
 
+          <Box sx={{ 
+            flexGrow: 1,
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <Box sx={{
+              position: 'relative',
+              borderRadius: '12px',
+              backgroundColor: (theme) => 
+                theme.palette.mode === 'dark' 
+                  ? alpha(theme.palette.common.white, 0.08)
+                  : alpha(theme.palette.common.black, 0.04),
+              '&:hover': {
+                backgroundColor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? alpha(theme.palette.common.white, 0.12)
+                    : alpha(theme.palette.common.black, 0.08),
+              },
+              width: '100%',
+              maxWidth: '600px',
+              margin: '0 16px',
+              border: '1px solid',
+              borderColor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.common.white, 0.1)
+                  : alpha(theme.palette.common.black, 0.1),
+            }}>
+              <Box sx={{
+                padding: '0 16px',
+                height: '100%',
+                position: 'absolute',
+                pointerEvents: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'text.secondary'
+              }}>
+                <SearchIcon />
+              </Box>
+              <InputBase
+                placeholder="Search news..."
+                sx={{
+                  color: 'inherit',
+                  width: '100%',
+                  '& .MuiInputBase-input': {
+                    padding: '10px 8px 10px 48px',
+                    width: '100%',
+                  },
+                }}
+              />
+            </Box>
+          </Box>
 
-  return getLayout();
+          <IconButton onClick={toggleTheme} color="inherit">
+            {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {isMobile ? (
+        <Drawer
+          variant="temporary"
+          open={isSidebarOpen}
+          onClose={toggleSidebar}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          PaperProps={{
+            sx: {
+              height: '100%',
+              bgcolor: 'background.default'
+            }
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': {
+              width: 240,
+              border: 'none'
+            },
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ 
+            height: 'calc(100% - 64px)',
+            overflow: 'auto'
+          }}>
+            <Sidebar isOpen={true} toggleSidebar={toggleSidebar} />
+          </Box>
+        </Drawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          PaperProps={{
+            sx: {
+              height: '100%',
+              bgcolor: 'background.default'
+            }
+          }}
+          sx={{
+            width: isSidebarOpen ? 240 : 72,
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: isSidebarOpen ? 240 : 72,
+              transition: 'width 0.2s',
+              overflowX: 'hidden',
+              border: 'none',
+              borderRight: 'none'
+            },
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ 
+            height: 'calc(100% - 64px)',
+            overflow: 'auto'
+          }}>
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+          </Box>
+        </Drawer>
+      )}
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          pt: 4,
+          width: 0,
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'background.default'
+        }}
+      >
+        <Box sx={{ 
+          flexGrow: 1,
+          overflow: 'auto',
+          width: '100%',
+          maxWidth: '100%',
+          bgcolor: 'background.default',
+          px: { xs: 2, sm: 3 },
+          ml: { xs: 0, sm: 1 }
+        }}>
+          <Outlet />
+        </Box>
+      </Box>
+    </Box>
+  );
 };
 
 export default MainLayout;

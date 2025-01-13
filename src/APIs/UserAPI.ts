@@ -1,6 +1,6 @@
 import { AxiosJournalist } from "../util/axios";
 import { HTTPApi } from "../util/http";
-import { Membership } from "./MembershipAPI";
+import { ChannelFollower, ChannelSubscription } from "./ChannelAPI";
 
 export type User = {
     id: string;
@@ -11,7 +11,8 @@ export type User = {
     roleId: number;
     statusId: number;
     externalId: string | null;
-    memberships: Membership[];
+    followings: ChannelFollower[];
+    subscriptions: ChannelSubscription[];
 }
 
 export type CreateUserData = Omit<User, "id" | "createdAt" | "memberships">

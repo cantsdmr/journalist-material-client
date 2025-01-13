@@ -23,6 +23,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@/APIs/*": ["src/APIs/*"],
+      "@/components/*": ["src/components/*"],
+      "@/contexts/*": ["src/contexts/*"],
+      "@/hooks/*": ["src/hooks/*"],
+      "@/pages/*": ["src/pages/*"],
+      "@/util/*": ["src/util/*"]
     }
   },
   "include": ["src"],

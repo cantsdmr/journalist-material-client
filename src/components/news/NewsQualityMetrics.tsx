@@ -8,7 +8,7 @@ import {
   CardContent
 } from '@mui/material';
 import { QualityMetrics as QualityMetricsType } from '../../APIs/NewsAPI';
-import { camelCaseToTitleCase } from '../../utils/stringUtils';
+import { camelCaseToTitleCase } from '../../util/stringUtils';
 
 interface NewsQualityMetricsProps {
   metrics: QualityMetricsType | null;

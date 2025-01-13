@@ -70,10 +70,12 @@ const Login: React.FC = () => {
   const handleEmailLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const token = await auth.signIn(email, password);
-      await api?.userApi.signIn({
-        idToken: token
-    });
+      const token = await auth?.signIn(email, password);
+      if (token) {
+        await api?.userApi.signIn({
+          idToken: token
+        });
+      }
     } catch (error) {
       setError('Failed to login with email and password');
     }
@@ -81,10 +83,12 @@ const Login: React.FC = () => {
 
   const handleProviderLogin = async (provider: AuthProvider) => {
     try {
-      const token = await auth.signInWithProvider(provider);
-      await api?.userApi.signIn({
-        idToken: token
-      });
+      const token = await auth?.signInWithProvider(provider);
+      if (token) {
+        await api?.userApi.signIn({
+          idToken: token
+        });
+      }
     } catch (error) {
       setError('Failed to login with Google');
     }
@@ -92,7 +96,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (auth?.user) {
-      navigate('/app/public-news')
+      navigate('/app/trending')
     }
   }, [auth?.user != null])
   

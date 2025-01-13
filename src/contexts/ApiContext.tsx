@@ -2,16 +2,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { AppAPI } from "../APIs/AppAPI";
 import { useAuthContext } from "./AuthContext";
 
-export interface ApiContextType {
+export type ApiContextValue = {
     api: AppAPI | undefined,
     isAuthenticated: boolean
 }
 
 const ApiContext = createContext(null as any)
-const useApiContext = () => useContext<ApiContextType>(ApiContext)
+const useApiContext = () => useContext<ApiContextValue>(ApiContext)
 
 const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-    const [value, setValue] = useState<ApiContextType>({
+    const [value, setValue] = useState<ApiContextValue>({
         api: new AppAPI(),
         isAuthenticated: false
     });

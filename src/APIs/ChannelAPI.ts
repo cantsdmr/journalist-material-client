@@ -14,11 +14,29 @@ export type Channel = {
     isFollowing: boolean;
     isSubscribed: boolean;
     followers?: any[];
+    followerCount: number;
+    subscriberCount: number;
     subscriptions?: any[];
     news?: News[];
     polls?: Poll[];
     users?: User[];
     tiers?: SubscriptionTier[];
+}
+
+export type ChannelFollower = {
+    id: string;
+    channelId: string;
+    userId: string;
+    followedAt: Date;
+}
+
+export type ChannelSubscription = {
+    id: string;
+    channelId: string;
+    userId: string;
+    subscribedAt: Date;
+    expiresAt: Date;
+    tierId: string;
 }
 
 export type SubscriptionTier = {

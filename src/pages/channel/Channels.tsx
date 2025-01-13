@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Container, 
-  Typography, 
   Stack,
   Box,
-  useTheme,
-  useMediaQuery
+  Typography
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Channel } from '../../APIs/ChannelAPI';
 import { useApiContext } from '../../contexts/ApiContext';
 import ChannelItem from '../../components/ChannelItem';
+import { alpha } from '@mui/material/styles';
+import { useUserInfo } from '../../hooks/useUserInfo';
 
 const Channels: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -18,8 +17,7 @@ const Channels: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { api } = useApiContext();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const { refreshUserInfo } = useUserInfo();
 
   const fetchMoreData = () => {
     getChannels(page + 1);
@@ -47,17 +45,15 @@ const Channels: React.FC = () => {
   };
 
   useEffect(() => {
-    getChannels(1);
+    if (api?.channelApi) {
+      getChannels(page);
+    }
   }, [api?.channelApi]);
 
   const handleFollow = async (channelId: string) => {
     try {
       await api?.channelApi.follow(channelId);
-      setChannels(prev => prev.map(channel => 
-        channel.id === channelId 
-          ? { ...channel, followers: [{ userId: 'current-user' }] }
-          : channel
-      ));
+      await refreshUserInfo();
     } catch (error) {
       console.error('Failed to follow channel:', error);
     }
@@ -66,61 +62,78 @@ const Channels: React.FC = () => {
   const handleUnfollow = async (channelId: string) => {
     try {
       await api?.channelApi.unfollow(channelId);
-      setChannels(prev => prev.map(channel => 
-        channel.id === channelId 
-          ? { ...channel, followers: [] }
-          : channel
-      ));
+      await refreshUserInfo();
     } catch (error) {
       console.error('Failed to unfollow channel:', error);
     }
   };
 
   return (
-    <Container 
-      maxWidth={isDesktop ? "lg" : "sm"} 
-      sx={{ 
-        mt: 3,
-        px: { xs: 2, sm: 3 }
-      }}
-    >
+    <Box sx={{ width: '100%', maxWidth: '100%', pb: 4 }}>
       <Typography 
         variant="h5" 
-        gutterBottom 
         sx={{ 
-          mb: 5,
-          fontSize: { xs: '1.5rem', sm: '2rem' }
+          fontSize: { xs: '1.125rem', sm: '1.25rem' },
+          fontWeight: 600,
+          color: 'text.primary',
+          mb: 1
         }}
       >
         Popular Channels
       </Typography>
+
       <InfiniteScroll
         dataLength={channels.length}
         next={fetchMoreData}
         hasMore={hasMore}
         loader={
-          <Stack spacing={3} sx={{ mt: 4 }}>
+          <Stack spacing={2} sx={{ mt: 2 }}>
             {[...Array(2)].map((_, index) => (
               <Box 
-                key={`loading-${index}`}
+                key={index}
                 sx={{
-                  height: 200,
-                  backgroundColor: 'grey.100',
-                  borderRadius: 2
+                  display: 'flex',
+                  gap: 2,
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? alpha(theme.palette.common.white, 0.05)
+                      : alpha(theme.palette.common.black, 0.03)
                 }}
-              />
+              >
+                <Box 
+                  sx={{ 
+                    width: 56, 
+                    height: 56, 
+                    borderRadius: 2,
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? alpha(theme.palette.common.white, 0.1)
+                        : alpha(theme.palette.common.black, 0.1)
+                  }} 
+                />
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ height: 24, width: '40%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.300' }} />
+                  <Box sx={{ height: 16, width: '80%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.200' }} />
+                  <Box sx={{ height: 16, width: '30%', borderRadius: 0.5, bgcolor: 'grey.200' }} />
+                </Box>
+              </Box>
             ))}
           </Stack>
         }
         endMessage={
-          <Box sx={{ textAlign: 'center', mt: 4, mb: 4 }}>
-            <Typography color="text.secondary">
-              No more channels to display
-            </Typography>
+          <Box sx={{ 
+            textAlign: 'center', 
+            mt: 4, 
+            color: 'text.secondary',
+            fontSize: '0.875rem'
+          }}>
+            No more channels to display
           </Box>
         }
       >
-        <Stack spacing={4}>
+        <Stack spacing={1}>
           {channels.map((channel) => (
             <ChannelItem 
               key={channel.id}
@@ -131,7 +144,7 @@ const Channels: React.FC = () => {
           ))}
         </Stack>
       </InfiniteScroll>
-    </Container>
+    </Box>
   );
 };
 

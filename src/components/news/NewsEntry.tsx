@@ -1,19 +1,21 @@
 import React from 'react';
 import { 
   Card, 
-  CardContent, 
   Typography, 
   Box, 
-  Avatar, 
-  Chip,
   Stack,
-  Link
+  alpha,
+  IconButton,
+  Tooltip,
+  Avatar
 } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { News } from '../../APIs/NewsAPI';
 import { NEWS_MEDIA_TYPE } from '../../enums/NewsEnums';
-import NewsEntryStats from './NewsEntryStats';
-import DefaultNewsAvatar from '../../assets/BG_journo.png'; // You'll need to add this
+import DefaultNewsAvatar from '../../assets/BG_journo.png';
+import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
+import ShareIcon from '@mui/icons-material/Share';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 interface NewsEntryProps {
   news: News;
@@ -24,98 +26,206 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
   const avatarMedia = news.media?.find(m => m.type === NEWS_MEDIA_TYPE.AVATAR);
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent navigation if clicking on channel chip
-    if (!(e.target as HTMLElement).closest('.channel-chip')) {
+    if (!(e.target as HTMLElement).closest('.action-button')) {
       navigate(`/app/news/${news.id}`);
     }
   };
 
   return (
-    <Card 
-      sx={{ 
-        display: 'flex', 
-        p: 2,
-        cursor: 'pointer',
-        '&:hover': { 
-          bgcolor: 'action.hover',
-          transform: 'translateY(-2px)',
-        },
-        transition: 'all 0.2s ease-in-out'
-      }}
-      onClick={handleCardClick}
-    >
-      <Avatar
-        variant="rounded"
-        src={avatarMedia?.url || DefaultNewsAvatar}
-        alt={news.title}
+    <Box sx={{ mb: 4 }}>
+      <Box 
+        component={RouterLink}
+        to={`/app/channels/${news.channel.id}`}
         sx={{ 
-          width: 120, 
-          height: 120, 
-          mr: 2,
-          borderRadius: 2
+          display: 'inline-flex',
+          alignItems: 'center',
+          color: 'text.primary',
+          textDecoration: 'none',
+          mb: 1.5,
+          px: 0.5,
+          '&:hover': { 
+            color: 'primary.main',
+            '& .channel-name': { color: 'primary.main' }
+          }
         }}
-      />
-      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <CardContent sx={{ flex: '1 0 auto', p: 0 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Link 
-              component={RouterLink} 
-              to={`/app/news/${news.id}`}
-              sx={{ 
-                textDecoration: 'none',
-                color: 'text.primary',
-                '&:hover': { color: 'primary.main' }
+      >
+        <Avatar
+          src={news.channel.logoUrl}
+          alt={news.channel.name}
+          variant="rounded"
+          sx={{ 
+            width: 28, 
+            height: 28, 
+            mr: 1.5,
+            bgcolor: 'grey.200',
+            borderRadius: 1.5
+          }}
+        >
+          <AccountCircleIcon fontSize="small" />
+        </Avatar>
+        <Typography 
+          variant="body2" 
+          className="channel-name"
+          fontWeight={500}
+          sx={{ 
+            transition: 'color 0.2s'
+          }}
+        >
+          {news.channel.name}
+        </Typography>
+      </Box>
+
+      <Card 
+        onClick={handleCardClick}
+        sx={{ 
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          cursor: 'pointer',
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          overflow: 'hidden',
+          '&:hover': { 
+            '& .news-thumbnail': { transform: 'scale(1.05)' },
+            '& .news-title': { color: 'primary.main' }
+          }
+        }}
+      >
+        <Box 
+          sx={{ 
+            position: 'relative',
+            width: { xs: '100%', sm: '360px' },
+            minWidth: { sm: '360px' },
+            height: { xs: '220px', sm: '200px' },
+            flexShrink: 0,
+            overflow: 'hidden',
+            bgcolor: 'grey.100'
+          }}
+        >
+          <Box
+            component="img"
+            src={avatarMedia?.url || DefaultNewsAvatar}
+            alt={news.title}
+            className="news-thumbnail"
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              transition: 'transform 0.3s ease',
+              display: 'block'
+            }}
+          />
+          {news.qualityMetrics?.overallQualityScore && (
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 12,
+                right: 12,
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                bgcolor: alpha('#000', 0.75),
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: 600
               }}
             >
-              <Typography variant="h6" component="div">
-                {news.title}
-              </Typography>
-            </Link>
-          </Box>
+              {news.qualityMetrics.overallQualityScore.toFixed(1)}
+            </Box>
+          )}
+        </Box>
 
+        <Box 
+          sx={{ 
+            p: 3,
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
           <Typography 
-            variant="body2" 
-            color="text.secondary" 
+            className="news-title"
+            variant="subtitle1" 
             sx={{ 
-              mb: 2,
+              fontWeight: 600,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              lineHeight: 1.4,
+              transition: 'color 0.2s',
+              mb: 2
+            }}
+          >
+            {news.title}
+          </Typography>
+
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              mb: 3,
+              lineHeight: 1.6
             }}
           >
             {news.content}
           </Typography>
 
-          <Stack 
-            direction="row" 
-            spacing={1} 
-            alignItems="center" 
-            sx={{ mb: 2 }}
-          >
-            <Chip
-              className="channel-chip"
-              label={news.channel.name}
-              size="small"
-              variant="outlined"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/app/channels/${news.channel.id}`);
-              }}
-              sx={{ 
-                borderRadius: 1,
-                '& .MuiChip-label': { px: 1 }
-              }}
-            />
-            <Typography variant="caption" color="text.secondary">
-              by {news.creator?.displayName ?? 'Unknown'}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mt: 'auto'
+          }}>
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              sx={{ fontWeight: 500 }}
+            >
+              {new Date(news.publishedAt).toLocaleDateString()}
             </Typography>
-          </Stack>
 
-          <NewsEntryStats news={news} />
-        </CardContent>
-      </Box>
-    </Card>
+            <Stack direction="row" spacing={1.5}>
+              <Tooltip title="Like">
+                <IconButton 
+                  className="action-button"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle like
+                  }}
+                  sx={{ 
+                    color: 'text.secondary',
+                    '&:hover': { color: 'error.main' }
+                  }}
+                >
+                  <FavoriteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Share">
+                <IconButton 
+                  className="action-button"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle share
+                  }}
+                  sx={{ 
+                    color: 'text.secondary',
+                    '&:hover': { color: 'primary.main' }
+                  }}
+                >
+                  <ShareIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Box>
+        </Box>
+      </Card>
+    </Box>
   );
 };
 

@@ -71,15 +71,16 @@ const SignUp: React.FC = () => {
   const handleEmailSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const userCredential = await auth.signUp(email, password);
-
+      const userCredential = await auth?.signUp(email, password);
+      if (userCredential) {
       await api?.userApi.signUp({
         external_id: userCredential.user.uid,
-        email: userCredential.user.email,   
-        display_name: userCredential.user.displayName ?? '',
-        photo_url: userCredential.user.photoURL ?? '',
-        role_id: USER_ROLE.REGULAR_USER
-    });
+          email: userCredential.user.email,   
+          display_name: userCredential.user.displayName ?? '',
+          photo_url: userCredential.user.photoURL ?? '',
+          role_id: USER_ROLE.REGULAR_USER
+        });
+      }
     } catch (error) {
       setError('Failed to sign up with email and password');
     }
@@ -87,7 +88,12 @@ const SignUp: React.FC = () => {
 
   const handleProviderLogin = async (provider: AuthProvider) => {
     try {
-      await auth.signInWithProvider(provider);
+      const token = await auth?.signInWithProvider(provider);
+      if (token) {
+        await api?.userApi.signIn({
+          idToken: token
+        });
+      }
     } catch (error) {
       setError('Failed to login with Google');
     }
@@ -95,7 +101,7 @@ const SignUp: React.FC = () => {
 
   useEffect(() => {
     if (auth?.user) {
-      navigate('/app/public-news')
+      navigate('/app/trending')
     }
   }, [auth?.user != null])
   

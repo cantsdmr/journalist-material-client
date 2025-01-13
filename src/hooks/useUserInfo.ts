@@ -1,13 +1,32 @@
-import { useEffect, useState } from "react";
-import { UserInfoType, useUserInfoContext } from "../contexts/UserContext";
+import { useUserInfoContext } from "../contexts/UserContext";
 
 export const useUserInfo = () => {
-    const [userInfo, setUserInfo] = useState<UserInfoType | undefined>(undefined)
-    const userInfoContext = useUserInfoContext();
-
-    useEffect(() => {
-        setUserInfo(userInfoContext)
-    }, [userInfoContext])
+    const context = useUserInfoContext();
     
-    return { userInfo };
+    if (context === undefined) {
+        throw new Error('useUserInfo must be used within a UserProvider');
+    }
+
+    const {
+        userInfo,
+        isFollowingChannel,
+        isSubscribedToChannel,
+        getChannelSubscriptionTier,
+        refreshUserInfo
+    } = context;
+
+    return {
+        // User basic info
+        userInfo,
+        
+        // Channel relationship methods
+        channelRelations: {
+            isFollowing: isFollowingChannel,
+            isSubscribed: isSubscribedToChannel,
+            getSubscriptionTier: getChannelSubscriptionTier,
+        },
+        
+        // Actions
+        refreshUserInfo
+    };
 };

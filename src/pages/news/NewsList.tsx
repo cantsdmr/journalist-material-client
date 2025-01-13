@@ -6,7 +6,6 @@ import {
   Box,
   Skeleton,
   Card,
-  CardContent
 } from '@mui/material';
 import { News } from '../../APIs/NewsAPI';
 import { useApiContext } from '../../contexts/ApiContext';
@@ -18,36 +17,52 @@ interface NewsListProps {
 }
 
 const NewsListSkeleton = () => (
-  <Card sx={{ display: 'flex', alignItems: 'flex-start', p: 2 }}>
-    <Skeleton 
-      variant="rectangular" 
-      width={150} 
-      height={150} 
-      sx={{ mr: 2 }} 
-    />
-    <Box sx={{ flex: 1 }}>
-      <CardContent>
-        <Skeleton variant="text" width="60%" height={32} sx={{ mb: 1 }} />
-        <Skeleton variant="text" width="90%" />
-        <Skeleton variant="text" width="85%" />
-        <Skeleton variant="text" width="80%" />
-        <Box sx={{ mt: 2 }}>
-          <Stack direction="row" spacing={1}>
-            <Skeleton variant="rounded" width={60} height={24} />
-            <Skeleton variant="rounded" width={80} height={24} />
-            <Skeleton variant="rounded" width={70} height={24} />
-          </Stack>
+  <Box sx={{ mb: 4 }}>
+    {[1, 2, 3].map((index) => (
+      <Box key={index} sx={{ mb: 10 }}>
+        {/* Channel info skeleton */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, px: 0.5 }}>
+          <Skeleton 
+            variant="rounded" 
+            width={28} 
+            height={28} 
+            sx={{ borderRadius: 1.5, mr: 1.5 }} 
+          />
+          <Skeleton width={120} height={20} />
         </Box>
-        <Box sx={{ mt: 3 }}>
-          <Stack spacing={1}>
-            <Skeleton variant="rounded" height={8} width="100%" />
-            <Skeleton variant="rounded" height={8} width="90%" />
-            <Skeleton variant="rounded" height={8} width="85%" />
-          </Stack>
-        </Box>
-      </CardContent>
-    </Box>
-  </Card>
+
+        {/* News card skeleton */}
+        <Card sx={{ 
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          borderRadius: 2,
+          overflow: 'hidden'
+        }}>
+          <Skeleton 
+            variant="rectangular" 
+            sx={{ 
+              width: { xs: '100%', sm: '360px' },
+              minWidth: { sm: '360px' },
+              height: { xs: '220px', sm: '200px' }
+            }} 
+          />
+          <Box sx={{ p: 3, flex: 1 }}>
+            <Skeleton width="90%" height={24} sx={{ mb: 2 }} />
+            <Skeleton width="80%" height={24} sx={{ mb: 2 }} />
+            <Skeleton width="95%" height={20} sx={{ mb: 1 }} />
+            <Skeleton width="90%" height={20} sx={{ mb: 3 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Skeleton width={100} height={20} />
+              <Box sx={{ display: 'flex', gap: 1.5 }}>
+                <Skeleton variant="circular" width={32} height={32} />
+                <Skeleton variant="circular" width={32} height={32} />
+              </Box>
+            </Box>
+          </Box>
+        </Card>
+      </Box>
+    ))}
+  </Box>
 );
 
 const NewsList: React.FC<NewsListProps> = ({ isSubscribed }) => {
@@ -61,8 +76,8 @@ const NewsList: React.FC<NewsListProps> = ({ isSubscribed }) => {
     try {
       setLoading(true);
       const response = isSubscribed 
-        ? await api?.newsApi.getFollowed(pageNum)
-        : await api?.newsApi.getMostPopular(pageNum);
+        ? await api?.newsApi.getFollowed(pageNum, 12)
+        : await api?.newsApi.getMostPopular(pageNum, 12);
 
       if (response) {
         if (pageNum === 1) {
@@ -81,9 +96,11 @@ const NewsList: React.FC<NewsListProps> = ({ isSubscribed }) => {
   };
 
   useEffect(() => {
-    setPage(1);
-    setNews([]);
-    fetchNews(1);
+    if (api?.newsApi) {
+      setPage(1);
+      setNews([]);
+      fetchNews(1);
+    }
   }, [isSubscribed, api?.newsApi]);
 
   const fetchMoreData = () => {
@@ -108,40 +125,29 @@ const NewsList: React.FC<NewsListProps> = ({ isSubscribed }) => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        {isSubscribed ? 'Subscribed News' : 'Public News'}
-      </Typography>
-      
+    <Container maxWidth="lg" sx={{ py: 4 }}>      
       <InfiniteScroll
         dataLength={news.length}
         next={fetchMoreData}
         hasMore={hasMore}
-        loader={
-          <Stack spacing={3} sx={{ my: 2 }}>
-            {[1, 2].map((index) => (
-              <NewsListSkeleton key={`loading-${index}`} />
-            ))}
-          </Stack>
-        }
-        endMessage={
-          <Typography 
-            textAlign="center" 
-            color="text.secondary"
-            sx={{ my: 2 }}
-          >
-            No more news to load
-          </Typography>
-        }
+        loader={<NewsListSkeleton />}
       >
-        <Stack spacing={3}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            px: 1,
+            mt: 6
+          }}
+        >
           {news.map((item) => (
             <NewsEntry 
               key={item.id} 
               news={item}
             />
           ))}
-        </Stack>
+        </Box>
       </InfiniteScroll>
     </Container>
   );

@@ -1,19 +1,19 @@
 import React from 'react';
 import { 
-  Card, 
-  CardContent, 
-  Typography, 
   Box,
+  Typography,
   Avatar,
   IconButton,
-  Stack
+  Stack,
+  alpha
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Channel } from '../APIs/ChannelAPI';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import AddIcon from '@mui/icons-material/Add';
+import PeopleIcon from '@mui/icons-material/People';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import CheckIcon from '@mui/icons-material/Check';
+import AddIcon from '@mui/icons-material/Add';
+import { useUserInfo } from '../hooks/useUserInfo';
 
 interface ChannelItemProps {
   channel: Channel;
@@ -27,7 +27,15 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
   onUnfollow
 }) => {
   const navigate = useNavigate();
-  const isFollowing = channel.followers && channel.followers.length > 0;
+  const { 
+    channelRelations: {
+      isFollowing,
+      isSubscribed
+    }
+  } = useUserInfo();
+
+  const isUserFollowing = isFollowing(channel.id);
+  const hasSubscription = isSubscribed(channel.id);
 
   const handleClick = () => {
     navigate(`/app/channels/${channel.id}`);
@@ -35,7 +43,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
 
   const handleFollow = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isFollowing) {
+    if (isUserFollowing) {
       onUnfollow(channel.id);
     } else {
       onFollow(channel.id);
@@ -43,129 +51,119 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
   };
 
   return (
-    <Card 
-      sx={{ 
-        height: '100%',
+    <Box
+      onClick={handleClick}
+      sx={{
         display: 'flex',
-        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 2,
+        p: 2,
         borderRadius: 2,
-        position: 'relative',
-        overflow: 'visible',
-        transition: 'all 0.3s ease',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease-in-out',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: (theme) => theme.shadows[8],
+          bgcolor: (theme) => 
+            theme.palette.mode === 'dark' 
+              ? alpha(theme.palette.common.white, 0.05)
+              : alpha(theme.palette.common.black, 0.03),
+          transform: 'translateX(4px)'
         }
       }}
     >
-      <Box 
+      <Avatar 
+        src={channel.logoUrl} 
         sx={{ 
-          position: 'absolute',
-          top: -20,
-          left: 24,
-          zIndex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2
+          width: 56, 
+          height: 56,
+          borderRadius: 2,
+          bgcolor: 'primary.main'
         }}
-      >
-        <Avatar 
-          src={channel.logoUrl} 
-          sx={{ 
-            width: 56, 
-            height: 56,
-            border: '3px solid white',
-            boxShadow: 2,
-            backgroundColor: 'primary.main'
-          }}
-        />
-        <IconButton
-          size="small"
-          onClick={handleFollow}
-          sx={{ 
-            backgroundColor: isFollowing ? 'success.main' : 'primary.main',
-            color: 'white',
-            width: 32,
-            height: 32,
-            '&:hover': {
-              backgroundColor: isFollowing ? 'success.dark' : 'primary.dark',
-            }
-          }}
-        >
-          {isFollowing ? <CheckIcon /> : <AddIcon />}
-        </IconButton>
-      </Box>
+      />
 
-      <CardContent sx={{ pt: 5, pb: 2 }}>
-        <Stack spacing={2} sx={{ height: '100%' }}>
-          <Box>
-            <Typography 
-              variant="h6" 
-              component="div" 
-              sx={{ 
-                fontWeight: 600,
-                mb: 0.5,
-                cursor: 'pointer',
-                '&:hover': {
-                  color: 'primary.main'
-                }
-              }}
-              onClick={handleClick}
-            >
-              {channel.name}
-            </Typography>
-            <Stack 
-              direction="row" 
-              spacing={1} 
-              alignItems="center"
-            >
-              <PersonOutlineIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography 
-                variant="body2" 
-                color="text.secondary"
-              >
-                {channel.followers?.length.toLocaleString() || 0} followers
-              </Typography>
-            </Stack>
-          </Box>
-
+      <Box sx={{ flex: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          mb: 0.5
+        }}>
           <Typography 
-            variant="body2" 
-            color="text.secondary"
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              minHeight: '40px',
-              flex: 1
+            variant="subtitle1" 
+            sx={{ 
+              fontWeight: 600,
+              color: 'text.primary'
             }}
           >
-            {channel.description}
+            {channel.name}
           </Typography>
 
-          <Box 
-            onClick={handleClick}
+          <IconButton
+            size="small"
+            onClick={handleFollow}
             sx={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              color: 'primary.main',
-              cursor: 'pointer',
+              bgcolor: isUserFollowing ? 'success.main' : 'primary.main',
+              color: 'white',
+              width: 32,
+              height: 32,
               '&:hover': {
-                textDecoration: 'underline'
+                bgcolor: isUserFollowing ? 'success.dark' : 'primary.dark',
               }
             }}
           >
-            <Typography variant="button">
-              View Channel
-            </Typography>
-            <ArrowForwardIcon fontSize="small" />
+            {isUserFollowing ? <CheckIcon /> : <AddIcon />}
+          </IconButton>
+        </Box>
+
+        <Typography 
+          variant="body2" 
+          color="text.secondary"
+          sx={{
+            mb: 1,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+        >
+          {channel.description}
+        </Typography>
+
+        <Stack 
+          direction="row" 
+          spacing={2}
+          sx={{ 
+            color: 'text.secondary',
+            fontSize: '0.875rem'
+          }}
+        >
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 0.5,
+            color: isUserFollowing ? 'primary.main' : 'inherit'
+          }}>
+            <PeopleIcon sx={{ fontSize: 16 }} />
+            {channel.followerCount.toLocaleString('en-US', { 
+              notation: 'compact',
+              maximumFractionDigits: 1 
+            })}
+          </Box>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 0.5,
+            color: hasSubscription ? 'primary.main' : 'inherit'
+          }}>
+            <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
+            {channel.subscriberCount.toLocaleString('en-US', { 
+              notation: 'compact',
+              maximumFractionDigits: 1 
+            })}
           </Box>
         </Stack>
-      </CardContent>
-    </Card>
+      </Box>
+    </Box>
   );
 };
 
