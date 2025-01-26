@@ -1,4 +1,4 @@
-import { AxiosJournalist } from "../util/axios";
+import { AxiosJournalist } from "@/utils/axios";
 import { ChannelAPI } from "./ChannelAPI";
 import { NewsAPI } from "./NewsAPI";
 import { PollAPI } from "./PollAPI";

@@ -4,7 +4,7 @@ import { useAuthContext } from "./AuthContext";
 import { User } from "@/APIs/UserAPI";
 
 interface UserContextValue {
-  userInfo: User | undefined;
+  userInfo: Nullable<User>;
   isFollowingChannel: (channelId: string) => boolean;
   isSubscribedToChannel: (channelId: string) => boolean;
   getChannelSubscriptionTier: (channelId: string) => string | undefined;
@@ -17,7 +17,7 @@ const useUserInfoContext = () => useContext(UserContext)
 const UserProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     const apiContext = useApiContext();
     const authContext = useAuthContext();
-    const [userInfo, setUserInfo] = useState<User | undefined>(undefined);
+    const [userInfo, setUserInfo] = useState<Nullable<User>>(null);
 
     const getUserInfo = async (externalId: string | undefined) => {
       if (externalId == null) {

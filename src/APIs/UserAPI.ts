@@ -1,6 +1,6 @@
-import { AxiosJournalist } from "../util/axios";
-import { HTTPApi } from "../util/http";
-import { ChannelFollower, ChannelSubscription } from "./ChannelAPI";
+import { AxiosJournalist } from "@/utils/axios";
+import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
+import { Channel, ChannelFollower, ChannelSubscription } from "./ChannelAPI";
 
 export type User = {
     id: string;
@@ -13,6 +13,15 @@ export type User = {
     externalId: string | null;
     followings: ChannelFollower[];
     subscriptions: ChannelSubscription[];
+    channels: ChannelUser[];
+}
+
+export type ChannelUser = {
+    id: string;
+    userId: string;
+    channelId: string;
+    channelName: string;
+    channel: Channel;
 }
 
 export type CreateUserData = Omit<User, "id" | "createdAt" | "memberships">
@@ -25,7 +34,7 @@ const SUB_PATH = {
     SIGN_UP: 'sign-up'
 }
 
-export class UserAPI extends HTTPApi<User, CreateUserData, EditUserData> {
+export class UserAPI extends HTTPApi {
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
     }
@@ -43,7 +52,7 @@ export class UserAPI extends HTTPApi<User, CreateUserData, EditUserData> {
         photo_url: string | null,
         role_id: number
     }) => {
-        return this._post(`${this.apiPath}/${SUB_PATH.SIGN_UP}`, { external_id, email, display_name, photo_url, role_id });
+        return this._post<void>(`${API_PATH}/${SUB_PATH.SIGN_UP}`, { external_id, email, display_name, photo_url, role_id });
     }
 
     public signIn = async ({
@@ -51,14 +60,18 @@ export class UserAPI extends HTTPApi<User, CreateUserData, EditUserData> {
     }: {
         idToken: string
     }) => {
-        return this._post(`${this.apiPath}/${SUB_PATH.SIGN_IN}`, { idToken });
+        return this._post<void>(`${API_PATH}/${SUB_PATH.SIGN_IN}`, { idToken });
     }
 
     public getUserInfo = async () => {
-        return this._get(`${this.apiPath}/${SUB_PATH.PROFILE}`);
+        return this._get<User>(`${API_PATH}/${SUB_PATH.PROFILE}`);
     }
 
     public getUserInfoByExternalId = async (externalId: string) => {
-        return this._get(`${this.apiPath}/${SUB_PATH.PROFILE}/${externalId}`);
+        return this._get<User>(`${API_PATH}/${SUB_PATH.PROFILE}/${externalId}`);
+    }
+
+    public getUserChannels = async (userId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
+        return this._list<ChannelUser>(`${API_PATH}/${userId}/channel`, pagination);
     }
 }

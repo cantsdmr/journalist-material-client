@@ -22,13 +22,16 @@
     "strictPropertyInitialization": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
+      // "@/*": ["src/*"],
       "@/APIs/*": ["src/APIs/*"],
       "@/components/*": ["src/components/*"],
       "@/contexts/*": ["src/contexts/*"],
       "@/hooks/*": ["src/hooks/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/constants/*": ["src/constants/*"],
+      "@/enums/*": ["src/enums/*"],
+      "@/assets/*": ["src/assets/*"],
       "@/pages/*": ["src/pages/*"],
-      "@/util/*": ["src/util/*"]
     }
   },
   "include": ["src"],

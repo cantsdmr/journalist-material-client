@@ -4,7 +4,8 @@ import { useAuthContext } from "./AuthContext";
 
 export type ApiContextValue = {
     api: AppAPI | undefined,
-    isAuthenticated: boolean
+    isAuthenticated: boolean,
+    isLoading: boolean
 }
 
 const ApiContext = createContext(null as any)
@@ -13,7 +14,8 @@ const useApiContext = () => useContext<ApiContextValue>(ApiContext)
 const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     const [value, setValue] = useState<ApiContextValue>({
         api: new AppAPI(),
-        isAuthenticated: false
+        isAuthenticated: false,
+        isLoading: true
     });
     const auth = useAuthContext();
 
@@ -23,7 +25,8 @@ const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
             const updatedApi = value.api?.setAuthHeader(token).setApis();
             setValue({
                 api: updatedApi,
-                isAuthenticated: true
+                isAuthenticated: true,
+                isLoading: false
             });
         }
     }

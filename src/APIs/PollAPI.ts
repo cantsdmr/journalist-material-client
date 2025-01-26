@@ -1,5 +1,5 @@
-import { AxiosJournalist } from "../util/axios";
-import { HTTPApi } from "../util/http";
+import { AxiosJournalist } from "@/utils/axios";
+import { HTTPApi } from "@/utils/http";
 
 export type Poll = {
     id: string;
@@ -31,7 +31,7 @@ export type EditPollData = Omit<Poll, "id">
 
 const API_PATH = '/polls'
    
-export class PollAPI extends HTTPApi<Poll, CreatePollData, EditPollData> {
+export class PollAPI extends HTTPApi {
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
     }

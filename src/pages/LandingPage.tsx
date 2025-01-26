@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Container } from '@mui/material';
-import bgURL from '../assets/BG_journo3.webp'
-import LandingPageAppBar from '../components/LandingPageAppBar';
+import bgURL from '@/assets/BG_journo3.webp'
+import LandingPageAppBar from '@/components/navigation/LandingPageAppBar';
 
 const LandingPage: React.FC = () => {
   return (

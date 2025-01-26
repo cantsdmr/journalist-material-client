@@ -1,58 +1,88 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import PrivateRoute from './navigation/PrivateRoute';
-import Login from './pages/Login';
+import { PATHS, NEWS, CHANNEL } from '@/constants/paths';
+
+// Layouts
+import MainLayout from '@/components/navigation/MainLayout';
+import StudioLayout from '@/components/navigation/StudioLayout';
+import PrivateRoute from '@/components/navigation/PrivateRoute';
+
+// Home pages
+// import GetStarted from '@/pages/auth/GetStarted';
+
+// Auth pages
+import Login from '@/pages/auth/Login';
+import SignUp from '@/pages/auth/SignUp';
+
+// Main app pages
+import LandingPage from '@/pages/LandingPage';
+import Explore from '@/pages/Explore';
+import Subscriptions from '@/pages/Subscriptions';
+
+// News pages
+import ListNews from '@/pages/app/news/ListNews';
+import ViewNews from '@/pages/app/news/ViewNews';
+
+// Channel pages
+import ListChannels from '@/pages/app/channel/ListChannels';
+import ViewChannel from '@/pages/app/channel/ViewChannel';
+
+// Studio pages
+import CreateNewsStudio from '@/pages/studio/news/CreateNews.studio';
+import EditNewsStudio from '@/pages/studio/news/EditNews.studio';
+import ViewNewsStudio from '@/pages/studio/news/ViewNews.studio';
+import ListNewsStudio from '@/pages/studio/news/ListNews.studio';
+// import NewsAnalytics from '@/pages/studio/news/NewsAnalytics';
+
+import ListChannelsStudio from '@/pages/studio/channel/ListChannels.studio';
+import CreateChannelStudio from '@/pages/studio/channel/CreateChannel.studio';
+import EditChannelStudio from '@/pages/studio/channel/EditChannel.studio';
+
+// import ChannelAnalytics from '@/pages/studio/channel/ChannelAnalytics';
 import NotFound from './pages/NotFound';
-import MainLayout from './navigation/MainLayout';
-import Subscriptions from './pages/Subscriptions';
-import Explore from './pages/Explore';
-import NewsDetail from './pages/news/NewsDetail';
-import CreatePoll from './components/CreatePoll';
-import Polls from './pages/poll/Polls';
-import PublicRoute from './navigation/PublicRoute';
-import DemoLayout from './navigation/DemoLayout';
-import DemoCreatorProfile from './demo/DemoCreatorProfile';
-import DemoExploreCreators from './demo/DemoExploreCreators';
-import DemoNewsFeed from './demo/DemoNewsFeed';
-import DemoSupporterDashboard from './demo/DemoSupporterDashboard';
-import DemoPoll from './demo/DemoPoll';
-import SignUp from './pages/SignUp';
-import Channels from './pages/channel/Channels';
-import ChannelDetail from './pages/channel/ChannelDetail';
-import NewsList from './pages/news/NewsList';
+import ViewChannelStudio from './pages/studio/channel/ViewChannel.studio';
 
 const App: React.FC = () => {
   return (
     <Routes>
-      <Route
-        path=""
-        element={
-          <LandingPage />
-        }
-      />
-      <Route path="login" element={<Login />} />
-      <Route path="get-started" element={<SignUp />} />
-      <Route path="demo/*" element={<PublicRoute><DemoLayout /></PublicRoute>} >
-        <Route path="creator-profile" element={<DemoCreatorProfile />} />
-        <Route path="explore-creators" element={<DemoExploreCreators />} />
-        <Route path="news-feed" element={<DemoNewsFeed />} />
-        <Route path="demo-poll" element={<DemoPoll />} />
-        <Route path="supporter-dashboard" element={<DemoSupporterDashboard />} />
+      {/* Home Routes */}
+      {/* <Route path={HOME.GET_STARTED} element={<GetStarted />} /> */}
+
+      {/* Auth Routes */}
+      <Route path={PATHS.LOGIN} element={<Login />} />
+      <Route path={PATHS.SIGNUP} element={<SignUp />} />
+
+      {/* Main App Routes */}
+      <Route path={`${PATHS.APP_ROOT}/*`} element={<PrivateRoute><MainLayout /></PrivateRoute>}>
+        <Route path={`${NEWS.ROOT}/*`}>
+          <Route path={NEWS.SUBPATHS.TRENDING} element={<ListNews isSubscribed={false} />} />
+          <Route path={NEWS.SUBPATHS.MY_FEED} element={<ListNews isSubscribed={true} />} />
+          <Route path={`${NEWS.VIEW}`} element={<ViewNews />} />
+        </Route>
+        <Route path={`${CHANNEL.ROOT}/*`}>
+          <Route index element={<ListChannels />} />
+          <Route path={`${CHANNEL.VIEW}`} element={<ViewChannel />} />
+        </Route>
       </Route>
-      <Route path="app/*" element={<PrivateRoute><MainLayout /></PrivateRoute>} >
-        <Route path="trending" element={<NewsList isSubscribed={false} />} />
-        <Route path="my-feed" element={<NewsList isSubscribed={true} />} />
-        <Route path="news/:id" element={<NewsDetail />} />
-        <Route path="channels" element={<Channels />} />
-        <Route path="channels/:channelId" element={<ChannelDetail />} />
-        <Route path="subscriptions" element={<Subscriptions />} />
-        <Route path="explore" element={<Explore />} />
-        <Route path="entry/:id" element={<NewsDetail />} />
-        <Route path="create-poll" element={<CreatePoll />} />
-        <Route path="polls" element={<Polls />} />
-        <Route path="*" element={<NotFound />} />
+
+      {/* Studio Routes */}
+      <Route path={`${PATHS.STUDIO_ROOT}/*`} element={<PrivateRoute><StudioLayout /></PrivateRoute>}>
+        {/* <Route index element={<Studio />} /> */}
+        <Route path={`${NEWS.ROOT}/*`}>
+          <Route index element={<ListNewsStudio isSubscribed={false} />} />
+          <Route path={`${NEWS.CREATE}`} element={<CreateNewsStudio />} />
+          <Route path={`${NEWS.EDIT}/:id`} element={<EditNewsStudio />} />
+          <Route path={`${NEWS.VIEW}`} element={<ViewNewsStudio />} />
+        </Route>
+        <Route path={`${CHANNEL.ROOT}/*`}>
+          <Route index element={<ListChannelsStudio />} />
+          <Route path={`${CHANNEL.CREATE}`} element={<CreateChannelStudio />} />
+          <Route path={`${CHANNEL.EDIT}/:id`} element={<EditChannelStudio />} />
+          <Route path={`${CHANNEL.VIEW}`} element={<ViewChannelStudio />} />
+        </Route>
       </Route>
+
+      {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

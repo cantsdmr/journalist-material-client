@@ -1,6 +1,6 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { firebaseAuth } from '../util/firebase';
+import { useAuth } from '@/hooks/useAuth';
+import { firebaseAuth } from '@/utils/firebase';
 import { 
   UserCredential, 
   AuthProvider as FirebaseAuthProvider,
