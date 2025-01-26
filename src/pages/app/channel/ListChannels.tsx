@@ -45,10 +45,8 @@ const ListChannels: React.FC = () => {
   };
 
   useEffect(() => {
-    if (api?.channelApi) {
-      getChannels(page);
-    }
-  }, [api?.channelApi]);
+    getChannels(page); 
+  }, []);
 
   const handleFollow = async (channelId: string) => {
     try {

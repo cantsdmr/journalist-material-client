@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { PATHS, NEWS, CHANNEL } from '@/constants/paths';
+import { useApp } from '@/hooks/useApp';
 
 // Layouts
 import MainLayout from '@/components/navigation/MainLayout';
@@ -41,8 +42,20 @@ import EditChannelStudio from '@/pages/studio/channel/EditChannel.studio';
 // import ChannelAnalytics from '@/pages/studio/channel/ChannelAnalytics';
 import NotFound from './pages/NotFound';
 import ViewChannelStudio from './pages/studio/channel/ViewChannel.studio';
+import LoadingScreen from '@/components/common/LoadingScreen';
+import ErrorScreen from '@/components/common/ErrorScreen';
 
 const App: React.FC = () => {
+  const { isFullyInitialized, error } = useApp();
+
+  if (!isFullyInitialized) {
+    return <LoadingScreen />;
+  }
+
+  if (error) {
+    return <ErrorScreen error={error} />;
+  }
+
   return (
     <Routes>
       {/* Home Routes */}

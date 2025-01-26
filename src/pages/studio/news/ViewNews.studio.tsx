@@ -130,7 +130,7 @@ const ViewNewsStudio: React.FC = () => {
     };
 
     getNews();
-  }, [id, api?.newsApi]);
+  }, []);
 
   if (loading) {
     return <ViewNewsSkeleton />;

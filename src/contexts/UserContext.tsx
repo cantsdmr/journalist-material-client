@@ -3,7 +3,7 @@ import { useApiContext } from "./ApiContext";
 import { useAuthContext } from "./AuthContext";
 import { User } from "@/APIs/UserAPI";
 
-interface UserContextValue {
+export interface UserContextValue {
   userInfo: Nullable<User>;
   isFollowingChannel: (channelId: string) => boolean;
   isSubscribedToChannel: (channelId: string) => boolean;

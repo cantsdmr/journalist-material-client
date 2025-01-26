@@ -11,7 +11,6 @@ import {
   alpha,
   useMediaQuery,
   Drawer,
-  CircularProgress,
   Menu,
   MenuItem,
   ListItemIcon,
@@ -24,18 +23,18 @@ import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
 import Sidebar from '@/components/navigation/Sidebar';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
-import { useApiContext } from '@/contexts/ApiContext';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { PATHS } from '@/constants/paths';
+import { useApp } from '@/hooks/useApp';
 
 const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const { isDarkMode, toggleTheme } = useAppTheme();
   const muiTheme = useMuiTheme();
-  const { isLoading } = useApiContext();
+  const { isFullyInitialized } = useApp();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
@@ -93,21 +92,8 @@ const MainLayout: React.FC = () => {
     </Menu>
   );
 
-  if (isLoading) {
-    return (
-      <Box 
-        sx={{ 
-          height: '100vh', 
-          width: '100vw', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          bgcolor: 'background.default'
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+  if (!isFullyInitialized) {
+    return null;
   }
 
   return (

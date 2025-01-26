@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { 
   Box,
   Container,
-  Grid
+  Typography,
+  Grid,
+  Skeleton
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -20,9 +22,11 @@ const ListChannelsStudio: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { api } = useApiContext();
   const { userInfo } = useUserInfo();
   const navigate = useNavigate();
+
 
   const fetchMoreData = () => {
     getChannels(page + 1);
@@ -47,18 +51,58 @@ const ListChannelsStudio: React.FC = () => {
       setHasMore(result?.metadata.hasNext === true);
     } catch (error) {
       console.error('Failed to fetch channels:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (api?.channelApi) {
-      getChannels(1);
-    }
-  }, [api?.channelApi]);
+    getChannels(page);
+  }, []);
+
+  const ChannelSkeleton = () => (
+    <Box 
+      sx={{
+        p: 3,
+        borderRadius: 2,
+        bgcolor: theme =>
+          theme.palette.mode === 'dark'
+            ? alpha(theme.palette.common.white, 0.05)
+            : alpha(theme.palette.common.black, 0.03),
+        height: 200
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
+        <Box sx={{ width: '100%' }}>
+          <Skeleton width="60%" height={24} />
+          <Skeleton width="40%" height={20} />
+        </Box>
+      </Box>
+      <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1 }} />
+      <Box sx={{ mt: 2 }}>
+        <Skeleton width="30%" height={24} />
+      </Box>
+    </Box>
+  );
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      {userChannels.length === 0 ? (
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+          {isLoading ? <Skeleton width={200} /> : 'My Channels'}
+        </Typography>
+      </Box>
+
+      {isLoading ? (
+        <Grid container spacing={3}>
+          {[1, 2, 3, 4].map((index) => (
+            <Grid item xs={12} md={6} key={index}>
+              <ChannelSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      ) : userChannels.length === 0 ? (
         <EmptyState
           title="No Channels Yet"
           description="Create your first channel to start publishing news and connecting with subscribers."
@@ -77,17 +121,7 @@ const ListChannelsStudio: React.FC = () => {
             <Grid container spacing={3} sx={{ mt: 1 }}>
               {[...Array(2)].map((_, index) => (
                 <Grid item xs={12} md={6} key={index}>
-                  <Box 
-                    sx={{
-                      p: 3,
-                      borderRadius: 2,
-                      bgcolor: theme =>
-                        theme.palette.mode === 'dark'
-                          ? alpha(theme.palette.common.white, 0.05)
-                          : alpha(theme.palette.common.black, 0.03),
-                      height: 200
-                    }}
-                  />
+                  <ChannelSkeleton />
                 </Grid>
               ))}
             </Grid>

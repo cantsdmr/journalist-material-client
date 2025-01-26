@@ -180,7 +180,7 @@ const ViewChannel: React.FC = () => {
                         left: 0,
                         right: 0,
                         height: 200,
-                        backgroundImage: `url(${channel.bannerUrl})`,
+                        backgroundImage: `url(${channel?.bannerUrl || 'https://via.placeholder.com/600x400'})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         filter: 'brightness(0.9)',

@@ -42,24 +42,20 @@ const ViewChannelStudio: React.FC = () => {
     const hasSubscription = isSubscribed(channelId ?? '');
     const currentTierId = getSubscriptionTier(channelId ?? '');
 
-    useEffect(() => {
-        const fetchChannel = async () => {
-            try {
-                if (channelId && api?.channelApi) {
-                    const result = await api?.channelApi.getChannel(channelId);
-                    if (result) {
-                        setChannel(result);
-                    }
+    const fetchChannel = async () => {
+        try {
+            if (channelId) {
+                const result = await api?.channelApi.getChannel(channelId);
+                if (result) {
+                    setChannel(result);
                 }
-            } catch (error) {
-                console.error('Failed to fetch channel:', error);
-            } finally {
-                setLoading(false);
             }
-        };
-
-        fetchChannel();
-    }, [channelId, api?.channelApi]);
+        } catch (error) {
+            console.error('Failed to fetch channel:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleFollow = async () => {
         try {
@@ -130,6 +126,10 @@ const ViewChannelStudio: React.FC = () => {
         }
     };
 
+    useEffect(() => {
+        fetchChannel();
+    }, []);
+
     if (loading) {
         return (
             <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -178,7 +178,7 @@ const ViewChannelStudio: React.FC = () => {
                         left: 0,
                         right: 0,
                         height: 200,
-                        backgroundImage: `url(${channel.bannerUrl})`,
+                        backgroundImage: `url(${channel?.bannerUrl || 'https://via.placeholder.com/600x400'})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         filter: 'brightness(0.9)',

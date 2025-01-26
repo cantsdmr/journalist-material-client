@@ -24,7 +24,7 @@ const EditNewsStudio: React.FC = () => {
     };
 
     fetchNews();
-  }, [id, api]);
+  }, []);
 
   const handleUpdate = async (data: any) => {
     await api?.newsApi.update(id!, data);

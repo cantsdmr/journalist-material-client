@@ -72,7 +72,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
         <Box
           sx={{
             height: 120,
-            backgroundImage: `url(${channel.bannerUrl})`,
+            backgroundImage: `url(${channel?.bannerUrl || 'https://via.placeholder.com/600x400'})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             borderTopLeftRadius: 1,

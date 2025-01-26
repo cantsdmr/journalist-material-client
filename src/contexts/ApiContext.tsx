@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { AppAPI } from "../APIs/AppAPI";
+import { AppAPI } from "@/APIs/AppAPI";
 import { useAuthContext } from "./AuthContext";
 
 export type ApiContextValue = {

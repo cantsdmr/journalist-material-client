@@ -24,6 +24,7 @@ export type Channel = {
     polls?: Poll[];
     users?: User[];
     tiers?: ChannelTier[];
+    tags?: string[];
 }
 
 export type ChannelFollower = {

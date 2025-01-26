@@ -40,7 +40,8 @@ const ChannelForm: React.FC<ChannelFormProps> = ({
       await onSubmit({
         ...formData,
         logoUrl: logo || '',
-        bannerUrl: banner || ''
+        bannerUrl: banner || '',
+        tags: []
       });
     } catch (error) {
       console.error('Failed to submit channel:', error);

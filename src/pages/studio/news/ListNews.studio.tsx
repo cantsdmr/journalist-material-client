@@ -11,11 +11,10 @@ import { News } from '@/APIs/NewsAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import NewsEntry from '@/components/news/NewsEntry';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useUserInfo } from '@/hooks/useUserInfo';
 import { EmptyState } from '@/components/common/EmptyState';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useNavigate } from 'react-router-dom';
-import { PATHS } from '@/constants/paths';
+import { useApp } from '@/hooks/useApp';
 
 interface ListNewsProps {
   isSubscribed: boolean;
@@ -77,14 +76,14 @@ const ListNewsStudio: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
-  const { userInfo } = useUserInfo();
+  const { user } = useApp();
   const navigate = useNavigate();
 
   const fetchNews = async (pageNum: number = page) => {
     try {
-      if (!userInfo) return;
+      if (!user?.userInfo) return;
       setLoading(true);
-      const response = await api?.newsApi.getCreatorNews(userInfo.id, { page: pageNum, limit: 12 });
+      const response = await api?.newsApi.getCreatorNews(user.userInfo.id, { page: pageNum, limit: 12 });
 
       if (response) {
         if (pageNum === 1) {
@@ -103,12 +102,8 @@ const ListNewsStudio: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   };
 
   useEffect(() => {
-    if (userInfo) {
-      setPage(1);
-      setNews([]);
-      fetchNews(1);
-    }
-  }, [userInfo]);
+    fetchNews(page);
+  }, []);
 
   const fetchMoreData = () => {
     if (!loading && hasMore) {

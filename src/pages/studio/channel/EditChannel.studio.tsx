@@ -29,7 +29,7 @@ const EditChannelStudio: React.FC = () => {
     };
 
     fetchChannel();
-  }, [id, api]);
+  }, []);
 
   const handleUpdate = async (data: any) => {
     try {

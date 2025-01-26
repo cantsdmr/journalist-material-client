@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ApiProvider } from '@/contexts/ApiContext';
 import { UserProvider } from '@/contexts/UserContext';
+import { AppProvider } from './contexts/AppContext';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <ApiProvider>
         <UserProvider>
           <ThemeProvider>
-            <App />
+            <AppProvider>
+              <App />
+            </AppProvider>
           </ThemeProvider>
         </UserProvider>
       </ApiProvider>

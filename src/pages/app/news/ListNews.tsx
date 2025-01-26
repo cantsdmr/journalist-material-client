@@ -97,12 +97,8 @@ const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   };
 
   useEffect(() => {
-    if (api?.newsApi) {
-      setPage(1);
-      setNews([]);
-      fetchNews(1);
-    }
-  }, [isSubscribed, api?.newsApi]);
+    fetchNews(page);
+  }, []);
 
   const fetchMoreData = () => {
     if (!loading && hasMore) {

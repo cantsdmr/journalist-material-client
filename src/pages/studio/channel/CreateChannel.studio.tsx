@@ -5,6 +5,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
 import { useNavigate } from 'react-router-dom';
 import { CreateChannelData } from '@/APIs/ChannelAPI';
+import { PATHS } from '@/constants/paths';
 
 const CreateChannelStudio: React.FC = () => {
   const { api } = useApiContext();
@@ -15,7 +16,7 @@ const CreateChannelStudio: React.FC = () => {
     try {
       const result = await api?.channelApi.createChannel(data);
       if (result) {
-        navigate(`/app/channels/${result.id}`);
+        navigate(`${PATHS.STUDIO_CHANNELS}`);
       }
     } catch (error) {
       console.error('Failed to create channel:', error);
