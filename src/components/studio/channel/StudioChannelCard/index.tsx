@@ -11,7 +11,8 @@ import {
   ListItemText,
   Stack,
   Chip,
-  alpha
+  alpha,
+  useTheme
 } from '@mui/material';
 import { Channel } from '@/APIs/ChannelAPI';
 import { useNavigate } from 'react-router-dom';
@@ -36,8 +37,10 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
   const { api } = useApiContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const theme = useTheme();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -58,20 +61,25 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
   return (
     <>
       <Card 
+        onClick={() => navigate(PATHS.STUDIO_CHANNEL_EDIT.replace(':channelId', channel.id))}
         sx={{ 
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
+          cursor: 'pointer',
+          transition: theme.transitions.create(['box-shadow', 'transform'], {
+            duration: theme.transitions.duration.shorter
+          }),
           '&:hover': {
-            boxShadow: theme => `0 0 0 1px ${alpha(theme.palette.primary.main, 0.2)}`
+            transform: 'translateY(-2px)',
+            boxShadow: theme => `0 4px 12px ${alpha(theme.palette.primary.main, 0.1)}`
           }
         }}
       >
-        {/* Banner Image */}
         <Box
           sx={{
-            height: 120,
+            height: { xs: 100, sm: 120 },
             backgroundImage: `url(${channel?.bannerUrl || 'https://via.placeholder.com/600x400'})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
@@ -85,37 +93,42 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)',
+              background: theme => `linear-gradient(180deg, 
+                ${alpha(theme.palette.background.default, 0)} 0%, 
+                ${alpha(theme.palette.background.default, 0.8)} 100%)`
             }
           }}
         >
-          <Box
-            sx={{
+          <IconButton
+            onClick={handleMenuOpen}
+            sx={{ 
               position: 'absolute',
               top: 8,
               right: 8,
-              zIndex: 1
+              zIndex: 1,
+              color: 'text.primary',
+              bgcolor: theme => alpha(theme.palette.background.paper, 0.8),
+              backdropFilter: 'blur(4px)',
+              '&:hover': {
+                bgcolor: theme => alpha(theme.palette.background.paper, 0.95)
+              }
             }}
           >
-            <IconButton
-              onClick={handleMenuOpen}
-              sx={{ 
-                color: 'white',
-                bgcolor: 'rgba(0,0,0,0.2)',
-                '&:hover': {
-                  bgcolor: 'rgba(0,0,0,0.4)'
-                }
-              }}
-            >
-              <MoreVertIcon />
-            </IconButton>
-          </Box>
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
         </Box>
 
-        <CardContent sx={{ flexGrow: 1, pt: 2 }}>
-          <Stack spacing={2}>
+        <CardContent sx={{ flexGrow: 1, p: { xs: 2, sm: 2.5 } }}>
+          <Stack spacing={{ xs: 1.5, sm: 2 }}>
             <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 600,
+                  mb: 0.5,
+                  fontSize: { xs: '1rem', sm: '1.125rem' }
+                }}
+              >
                 {channel.name}
               </Typography>
               <Typography 
@@ -126,34 +139,46 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
-                  mb: 2
+                  fontSize: { xs: '0.875rem', sm: '0.875rem' },
+                  lineHeight: 1.5
                 }}
               >
                 {channel.description}
               </Typography>
             </Box>
 
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack 
+              direction="row" 
+              spacing={1} 
+              flexWrap="wrap"
+              sx={{ gap: 1 }}
+            >
               <Chip 
                 size="small"
                 label={`${channel.subscriberCount} subscribers`}
                 sx={{ 
-                  bgcolor: theme => 
-                    theme.palette.mode === 'dark' 
-                      ? alpha(theme.palette.primary.main, 0.1)
-                      : alpha(theme.palette.primary.main, 0.05),
-                  color: 'primary.main'
+                  height: 24,
+                  fontSize: '0.75rem',
+                  bgcolor: theme => alpha(theme.palette.primary.main, 
+                    theme.palette.mode === 'dark' ? 0.15 : 0.08),
+                  color: 'primary.main',
+                  '& .MuiChip-label': {
+                    px: 1
+                  }
                 }}
               />
               <Chip 
                 size="small"
                 label={`10 news`}
                 sx={{ 
-                  bgcolor: theme =>
-                    theme.palette.mode === 'dark'
-                      ? alpha(theme.palette.secondary.main, 0.1)
-                      : alpha(theme.palette.secondary.main, 0.05),
-                  color: 'secondary.main'
+                  height: 24,
+                  fontSize: '0.75rem',
+                  bgcolor: theme => alpha(theme.palette.secondary.main,
+                    theme.palette.mode === 'dark' ? 0.15 : 0.08),
+                  color: 'secondary.main',
+                  '& .MuiChip-label': {
+                    px: 1
+                  }
                 }}
               />
             </Stack>
@@ -165,8 +190,12 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()}
         PaperProps={{
-          sx: { width: 200 }
+          sx: { 
+            width: 200,
+            mt: 1
+          }
         }}
       >
         <MenuItem onClick={() => {
@@ -176,7 +205,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
           <ListItemIcon>
             <EditIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Edit Channel</ListItemText>
+          <ListItemText primary="Edit Channel" />
         </MenuItem>
         <MenuItem onClick={() => {
           navigate(`/app/channels/${channel.id}`);
@@ -185,7 +214,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
           <ListItemIcon>
             <VisibilityIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>View Public Page</ListItemText>
+          <ListItemText primary="View Public Page" />
         </MenuItem>
         <MenuItem 
           onClick={() => {
@@ -197,7 +226,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
           <ListItemIcon sx={{ color: 'inherit' }}>
             <DeleteIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Delete Channel</ListItemText>
+          <ListItemText primary="Delete Channel" />
         </MenuItem>
       </Menu>
 

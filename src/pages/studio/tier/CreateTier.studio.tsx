@@ -4,7 +4,7 @@ import TierForm from '@/components/tier/TierForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CreateTierData } from '@/APIs/ChannelAPI';
+import { CreateChannelTierData } from '@/APIs/ChannelAPI';
 
 const CreateTier: React.FC = () => {
   const { channelId } = useParams<{ channelId: string }>();
@@ -12,7 +12,7 @@ const CreateTier: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = async (data: CreateTierData) => {
+  const handleCreate = async (data: CreateChannelTierData) => {
     try {
       if (channelId) {
         const result = await api?.channelApi.createTier(channelId, data);

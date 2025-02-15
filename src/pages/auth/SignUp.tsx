@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Box, TextField, Button, Typography, Divider, Link } from '@mui/material';
-import { firebaseAuth, googleProvider, twitterProvider, facebookProvider, appleProvider } from '@/utils/firebase';
+import { googleProvider, twitterProvider, facebookProvider, appleProvider } from '@/utils/firebase';
 import { useNavigate } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
 import XIcon from '@mui/icons-material/X';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import AppleIcon from '@mui/icons-material/Apple';
 import { styled } from '@mui/material/styles';
-import { useAuth } from '../../hooks/useAuth';
-import { USER_ROLE } from '../../enums/UserEnums';
+import { useAuth } from '@/contexts/AuthContext';
+import { USER_ROLE } from '@/enums/UserEnums';
 import { AuthProvider } from 'firebase/auth';
-import { useApiContext } from '../../contexts/ApiContext';
+import { useApiContext } from '@/contexts/ApiContext';
 
 interface SocialButtonProps {
   bgcolor: string;
@@ -64,7 +64,7 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const auth = useAuth(firebaseAuth);
+  const auth = useAuth();
   const { api } = useApiContext();
   const navigate = useNavigate();
 
@@ -74,10 +74,10 @@ const SignUp: React.FC = () => {
       const userCredential = await auth?.signUp(email, password);
       if (userCredential) {
       await api?.userApi.signUp({
-        external_id: userCredential.user.uid,
-          email: userCredential.user.email,   
-          display_name: userCredential.user.displayName ?? '',
-          photo_url: userCredential.user.photoURL ?? '',
+        external_id: userCredential.uid,
+          email: userCredential.email,   
+          display_name: userCredential.displayName ?? '',
+          photo_url: userCredential.photoURL ?? '',
           role_id: USER_ROLE.REGULAR_USER
         });
       }

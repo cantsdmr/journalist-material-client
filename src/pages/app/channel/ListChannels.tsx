@@ -6,10 +6,10 @@ import {
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Channel } from '../../../APIs/ChannelAPI';
-import { useApiContext } from '../../../contexts/ApiContext';
+import { useApiContext } from '@/contexts/ApiContext';
 import ChannelItem from '@/components/channel/ChannelItem/index';
 import { alpha } from '@mui/material/styles';
-import { useUserInfo } from '@/hooks/useUserInfo';
+import { useUser } from '@/contexts/UserContext';
 
 const ListChannels: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -17,7 +17,7 @@ const ListChannels: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { api } = useApiContext();
-  const { refreshUserInfo } = useUserInfo();
+  const { actions } = useUser();
 
   const fetchMoreData = () => {
     getChannels(page + 1);
@@ -51,7 +51,7 @@ const ListChannels: React.FC = () => {
   const handleFollow = async (channelId: string) => {
     try {
       await api?.channelApi.follow(channelId);
-      await refreshUserInfo();
+      await actions.refreshUser();
     } catch (error) {
       console.error('Failed to follow channel:', error);
     }
@@ -60,7 +60,7 @@ const ListChannels: React.FC = () => {
   const handleUnfollow = async (channelId: string) => {
     try {
       await api?.channelApi.unfollow(channelId);
-      await refreshUserInfo();
+      await actions.refreshUser();
     } catch (error) {
       console.error('Failed to unfollow channel:', error);
     }

@@ -56,8 +56,8 @@ export type ChannelTier = {
 export type CreateChannelData = Omit<Channel, "id" | "createdAt" | "updatedAt" | "isFollowing" | "isSubscribed" | "followers" | "subscriptions" | "news" | "polls" | "users" | "tiers" | "followerCount" | "subscriberCount">
 export type EditChannelData = Omit<Channel, "id" | "createdAt" | "updatedAt" | "isFollowing" | "isSubscribed" | "followers" | "subscriptions" | "news" | "polls" | "users" | "tiers" | "followerCount" | "subscriberCount">
 
-export type CreateTierData = Omit<ChannelTier, "id" | "channelId">;
-export type EditTierData = Omit<ChannelTier, "id" | "channelId">;
+export type CreateChannelTierData = Omit<ChannelTier, "id" | "channelId" >;
+export type EditChannelTierData = Omit<ChannelTier, "id" | "channelId">;
 
 const API_PATH = '/api/channels'
 const SUB_PATH = {
@@ -89,7 +89,7 @@ export class ChannelAPI extends HTTPApi {
     }
 
     public updateChannel = (channelId: string, data: EditChannelData) => {
-        return this._patch<Channel>(`${API_PATH}/${channelId}`, data);
+        return this._put<Channel>(`${API_PATH}/${channelId}`, data);
     }
 
     public deleteChannel = (channelId: string) => {
@@ -97,12 +97,16 @@ export class ChannelAPI extends HTTPApi {
     }
 
     // Tier methods
-    public createTier = (channelId: string, data: CreateTierData) => {
+    public createTier = (channelId: string, data: CreateChannelTierData) => {
         return this._post<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`, data);
     }
 
-    public updateTier = (channelId: string, tierId: string, data: EditTierData) => {
-        return this._patch<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}/${tierId}`, data);
+    public updateTier = (channelId: string, tierId: string, data: EditChannelTierData) => {
+        return this._put<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}/${tierId}`, data);
+    }
+
+    public updateTiers = (channelId: string, tiers: ChannelTier[]) => {
+        return this._put<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`, tiers);
     }
 
     public getTiers = (channelId: string) => {
@@ -136,6 +140,6 @@ export class ChannelAPI extends HTTPApi {
     }
 
     public changeSubscriptionTier = (channelId: string, tierId: string) => {
-        return this._patch<ChannelSubscription>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, { tierId })
+        return this._put<ChannelSubscription>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, { tierId })
     }
 }

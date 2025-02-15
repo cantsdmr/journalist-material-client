@@ -10,9 +10,9 @@ import {
   Avatar
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { News } from '../../APIs/NewsAPI';
-import { NEWS_MEDIA_TYPE } from '../../enums/NewsEnums';
-import DefaultNewsAvatar from '../../assets/BG_journo.png';
+import { News } from '@/APIs/NewsAPI';
+import { NEWS_MEDIA_TYPE } from '@/enums/NewsEnums';
+import DefaultNewsAvatar from '@/assets/BG_journo.png';
 import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Container, Typography } from '@mui/material';
-import ChannelForm from '@/components/channel/ChannelForm';
+import ChannelForm from '@/components/studio/channel/ChannelForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
 import { useNavigate } from 'react-router-dom';
-import { CreateChannelData } from '@/APIs/ChannelAPI';
+import { CreateChannelData, EditChannelData } from '@/APIs/ChannelAPI';
 import { PATHS } from '@/constants/paths';
 
 const CreateChannelStudio: React.FC = () => {
@@ -12,9 +12,10 @@ const CreateChannelStudio: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
-  const handleCreate = async (data: CreateChannelData) => {
+  const handleCreate = async (data: EditChannelData | CreateChannelData | null | undefined) => {
+    if (!data) return;
     try {
-      const result = await api?.channelApi.createChannel(data);
+      const result = await api?.channelApi.createChannel(data as CreateChannelData);
       if (result) {
         navigate(`${PATHS.STUDIO_CHANNELS}`);
       }

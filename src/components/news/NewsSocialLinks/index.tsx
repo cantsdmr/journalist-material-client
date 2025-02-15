@@ -14,6 +14,7 @@ import LaunchIcon from '@mui/icons-material/Launch';
 
 interface NewsSocialLinksProps {
   links: SocialLink[];
+  onChange?: (links: SocialLink[]) => void;
 }
 
 const NewsSocialLinks: React.FC<NewsSocialLinksProps> = ({ links }) => {

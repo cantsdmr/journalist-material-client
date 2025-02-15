@@ -34,7 +34,9 @@ const ViewChannel: React.FC = () => {
             isSubscribed,
             getSubscriptionTier,
         },
-        refreshUserInfo
+        actions: {
+            refreshUser
+        }
     } = useUserInfo();
 
     // Use them in your component
@@ -69,7 +71,7 @@ const ViewChannel: React.FC = () => {
         } catch (error) {
             console.error('Failed to follow channel:', error);
         } finally {
-            await refreshUserInfo();
+            await refreshUser();
             setFollowLoading(false);
         }
     };
@@ -82,7 +84,7 @@ const ViewChannel: React.FC = () => {
         } catch (error) {
             console.error('Failed to unfollow channel:', error);
         } finally {
-            await refreshUserInfo();
+            await refreshUser();
             setFollowLoading(false);
         }
     };
@@ -95,7 +97,7 @@ const ViewChannel: React.FC = () => {
         } catch (error) {
             console.error('Failed to join channel:', error);
         } finally {
-            await refreshUserInfo();
+            await refreshUser();
             setLoadingTierId(null);
         }
     };
@@ -112,7 +114,7 @@ const ViewChannel: React.FC = () => {
         } catch (error) {
             console.error('Failed to change subscription tier:', error);
         } finally {
-            await refreshUserInfo();
+            await refreshUser();
             setLoadingTierId(null);
         }
     };
@@ -125,7 +127,7 @@ const ViewChannel: React.FC = () => {
         } catch (error) {
             console.error('Failed to cancel subscription:', error);
         } finally {
-            await refreshUserInfo();
+            await refreshUser();
             setCancelLoading(false);
         }
     };

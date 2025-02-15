@@ -14,15 +14,15 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <BrowserRouter>
       <AuthProvider>
         <ApiProvider>
-        <UserProvider>
-          <ThemeProvider>
-            <AppProvider>
-              <App />
-            </AppProvider>
-          </ThemeProvider>
-        </UserProvider>
-      </ApiProvider>
-    </AuthProvider>
+          <UserProvider>
+            <ThemeProvider>
+              <AppProvider>
+                <App />
+              </AppProvider>
+            </ThemeProvider>
+          </UserProvider>
+        </ApiProvider>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

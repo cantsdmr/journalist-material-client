@@ -14,7 +14,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { EmptyState } from '@/components/common/EmptyState';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '@/hooks/useApp';
+import { useUser } from '@/contexts/UserContext';
 
 interface ListNewsProps {
   isSubscribed: boolean;
@@ -70,20 +70,20 @@ const ListNewsSkeleton = () => (
   </Box>
 );
 
-const ListNewsStudio: React.FC<ListNewsProps> = ({ isSubscribed }) => {
+const ListNewsStudio: React.FC<ListNewsProps> = () => {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
-  const { user } = useApp();
+  const { user } = useUser();
   const navigate = useNavigate();
 
   const fetchNews = async (pageNum: number = page) => {
     try {
-      if (!user?.userInfo) return;
+      if (!user) return;
       setLoading(true);
-      const response = await api?.newsApi.getCreatorNews(user.userInfo.id, { page: pageNum, limit: 12 });
+      const response = await api?.newsApi.getCreatorNews(user.id, { page: pageNum, limit: 12 });
 
       if (response) {
         if (pageNum === 1) {

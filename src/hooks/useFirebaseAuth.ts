@@ -3,7 +3,6 @@ import {
   Auth, 
   AuthProvider, 
   User as FirebaseUser,
-  UserCredential,
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signInWithPopup, 
@@ -11,29 +10,32 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 
-interface UseAuthReturn {
+export interface AuthState {
   user: FirebaseUser | null;
-  signIn: (email: string, password: string) => Promise<string>;
-  signInWithProvider: (provider: AuthProvider) => Promise<string>;
-  signUp: (email: string, password: string) => Promise<UserCredential>;
-  signUpWithProvider: (provider: AuthProvider) => Promise<UserCredential>;
+  isAuthenticated: boolean;
+  getToken: () => Promise<string | null>;
+  signIn: (email: string, password: string) => Promise<string | null>;
+  signInWithProvider: (provider: AuthProvider) => Promise<string | null>;
+  signUp: (email: string, password: string) => Promise<FirebaseUser | null>;
   signOut: () => Promise<void>;
 }
 
-export const useAuth = (firebaseAuth: Auth): UseAuthReturn | undefined => {
+export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
       setUser(firebaseUser);
-      setIsInitialized(true);
     });
 
     return () => unsubscribe();
   }, [firebaseAuth]);
 
-  const signIn = async (email: string, password: string): Promise<string> => {
+  const getToken = async (): Promise<string | null> => {
+    return user ? user.getIdToken() : null;
+  };
+
+  const signIn = async (email: string, password: string): Promise<string | null> => {
     try {
       const userCredential = await signInWithEmailAndPassword(firebaseAuth, email, password);
       return await userCredential.user.getIdToken();
@@ -43,7 +45,7 @@ export const useAuth = (firebaseAuth: Auth): UseAuthReturn | undefined => {
     }
   };
 
-  const signInWithProvider = async (provider: AuthProvider): Promise<string> => {
+  const signInWithProvider = async (provider: AuthProvider): Promise<string | null> => {
     try {
       const userCredential = await signInWithPopup(firebaseAuth, provider);
       return await userCredential.user.getIdToken();
@@ -53,20 +55,12 @@ export const useAuth = (firebaseAuth: Auth): UseAuthReturn | undefined => {
     }
   };
 
-  const signUp = async (email: string, password: string): Promise<UserCredential> => {
+  const signUp = async (email: string, password: string): Promise<FirebaseUser | null> => {
     try {
-      return await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
+      return userCredential.user;
     } catch (error) {
       console.error('Sign up error:', error);
-      throw error;
-    }
-  };
-
-  const signUpWithProvider = async (provider: AuthProvider): Promise<UserCredential> => {
-    try {
-      return await signInWithPopup(firebaseAuth, provider);
-    } catch (error) {
-      console.error('Sign up with provider error:', error);
       throw error;
     }
   };
@@ -81,17 +75,13 @@ export const useAuth = (firebaseAuth: Auth): UseAuthReturn | undefined => {
     }
   };
 
-  // Don't return anything until auth is initialized
-  if (!isInitialized) {
-    return undefined;
-  }
-
   return {
     user,
+    isAuthenticated: !!user,
+    getToken,
     signIn,
     signInWithProvider,
     signUp,
-    signUpWithProvider,
     signOut
   };
 };

@@ -15,7 +15,7 @@ interface SidebarProps {
   toggleSidebar: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ }) => {
   const location = useLocation();
 
   const menuItems = [

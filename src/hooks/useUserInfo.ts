@@ -1,32 +1,32 @@
-import { useUserInfoContext } from "../contexts/UserContext";
+import { User } from "@/APIs/UserAPI";
+import { useUser } from "@/contexts/UserContext";
 
-export const useUserInfo = () => {
-    const context = useUserInfoContext();
-    
-    if (context === undefined) {
-        throw new Error('useUserInfo must be used within a UserProvider');
+interface UserInfo {
+  user: User | null;
+  isLoading: boolean;
+  channelRelations: {
+    isFollowing: (channelId: string) => boolean;
+    isSubscribed: (channelId: string) => boolean;
+    getSubscriptionTier: (channelId: string) => string | undefined;
+  };
+  actions: {
+    refreshUser: () => Promise<void>;
+  };
+}
+
+export const useUserInfo = (): UserInfo => {
+  const { user, isLoading, actions } = useUser();
+
+  return {
+    user,
+    isLoading,
+    channelRelations: {
+      isFollowing: actions.isFollowing,
+      isSubscribed: actions.isSubscribed,
+      getSubscriptionTier: actions.getSubscriptionTier,
+    },
+    actions: {
+      refreshUser: actions.refreshUser
     }
-
-    const {
-        userInfo,
-        isFollowingChannel,
-        isSubscribedToChannel,
-        getChannelSubscriptionTier,
-        refreshUserInfo
-    } = context;
-
-    return {
-        // User basic info
-        userInfo,
-        
-        // Channel relationship methods
-        channelRelations: {
-            isFollowing: isFollowingChannel,
-            isSubscribed: isSubscribedToChannel,
-            getSubscriptionTier: getChannelSubscriptionTier,
-        },
-        
-        // Actions
-        refreshUserInfo
-    };
+  };
 };

@@ -9,7 +9,7 @@ import {
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import StarIcon from '@mui/icons-material/Star';
-import { News } from '../../APIs/NewsAPI';
+import { News } from '@/APIs/NewsAPI';
 
 interface NewsEntryStatsProps {
   news: News;

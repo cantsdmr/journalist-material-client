@@ -4,13 +4,13 @@ import {
   Select, MenuItem, Box,
   Typography
 } from '@mui/material';
-import { CreateChannelData } from '@/APIs/ChannelAPI';
+import { CreateChannelData, EditChannelData } from '@/APIs/ChannelAPI';
 import ImageUpload from '@/components/common/ImageUpload';
 import { CHANNEL_STATUS } from '@/enums/ChannelEnums';
 
 interface ChannelFormProps {
-  initialData?: CreateChannelData;
-  onSubmit: (data: CreateChannelData) => Promise<void>;
+  initialData?: Nullable<CreateChannelData> | Nullable<EditChannelData>;
+  onSubmit: (data: Nullable<CreateChannelData> | Nullable<EditChannelData>) => Promise<void>;
   submitButtonText: string;
 }
 

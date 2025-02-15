@@ -27,14 +27,14 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { PATHS } from '@/constants/paths';
-import { useApp } from '@/hooks/useApp';
+import { useApp } from '@/contexts/AppContext';
 
 const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const { isDarkMode, toggleTheme } = useAppTheme();
   const muiTheme = useMuiTheme();
-  const { isFullyInitialized } = useApp();
+  const { isLoading } = useApp();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
 
@@ -79,7 +79,7 @@ const MainLayout: React.FC = () => {
         sx: { width: 220 }
       }}
     >
-      {profileMenuItems.map((item, index) => [
+      {profileMenuItems.map((item) => [
         <MenuItem 
           key={item.path}
           onClick={() => handleNavigate(item.path)}
@@ -92,7 +92,7 @@ const MainLayout: React.FC = () => {
     </Menu>
   );
 
-  if (!isFullyInitialized) {
+  if (isLoading) {
     return null;
   }
 

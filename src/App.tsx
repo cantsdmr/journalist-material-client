@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { PATHS, NEWS, CHANNEL } from '@/constants/paths';
-import { useApp } from '@/hooks/useApp';
+import { useApp } from '@/contexts/AppContext';
 
 // Layouts
 import MainLayout from '@/components/navigation/MainLayout';
@@ -17,8 +17,8 @@ import SignUp from '@/pages/auth/SignUp';
 
 // Main app pages
 import LandingPage from '@/pages/LandingPage';
-import Explore from '@/pages/Explore';
-import Subscriptions from '@/pages/Subscriptions';
+// import Explore from '@/pages/Explore';
+// import Subscriptions from '@/pages/Subscriptions';
 
 // News pages
 import ListNews from '@/pages/app/news/ListNews';
@@ -37,18 +37,17 @@ import ListNewsStudio from '@/pages/studio/news/ListNews.studio';
 
 import ListChannelsStudio from '@/pages/studio/channel/ListChannels.studio';
 import CreateChannelStudio from '@/pages/studio/channel/CreateChannel.studio';
-import EditChannelStudio from '@/pages/studio/channel/EditChannel.studio';
 
 // import ChannelAnalytics from '@/pages/studio/channel/ChannelAnalytics';
 import NotFound from './pages/NotFound';
 import ViewChannelStudio from './pages/studio/channel/ViewChannel.studio';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import ErrorScreen from '@/components/common/ErrorScreen';
+import EditChannel from './pages/studio/channel/EditChannel.studio';
 
 const App: React.FC = () => {
-  const { isFullyInitialized, error } = useApp();
-
-  if (!isFullyInitialized) {
+  const { isLoading, error } = useApp();
+  if (isLoading) {
     return <LoadingScreen />;
   }
 
@@ -59,7 +58,7 @@ const App: React.FC = () => {
   return (
     <Routes>
       {/* Home Routes */}
-      {/* <Route path={HOME.GET_STARTED} element={<GetStarted />} /> */}
+      <Route path={PATHS.HOME} element={<LandingPage />} />
 
       {/* Auth Routes */}
       <Route path={PATHS.LOGIN} element={<Login />} />
@@ -90,8 +89,8 @@ const App: React.FC = () => {
         <Route path={`${CHANNEL.ROOT}/*`}>
           <Route index element={<ListChannelsStudio />} />
           <Route path={`${CHANNEL.CREATE}`} element={<CreateChannelStudio />} />
-          <Route path={`${CHANNEL.EDIT}/:id`} element={<EditChannelStudio />} />
           <Route path={`${CHANNEL.VIEW}`} element={<ViewChannelStudio />} />
+          <Route path={`${CHANNEL.EDIT}/:id`} element={<EditChannel />} />
         </Route>
       </Route>
 

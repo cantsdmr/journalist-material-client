@@ -8,9 +8,9 @@ import {
   Typography
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { News } from '../../APIs/NewsAPI';
-import { useApiContext } from '../../contexts/ApiContext';
-import NewsEntry from './NewsEntry';
+import { News } from '@/APIs/NewsAPI';
+import { useApiContext } from '@/contexts/ApiContext';
+import NewsEntry from '@/components/news/NewsEntry';
 
 interface NewsFeedProps {
   selectedTag: string;
@@ -23,7 +23,7 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const { api, isAuthenticated } = useApiContext();
+  const { api } = useApiContext();
 
   const fetchMoreData = () => {
     getNews(page + 1);
@@ -34,9 +34,9 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
       let newsResult;
       
       if (isSubscribed) {
-        newsResult = await api?.newsApi.getFollowed(_page, limit);
+        newsResult = await api?.newsApi.getFollowed({ page: _page, limit: limit });
       } else {
-        newsResult = await api?.newsApi.getMostPopular(_page, limit);
+        newsResult = await api?.newsApi.getTrending({ page: _page, limit: limit });
       }
       
       if (_page === 1) {
@@ -56,10 +56,8 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      getNews(1);
-    }
-  }, [api?.newsApi, isAuthenticated, selectedTag]);
+    getNews(1);
+  }, [api?.newsApi, selectedTag]);
 
   if (loading) {
     return (

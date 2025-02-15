@@ -3,7 +3,7 @@ import { Box, Typography, CircularProgress } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
-import { ChannelTier, EditTierData } from '@/APIs/ChannelAPI';
+import { ChannelTier, EditChannelTierData } from '@/APIs/ChannelAPI';
 import TierForm from '@/components/tier/TierForm';
 const EditTier: React.FC = () => {
   const { channelId, tierId } = useParams<{ channelId: string; tierId: string }>();
@@ -31,7 +31,7 @@ const EditTier: React.FC = () => {
     }
   };
 
-  const handleUpdate = async (data: EditTierData) => {
+  const handleUpdate = async (data: EditChannelTierData) => {
     try {
       if (channelId && tierId) {
         await api?.channelApi.updateTier(channelId, tierId, data);

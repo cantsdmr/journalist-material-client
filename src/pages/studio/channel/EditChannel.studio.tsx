@@ -1,86 +1,86 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Typography } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import ChannelForm from '@/components/channel/ChannelForm';
-import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
-import ChannelFormSkeleton from '@/components/channel/ChannelForm/ChannelFormSkeleton';
+import React from 'react';
+import {
+  Box,
+  useMediaQuery,
+  useTheme,
+  Typography
+} from '@mui/material';
+import { useParams } from 'react-router-dom';
+import { BasicInfoTab } from '@/components/studio/channel/BasicInfoTab';
+import { TiersTab } from '@/components/studio/channel/TiersTab';
+import { MobileNavigation, DesktopNavigation, TabConfigArray } from '@/components/studio/channel/CustomizationNav';
+import { useChannel } from '@/hooks/useChannel';
 
-const EditChannelStudio: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { api } = useApiContext();
-  const [initialData, setInitialData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+const TABS = [
+  { id: 'basic', label: 'Basic Info', component: BasicInfoTab },
+  { id: 'tiers', label: 'Channel Tiers', component: TiersTab }
+] as const;
 
-  useEffect(() => {
-    const fetchChannel = async () => {
-      setLoading(true);
-      try {
-        const channel = await api?.channelApi.getChannel(id!);
-        setInitialData(channel);
-      } catch (error) {
-        console.error('Failed to fetch channel:', error);
-        setError('Failed to fetch channel');
-      } finally {
-        setLoading(false);
-      }
-    };
+type TabId = typeof TABS[number]['id'];
 
-    fetchChannel();
-  }, []);
+const EditChannel = () => {
+  const { id } = useParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [activeTab, setActiveTab] = React.useState<TabId>('basic');
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const { channel, isLoading, updateChannel } = useChannel(id);
 
-  const handleUpdate = async (data: any) => {
-    try {
-      await api?.channelApi.updateChannel(id!, data);
-      navigate(`/app/channels/${id}`);
-    } catch (error) {
-      console.error('Failed to update channel:', error);
-      setError('Failed to update channel');
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId as TabId);
+  };
+
+  if (!id || isLoading || !channel) return null;
+
+  const renderActiveComponent = () => {
+    switch (activeTab) {
+      case 'basic':
+        return <BasicInfoTab channel={channel} onUpdate={updateChannel} />;
+      case 'tiers':
+        return <TiersTab channelId={channel.id} />;
+      default:
+        return null;
     }
   };
 
-  if (loading) return <ChannelFormSkeleton />;
-  if (error) return (
-    <Container sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
-      />
-    </Container>
-  );
-  if (!initialData) return null;
-
   return (
-    <Container sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-      <Typography 
-        variant="h5" 
-        sx={{ 
-          fontSize: { xs: '1.125rem', sm: '1.25rem' },
-          fontWeight: 600,
-          mb: 3
-        }}
-      >
-        Edit Channel
-      </Typography>
+    <Box sx={{
+      minHeight: '100%',
+      bgcolor: 'background.default'
+    }}>
+      {isMobile ? (
+        <>
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Edit Channel
+            </Typography>
+          </Box>
 
-      <ChannelForm
-        initialData={initialData}
-        onSubmit={handleUpdate}
-        submitButtonText="Update Channel"
-      />
+          {renderActiveComponent()}
 
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
-      />
-    </Container>
+          <MobileNavigation
+            tabs={TABS as TabConfigArray}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            onOpen={() => setIsDrawerOpen(true)}
+          />
+        </>
+      ) : (
+        <>
+          <DesktopNavigation
+            tabs={TABS as TabConfigArray}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+          />
+          <Box sx={{ p: { md: 3, lg: 4 } }}>
+            {renderActiveComponent()}
+          </Box>
+        </>
+      )}
+    </Box>
   );
 };
 
-export default EditChannelStudio;
+export default EditChannel; 

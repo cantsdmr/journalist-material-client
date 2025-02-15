@@ -1,5 +1,6 @@
 // Base paths
 export const BASE = {
+  HOME: '/',
   APP: '/app',
   STUDIO: '/studio',
   AUTH: '/auth'
@@ -21,11 +22,13 @@ export const CHANNEL = {
   ROOT: 'channels',
   CREATE: 'create',
   EDIT: 'edit',
-  VIEW: ':id'
+  VIEW: ':id',
 } as const;
 
 // Absolute paths
 export const PATHS = {
+  // Base
+  HOME: BASE.HOME,
   // Auth
   LOGIN: `${BASE.AUTH}/login`,
   SIGNUP: `${BASE.AUTH}/signup`,

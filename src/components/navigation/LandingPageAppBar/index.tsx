@@ -4,8 +4,8 @@ import { styled, alpha } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from 'react-router-dom';
 import logoURL from '@/assets/logo.png'
-import { useAuthContext } from '@/contexts/AuthContext';
-import { useUserInfoContext } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { PATHS } from '@/constants/paths';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -47,27 +47,32 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 const LandingPageAppBar: React.FC = () => {
-  const auth = useAuthContext();
-  const userInfo = useUserInfoContext();
+  const auth = useAuth();
   const [signedIn, setSignedIn] = useState<boolean>(false);
 
   const logout = async () => {
-    await auth?.signOut()
-    setSignedIn(false)
-  }
+    await auth?.signOut();
+    setSignedIn(false);
+  };
 
   useEffect(() => {
-      if (auth?.user) {
-        setSignedIn(true)
-        userInfo
-      }
-
-  }, [auth?.user])
+    setSignedIn(!!auth?.user);
+  }, [auth?.user]);
 
   return (
     <AppBar position="absolute" sx={{ background: '#f0e8e861', boxShadow: 'none' }}>
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Search>
+      <Toolbar 
+        sx={{ 
+          justifyContent: 'space-between',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 2, sm: 0 },
+          py: { xs: 2, sm: 0 }
+        }}
+      >
+        <Search sx={{ 
+          order: { xs: 2, sm: 1 },
+          width: { xs: '100%', sm: 'auto' }
+        }}>
           <SearchIconWrapper>
             <SearchIcon />
           </SearchIconWrapper>
@@ -76,19 +81,79 @@ const LandingPageAppBar: React.FC = () => {
             inputProps={{ 'aria-label': 'search' }}
           />
         </Search>
-        <Box sx={{ flexGrow: 1, textAlign: 'center' }}>
-          <img height={35} style={{marginTop: 5}} src={logoURL}></img>
+        <Box sx={{ 
+          flexGrow: 1, 
+          textAlign: 'center',
+          order: { xs: 1, sm: 2 }
+        }}>
+          <img height={35} style={{marginTop: 5}} src={logoURL} alt="Logo" />
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Button color="primary" variant="outlined" size="large" component={Link} style={{ marginRight: 30 }} to="/login">
-            {!signedIn ? "Log in" : "Explore" }
-          </Button>
-          <Button color="primary" variant="outlined" size="large" disabled={!signedIn} onClick={logout} style={{ marginRight: 30 }}>
-            Log out
-          </Button>
-          <Button color="secondary" variant="outlined" size="large" component={Link} to="/get-started">
-            Get Started
-          </Button>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          order: { xs: 3, sm: 3 },
+          width: { xs: '100%', sm: 'auto' },
+          justifyContent: { xs: 'center', sm: 'flex-end' },
+          gap: 2
+        }}>
+          {!signedIn ? (
+            <>
+              <Button 
+                color="primary" 
+                variant="outlined" 
+                size="large" 
+                component={Link} 
+                to={PATHS.LOGIN}
+                sx={{
+                  width: { xs: '45%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                Log in
+              </Button>
+              <Button 
+                color="secondary" 
+                variant="outlined" 
+                size="large" 
+                component={Link} 
+                to={PATHS.SIGNUP}
+                sx={{
+                  width: { xs: '45%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                Get Started
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                color="primary" 
+                variant="outlined" 
+                size="large" 
+                component={Link}
+                to={PATHS.APP_NEWS_MY_FEED}
+                sx={{
+                  width: { xs: '45%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                My Feed
+              </Button>
+              <Button 
+                color="secondary" 
+                variant="outlined" 
+                size="large" 
+                onClick={logout}
+                sx={{
+                  width: { xs: '45%', sm: 'auto' },
+                  fontSize: { xs: '0.875rem', sm: '1rem' }
+                }}
+              >
+                Log out
+              </Button>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

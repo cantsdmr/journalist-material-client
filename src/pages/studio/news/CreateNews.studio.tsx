@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import NewsForm from '@/components/news/NewsForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
@@ -23,9 +23,8 @@ const CreateNewsStudio: React.FC = () => {
     }
   };
 
-
   return (
-    <Container sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+    <Box sx={{ p: 3, maxWidth: 800 }}>
       <Typography 
         variant="h5" 
         sx={{ 
@@ -48,7 +47,7 @@ const CreateNewsStudio: React.FC = () => {
         severity="error"
         onClose={() => setError(null)}
       />
-    </Container>
+    </Box>
   );
 };
 

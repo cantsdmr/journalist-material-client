@@ -6,12 +6,12 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { ChannelTier, CreateTierData, EditTierData } from '@/APIs/ChannelAPI';
+import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/APIs/ChannelAPI';
 
 interface TierFormProps {
   initialData?: ChannelTier;
   channelId: string;
-  onSubmit: (data: CreateTierData | EditTierData) => Promise<void>;
+  onSubmit: (data: CreateChannelTierData | EditChannelTierData) => Promise<void>;
   submitButtonText: string;
 }
 
@@ -22,7 +22,7 @@ const TierForm: React.FC<TierFormProps> = ({
   submitButtonText
 }) => {
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateTierData>(() => ({
+  const [formData, setFormData] = useState<CreateChannelTierData>(() => ({
     name: initialData?.name || '',
     price: initialData?.price || 0,
     description: initialData?.description || '',

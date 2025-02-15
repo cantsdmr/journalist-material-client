@@ -1,12 +1,12 @@
-import React from 'react';
-import PollList from '../../components/PollList';
+// import React from 'react';
+// import PollList from '@/components/common/';
 
-const Polls: React.FC = () => {
-  return (
-    <div>
-      <PollList />
-    </div>
-  );
-};
+// const Polls: React.FC = () => {
+//   return (
+//     <div>
+//       <PollList />
+//     </div>
+//   );
+// };
 
-export default Polls;
+// export default Polls;

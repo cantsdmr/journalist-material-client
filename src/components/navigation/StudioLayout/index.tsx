@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   Box, AppBar, Toolbar, IconButton, Typography,
   Menu, MenuItem, useTheme as useMuiTheme,
-  useMediaQuery,
   ListItemIcon, ListItemText
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -12,7 +11,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
-import { useApp } from '@/hooks/useApp';
+import { useApp } from '@/contexts/AppContext';
 import StudioSidebar from '../StudioSidebar';
 import { PATHS } from '@/constants/paths';
 
@@ -22,8 +21,7 @@ const StudioLayout: React.FC = () => {
   const navigate = useNavigate();
   const muiTheme = useMuiTheme();
   const { isDarkMode, toggleTheme } = useAppTheme();
-  const { isFullyInitialized } = useApp();
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
+  const { isLoading } = useApp();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -42,7 +40,7 @@ const StudioLayout: React.FC = () => {
     handleMenuClose();
   };
 
-  if (!isFullyInitialized) {
+  if (isLoading) {
     return null;
   }
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { 
   Box,
-  Container,
   Typography,
   Grid,
-  Skeleton
+  Skeleton,
+  useTheme
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -20,13 +20,12 @@ import { EmptyState } from '@/components/common/EmptyState';
 const ListChannelsStudio: React.FC = () => {
   const [userChannels, setUserChannels] = useState<ChannelUser[]>([]);
   const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
   const { api } = useApiContext();
-  const { userInfo } = useUserInfo();
+  const { user } = useUserInfo();
   const navigate = useNavigate();
-
+  const theme = useTheme();
 
   const fetchMoreData = () => {
     getChannels(page + 1);
@@ -34,20 +33,16 @@ const ListChannelsStudio: React.FC = () => {
 
   const getChannels = async (_page: number = page) => {
     try {
-      if (!userInfo?.id) {
-        return;
-      }
+      if (!user?.id) return;
 
-      const result = await api?.userApi.getUserChannels(userInfo.id);
+      const result = await api?.userApi.getUserChannels(user.id);
       
-      if (_page === 1) {
-        setUserChannels(result?.items ?? []);
-      } else {
-        setUserChannels(prev => [...prev, ...(result?.items ?? [])]);
-      }
+      setUserChannels(prev => _page === 1 
+        ? result?.items ?? [] 
+        : [...prev, ...(result?.items ?? [])]
+      );
       
       setPage(result?.metadata.currentPage ?? 1);
-      setLimit(result?.metadata.limit ?? 10);
       setHasMore(result?.metadata.hasNext === true);
     } catch (error) {
       console.error('Failed to fetch channels:', error);
@@ -57,47 +52,68 @@ const ListChannelsStudio: React.FC = () => {
   };
 
   useEffect(() => {
-    getChannels(page);
+    getChannels(1);
   }, []);
 
   const ChannelSkeleton = () => (
     <Box 
       sx={{
-        p: 3,
-        borderRadius: 2,
-        bgcolor: theme =>
-          theme.palette.mode === 'dark'
-            ? alpha(theme.palette.common.white, 0.05)
-            : alpha(theme.palette.common.black, 0.03),
-        height: 200
+        p: 2,
+        borderRadius: 1,
+        bgcolor: theme => alpha(
+          theme.palette.mode === 'dark' 
+            ? theme.palette.common.white 
+            : theme.palette.common.black,
+          theme.palette.mode === 'dark' ? 0.05 : 0.03
+        ),
+        height: { xs: 180, sm: 200 },
+        transition: theme.transitions.create(['background-color', 'height'])
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+        <Skeleton variant="circular" width={32} height={32} sx={{ mr: 1.5 }} />
         <Box sx={{ width: '100%' }}>
-          <Skeleton width="60%" height={24} />
-          <Skeleton width="40%" height={20} />
+          <Skeleton width="60%" height={20} />
+          <Skeleton width="40%" height={16} />
         </Box>
       </Box>
-      <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1 }} />
-      <Box sx={{ mt: 2 }}>
-        <Skeleton width="30%" height={24} />
+      <Skeleton 
+        variant="rectangular" 
+        sx={{ 
+          borderRadius: 1,
+          height: { xs: 70, sm: 80 }
+        }} 
+      />
+      <Box sx={{ mt: 1.5 }}>
+        <Skeleton width="30%" height={20} />
       </Box>
     </Box>
   );
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          {isLoading ? <Skeleton width={200} /> : 'My Channels'}
+    <Box sx={{ 
+      px: { xs: 2, sm: 3, md: 4 },
+      py: { xs: 2, sm: 3 },
+      maxWidth: 'lg',
+      mx: 'auto',
+      width: '100%'
+    }}>
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 600,
+            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+          }}
+        >
+          {isLoading ? <Skeleton width={150} /> : 'My Channels'}
         </Typography>
       </Box>
 
       {isLoading ? (
-        <Grid container spacing={3}>
-          {[1, 2, 3, 4].map((index) => (
-            <Grid item xs={12} md={6} key={index}>
+        <Grid container spacing={2}>
+          {[1, 2].map((index) => (
+            <Grid item xs={12} sm={6} key={index}>
               <ChannelSkeleton />
             </Grid>
           ))}
@@ -106,7 +122,7 @@ const ListChannelsStudio: React.FC = () => {
         <EmptyState
           title="No Channels Yet"
           description="Create your first channel to start publishing news and connecting with subscribers."
-          icon={<AddToQueueIcon sx={{ fontSize: 48 }} />}
+          icon={<AddToQueueIcon sx={{ fontSize: { xs: 40, sm: 48 } }} />}
           action={{
             label: "Create Channel",
             onClick: () => navigate(PATHS.STUDIO_CHANNEL_CREATE)
@@ -118,18 +134,18 @@ const ListChannelsStudio: React.FC = () => {
           next={fetchMoreData}
           hasMore={hasMore}
           loader={
-            <Grid container spacing={3} sx={{ mt: 1 }}>
-              {[...Array(2)].map((_, index) => (
-                <Grid item xs={12} md={6} key={index}>
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+              {[1, 2].map((index) => (
+                <Grid item xs={12} sm={6} key={index}>
                   <ChannelSkeleton />
                 </Grid>
               ))}
             </Grid>
           }
         >
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             {userChannels.map((userChannel) => (
-              <Grid item xs={12} md={6} key={userChannel.id}>
+              <Grid item xs={12} sm={6} key={userChannel.id}>
                 <StudioChannelCard 
                   channel={userChannel.channel}
                   onRefresh={() => getChannels(1)}
@@ -139,7 +155,7 @@ const ListChannelsStudio: React.FC = () => {
           </Grid>
         </InfiniteScroll>
       )}
-    </Container>
+    </Box>
   );
 };
 

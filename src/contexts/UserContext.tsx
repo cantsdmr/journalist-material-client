@@ -1,74 +1,55 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { useApiContext } from "./ApiContext";
-import { useAuthContext } from "./AuthContext";
+import { useAuth } from "./AuthContext";
 import { User } from "@/APIs/UserAPI";
+import { createCtx } from "./BaseContext";
 
-export interface UserContextValue {
-  userInfo: Nullable<User>;
-  isFollowingChannel: (channelId: string) => boolean;
-  isSubscribedToChannel: (channelId: string) => boolean;
-  getChannelSubscriptionTier: (channelId: string) => string | undefined;
-  refreshUserInfo: () => Promise<void>;
+interface UserState {
+  user: User | null;
+  isLoading: boolean;
+  actions: {
+    refreshUser: () => Promise<void>;
+    isFollowing: (channelId: string) => boolean;
+    isSubscribed: (channelId: string) => boolean;
+    getSubscriptionTier: (channelId: string) => string | undefined;
+  };
 }
 
-const UserContext = createContext<UserContextValue | undefined>(undefined)
-const useUserInfoContext = () => useContext(UserContext)
+export const [UserContext, useUser] = createCtx<UserState>();
 
-const UserProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-    const apiContext = useApiContext();
-    const authContext = useAuthContext();
-    const [userInfo, setUserInfo] = useState<Nullable<User>>(null);
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { api, isAuthenticated } = useApiContext();
+  const { user: authUser } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-    const getUserInfo = async (externalId: string | undefined) => {
-      if (externalId == null) {
-        return;
-      }
-
-      const userInfo = await apiContext?.api?.userApi.getUserInfoByExternalId(externalId);
-      setUserInfo(userInfo)
+  const refreshUser = async () => {
+    if (!authUser?.uid) return;
+    setIsLoading(true);
+    try {
+      const data = await api.userApi.getUserInfoByExternalId(authUser.uid);
+      setUser(data);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const refreshUserInfo = async () => {
-      if (authContext?.user?.uid) {
-        await getUserInfo(authContext.user.uid);
-      }
-    };
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUser();
+    }
+  }, [authUser?.uid, isAuthenticated]);
 
-    const isFollowingChannel = (channelId: string): boolean => {
-      return userInfo?.followings?.some(following => following.channelId === channelId) ?? false;
-    };
+  const value = {
+    user,
+    isLoading,
+    actions: {
+      refreshUser,
+      isFollowing: (channelId: string) => user?.followings?.some(f => f.channelId === channelId) ?? false,
+      isSubscribed: (channelId: string) => user?.subscriptions?.some(s => s.channelId === channelId) ?? false,
+      getSubscriptionTier: (channelId: string) => user?.subscriptions?.find(s => s.channelId === channelId)?.tierId
+    }
+  };
 
-    const isSubscribedToChannel = (channelId: string): boolean => {
-      return userInfo?.subscriptions?.some(sub => sub.channelId === channelId) ?? false;
-    };
-
-    const getChannelSubscriptionTier = (channelId: string): string | undefined => {
-      return userInfo?.subscriptions
-        ?.find(sub => sub.channelId === channelId)
-        ?.tierId;
-    };
-  
-    useEffect(() => {
-      if (!apiContext?.isAuthenticated || authContext?.user == null) {
-        return;
-      }
-
-      getUserInfo(authContext?.user?.uid)
-    }, [authContext?.user, apiContext?.isAuthenticated])
-
-    return (
-      <UserContext.Provider 
-        value={{
-          userInfo,
-          isFollowingChannel,
-          isSubscribedToChannel,
-          getChannelSubscriptionTier,
-          refreshUserInfo
-        }}
-      >
-        {children}
-      </UserContext.Provider>
-    )
-}
-
-export { useUserInfoContext, UserProvider }
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+};

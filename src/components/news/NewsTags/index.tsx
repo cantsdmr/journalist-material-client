@@ -7,8 +7,8 @@ import {
 } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { NewsTag } from '../APIs/NewsAPI';
-import { useApiContext } from '../contexts/ApiContext';
+import { NewsTag } from '@/APIs/NewsAPI';
+import { useApiContext } from '@/contexts/ApiContext';
 
 const SCROLL_AMOUNT = 200;
 
@@ -19,7 +19,7 @@ interface NewsTagsProps {
 
 const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
   const [newsTags, setNewsTags] = useState<NewsTag[]>([]);
-  const { api, isAuthenticated } = useApiContext();
+  const { api } = useApiContext();
   const theme = useTheme();
   const tagsContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -33,10 +33,10 @@ const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
 
   const fetchTags = async () => {
     try {
-      const tagsResult = await api?.newsApi.getNewsTags();
+      const tagsResult = await api?.newsApi.getTags();
       if (tagsResult?.items) {
         setNewsTags([
-          { id: 'all', title: 'All' },
+          { id: 'all', tagId: 'all', title: 'All' },
           ...tagsResult.items
         ]);
       }
@@ -46,10 +46,8 @@ const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && api?.newsApi) {
-      fetchTags();
-    }
-  }, [api?.newsApi != null, isAuthenticated]);
+    fetchTags();
+  }, [api?.newsApi != null]);
 
   return (
     <Box sx={{ 

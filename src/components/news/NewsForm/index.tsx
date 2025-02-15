@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { CreateNewsData, NewsMedia, SocialLink } from '../../../APIs/NewsAPI';
 import { OutputData } from '@editorjs/editorjs';
-import { NEWS_STATUS } from '@/enums/NewsEnums';
+import { NEWS_MEDIA_FORMAT, NEWS_MEDIA_TYPE, NEWS_STATUS } from '@/enums/NewsEnums';
 import JEditor from '@/components/editor/JEditor';
 import NewsSocialLinks from '@/components/news/NewsSocialLinks';
 import { useUserInfo } from '@/hooks/useUserInfo';
@@ -27,16 +27,16 @@ const NewsForm: React.FC<NewsFormProps> = ({
   onSubmit,
   submitButtonText
 }) => {
-  const { userInfo } = useUserInfo();
+  const { user } = useUserInfo();
   const navigate = useNavigate();
   
   // Check if user has channels
   useEffect(() => {
-    if (userInfo && (!userInfo.channels || userInfo.channels.length === 0)) {
+    if (user && (!user.channels || user.channels.length === 0)) {
       // User has no channels
       return;
     }
-  }, [userInfo]);
+  }, [user]);
 
   const [formData, setFormData] = useState<any>(() => ({
     title: initialData?.title || '',
@@ -82,8 +82,17 @@ const NewsForm: React.FC<NewsFormProps> = ({
     }));
   }, []);
 
-  if (!userInfo?.channels || userInfo.channels.length === 0) {
-    return (
+  const hasChannel = user?.channels && user.channels.length > 0;
+
+  return !hasChannel ? (
+    <Box sx={{ 
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      p: 3 
+    }}>
       <EmptyState
         title="Channel Required"
         description="You need to create a channel before you can start publishing news articles."
@@ -93,14 +102,19 @@ const NewsForm: React.FC<NewsFormProps> = ({
           onClick: () => navigate(PATHS.STUDIO_CHANNEL_CREATE)
         }}
       />
-    );
-  }
-
-  return (
+    </Box>
+  ) : (
     <form onSubmit={handleSubmit}>
       <Stack spacing={4}>
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
+
         {/* Warning Alert when no channels */}
-        {userInfo && (!userInfo.channels || userInfo.channels.length === 0) && (
+        {user && (!user.channels || user.channels.length === 0) && (
           <Alert 
             severity="warning"
             action={
@@ -118,7 +132,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
         )}
 
         {/* Rest of your form components */}
-        {userInfo?.channels && userInfo.channels.length > 0 ? (
+        {user?.channels && user.channels.length > 0 ? (
           <>
             {/* Media Section */}
             <Box>
@@ -136,9 +150,15 @@ const NewsForm: React.FC<NewsFormProps> = ({
                     Use a high-quality image for best results.
                   </Typography>
                   <ImageUpload
-                    image={coverImage}
-                    onChange={setCoverImage}
-                    aspectRatio="16/9"
+                    label={null}
+                    value={coverImage?.url}
+                    onChange={(url) => setCoverImage(url ? {
+                      id: '0',
+                      newsId: '0',
+                      url,
+                      type: NEWS_MEDIA_TYPE.COVER,
+                      format: NEWS_MEDIA_FORMAT.IMAGE
+                    } : null)}
                   />
                 </Box>
               </Stack>
@@ -189,7 +209,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
                       }))}
                       required
                     >
-                      {userInfo?.channels.map((channel) => (
+                      {user?.channels.map((channel) => (
                         <MenuItem key={channel.channelId} value={channel.channelId}>
                           {channel.channelName}
                         </MenuItem>
@@ -327,7 +347,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
             <Button
               type="submit"
               variant="contained"
-              disabled={loading || !userInfo?.channels?.length}
+              disabled={loading || !user?.channels?.length}
               sx={{
                 py: 1.5,
                 textTransform: 'none',

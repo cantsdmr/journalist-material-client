@@ -3,11 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://cantsdmr.github.io/journalist-material-client",
   "scripts": {
     "dev": "vite",
+    "dev:staging": "vite --mode staging",
     "build": "tsc && vite build",
+    "build:staging": "tsc && vite build --mode staging",
+    "build:prod": "tsc && vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:staging": "vite preview --mode staging",
+    "predeploy": "npm run build:staging",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@editorjs/checklist": "^1.6.0",
@@ -25,6 +32,7 @@
     "@editorjs/warning": "^1.4.1",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
+    "@hello-pangea/dnd": "^17.0.0",
     "@mui/icons-material": "^5.15.17",
     "@mui/material": "^5.15.17",
     "axios": "^1.7.2",
@@ -44,6 +52,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "gh-pages": "^6.3.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
   }
