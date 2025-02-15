@@ -208,7 +208,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
           <ListItemText primary="Edit Channel" />
         </MenuItem>
         <MenuItem onClick={() => {
-          navigate(`/app/channels/${channel.id}`);
+          navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', channel.id));
           handleMenuClose();
         }}>
           <ListItemIcon>

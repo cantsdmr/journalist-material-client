@@ -5,6 +5,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
 import { ChannelTier, EditChannelTierData } from '@/APIs/ChannelAPI';
 import TierForm from '@/components/tier/TierForm';
+import { PATHS } from '@/constants/paths';
 const EditTier: React.FC = () => {
   const { channelId, tierId } = useParams<{ channelId: string; tierId: string }>();
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const EditTier: React.FC = () => {
     try {
       if (channelId && tierId) {
         await api?.channelApi.updateTier(channelId, tierId, data);
-        navigate(`/app/channels/${channelId}/tiers/${tierId}`);
+        navigate(PATHS.STUDIO_CHANNEL_VIEW.replace(':channelId', channelId));
       }
     } catch (error) {
       console.error('Failed to update tier:', error);

@@ -14,6 +14,7 @@ import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import CheckIcon from '@mui/icons-material/Check';
 import AddIcon from '@mui/icons-material/Add';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { PATHS } from '@/constants/paths';
 
 interface ChannelItemProps {
   channel: Channel;
@@ -38,7 +39,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
   const hasSubscription = isSubscribed(channel.id);
 
   const handleClick = () => {
-    navigate(`/app/channels/${channel.id}`);
+    navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', channel.id));
   };
 
   const handleFollow = (e: React.MouseEvent) => {

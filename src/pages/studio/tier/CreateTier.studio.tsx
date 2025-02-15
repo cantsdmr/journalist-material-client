@@ -5,6 +5,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CreateChannelTierData } from '@/APIs/ChannelAPI';
+import { PATHS } from '@/constants/paths';
 
 const CreateTier: React.FC = () => {
   const { channelId } = useParams<{ channelId: string }>();
@@ -15,8 +16,8 @@ const CreateTier: React.FC = () => {
   const handleCreate = async (data: CreateChannelTierData) => {
     try {
       if (channelId) {
-        const result = await api?.channelApi.createTier(channelId, data);
-        navigate(`/app/channels/${channelId}/tiers/${result?.id}`);
+        await api?.channelApi.createTier(channelId, data);
+        navigate(PATHS.STUDIO_CHANNEL_VIEW.replace(':channelId', channelId));
       }
     } catch (error) {
       console.error('Failed to create tier:', error);

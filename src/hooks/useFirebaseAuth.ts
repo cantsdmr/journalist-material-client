@@ -13,6 +13,7 @@ import {
 export interface AuthState {
   user: FirebaseUser | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   getToken: () => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<string | null>;
   signInWithProvider: (provider: AuthProvider) => Promise<string | null>;
@@ -22,10 +23,14 @@ export interface AuthState {
 
 export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
-      setUser(firebaseUser);
+      if (firebaseUser) {
+        setUser(firebaseUser);
+      }
+      setIsLoading(false);
     });
 
     return () => unsubscribe();
@@ -77,7 +82,8 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
 
   return {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: user != null,
+    isLoading,
     getToken,
     signIn,
     signInWithProvider,

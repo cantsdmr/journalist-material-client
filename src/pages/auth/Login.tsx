@@ -10,7 +10,7 @@ import { styled } from '@mui/material/styles';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthProvider } from 'firebase/auth';
 import { useApiContext } from '@/contexts/ApiContext';
-
+import { PATHS } from '@/constants/paths';
 interface SocialButtonProps {
   bgcolor: string;
 }
@@ -96,7 +96,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (auth?.user) {
-      navigate('/app/news/trending')
+      navigate(PATHS.APP_NEWS_TRENDING)
     }
   }, [auth?.user != null])
   

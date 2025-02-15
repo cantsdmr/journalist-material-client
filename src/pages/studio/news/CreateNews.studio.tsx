@@ -5,6 +5,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import Notification from '@/components/common/Notification';
 import { useNavigate } from 'react-router-dom';
 import { CreateNewsData } from '@/APIs/NewsAPI';
+import { PATHS } from '@/constants/paths';
 
 const CreateNewsStudio: React.FC = () => {
   const { api } = useApiContext();
@@ -15,7 +16,7 @@ const CreateNewsStudio: React.FC = () => {
     try {
       const result = await api?.newsApi.createNews(data);
       if (result) {
-        navigate(`/app/news/${result.id}`);
+        navigate(PATHS.APP_NEWS_VIEW.replace(':id', result.id));
       }
     } catch (error) {
       console.error('Failed to create news:', error);

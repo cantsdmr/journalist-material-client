@@ -16,6 +16,7 @@ import DefaultNewsAvatar from '@/assets/BG_journo.png';
 import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { PATHS } from '@/constants/paths';
 
 interface NewsEntryProps {
   news: News;
@@ -27,7 +28,7 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (!(e.target as HTMLElement).closest('.action-button')) {
-      navigate(`/app/news/${news.id}`);
+      navigate(PATHS.APP_NEWS_VIEW.replace(':id', news.id));
     }
   };
 

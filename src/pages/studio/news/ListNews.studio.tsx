@@ -15,6 +15,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
+import { PATHS } from '@/constants/paths';
 
 interface ListNewsProps {
   isSubscribed: boolean;
@@ -135,7 +136,7 @@ const ListNewsStudio: React.FC<ListNewsProps> = () => {
           icon={<PostAddIcon sx={{ fontSize: 48 }} />}
           action={{
             label: "Create News",
-            onClick: () => navigate('create')
+            onClick: () => navigate(PATHS.STUDIO_NEWS_CREATE)
           }}
         />
       </Container>
