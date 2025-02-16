@@ -25,7 +25,7 @@ const ViewChannel: React.FC = () => {
     const [followLoading, setFollowLoading] = useState(false);
     const [cancelLoading, setCancelLoading] = useState(false);
     const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
-    const { channelId } = useParams();
+    const { id } = useParams();
     const { api } = useApiContext();
     const {
         // Channel relationship methods
@@ -40,15 +40,15 @@ const ViewChannel: React.FC = () => {
     } = useUserInfo();
 
     // Use them in your component
-    const isUserFollowing = isFollowing(channelId ?? '');
-    const hasSubscription = isSubscribed(channelId ?? '');
-    const currentTierId = getSubscriptionTier(channelId ?? '');
+    const isUserFollowing = isFollowing(id ?? '');
+    const hasSubscription = isSubscribed(id ?? '');
+    const currentTierId = getSubscriptionTier(id ?? '');
 
     useEffect(() => {
         const fetchChannel = async () => {
             try {
-                if (channelId && api?.channelApi) {
-                    const result = await api?.channelApi.getChannel(channelId);
+                if (id) {
+                    const result = await api?.channelApi.getChannel(id);
                     if (result) {
                         setChannel(result);
                     }
@@ -61,7 +61,7 @@ const ViewChannel: React.FC = () => {
         };
 
         fetchChannel();
-    }, [channelId, api?.channelApi]);
+    }, [id]);
 
     const handleFollow = async () => {
         try {
