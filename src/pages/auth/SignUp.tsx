@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Box, TextField, Button, Typography, Divider, Link } from '@mui/material';
+import { Container, Box, TextField, Button, Typography, Divider } from '@mui/material';
 import { googleProvider, twitterProvider, facebookProvider, appleProvider } from '@/utils/firebase';
 import { useNavigate } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
