@@ -7,46 +7,43 @@ const LandingPage: React.FC = () => {
   const phrases = ['Your media', 'Your rules', 'Your audience'];
   const [text, setText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [delta, setDelta] = useState(200 - Math.random() * 100);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const ticker = setInterval(() => {
-      tick();
-    }, delta);
+    const currentPhrase = phrases[currentIndex];
+    let timeout: NodeJS.Timeout;
 
-    return () => clearInterval(ticker);
-  }, [text, isDeleting, phraseIndex]);
-
-  const tick = () => {
-    const currentPhrase = phrases[phraseIndex];
-    const updateDelta = isDeleting ? 100 : 200;
-
-    if (!isDeleting && text === currentPhrase) {
-      // Start deleting after a pause
-      setTimeout(() => setIsDeleting(true), 1500);
-      setDelta(updateDelta);
-      return;
+    if (!isDeleting) {
+      if (text.length < currentPhrase.length) {
+        timeout = setTimeout(() => {
+          setText(currentPhrase.substring(0, text.length + 1));
+        }, 150);
+      } else {
+        timeout = setTimeout(() => {
+          setIsDeleting(true);
+        }, 2000);
+      }
     }
 
-    if (isDeleting && text === '') {
-      setIsDeleting(false);
-      setPhraseIndex((prev) => (prev + 1) % phrases.length);
-      setDelta(500);
-      return;
+    if (isDeleting) {
+      if (text.length > 0) {
+        timeout = setTimeout(() => {
+          setText(text.substring(0, text.length - 1));
+        }, 100);
+      } else {
+        timeout = setTimeout(() => {
+          setIsDeleting(false);
+          setCurrentIndex((prev) => (prev + 1) % phrases.length);
+        }, 500);
+      }
     }
 
-    const newText = isDeleting 
-      ? currentPhrase.substring(0, text.length - 1)
-      : currentPhrase.substring(0, text.length + 1);
-
-    setText(newText);
-    setDelta(updateDelta);
-  };
+    return () => clearTimeout(timeout);
+  }, [text, currentIndex, isDeleting]);
 
   return (
     <Box sx={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-      <LandingPageAppBar/>
+      <LandingPageAppBar />
       <Box
         sx={{
           position: 'absolute',
@@ -62,10 +59,10 @@ const LandingPage: React.FC = () => {
       />
       <Container sx={{ position: 'relative', zIndex: 1, pt: 8 }}>
         <Box sx={{ textAlign: 'center', mt: '40vh' }}>
-          <Typography 
-            variant="h2" 
-            component="h1" 
-            sx={{ 
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{
               fontWeight: 'bold',
               color: '#b068b1',
               textShadow: '2px 2px 4px rgba(0, 0, 0, 0.1)',
