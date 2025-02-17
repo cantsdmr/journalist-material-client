@@ -3,7 +3,6 @@ import { Box, Typography, Container } from '@mui/material';
 import LandingPageAppBar from '@/components/navigation/LandingPageAppBar';
 
 const LandingPage: React.FC = () => {
-  const staticPrefix = 'Your ';
   const changingWords = ['media', 'rules', 'audience'];
   const [text, setText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
