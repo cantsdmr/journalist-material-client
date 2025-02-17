@@ -35,7 +35,7 @@ const LandingPageAppBar: React.FC = () => {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: 'rgba(0, 0, 0, 0.6)', // Dark overlay
             zIndex: 1
           }
         }}
@@ -131,21 +131,11 @@ const LandingPageAppBar: React.FC = () => {
                     borderWidth: '2px',
                     textTransform: 'none',
                     fontWeight: 600,
-                    color: '#1976D2',
-                    borderColor: '#1976D2',
-                    background: 'rgba(25, 118, 210, 0.05)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       borderWidth: '2px',
-                      borderColor: '#1565C0',
-                      color: '#1565C0',
-                      background: 'rgba(25, 118, 210, 0.1)',
                       transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(21, 101, 192, 0.25)'
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                      boxShadow: '0 4px 12px rgba(21, 101, 192, 0.2)'
+                      boxShadow: '0 4px 12px rgba(33, 150, 243, 0.2)'
                     }
                   }}
                 >
@@ -195,21 +185,11 @@ const LandingPageAppBar: React.FC = () => {
                     borderWidth: '2px',
                     textTransform: 'none',
                     fontWeight: 600,
-                    color: '#1976D2',
-                    borderColor: '#1976D2',
-                    background: 'rgba(25, 118, 210, 0.05)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
                       borderWidth: '2px',
-                      borderColor: '#1565C0',
-                      color: '#1565C0',
-                      background: 'rgba(25, 118, 210, 0.1)',
                       transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(21, 101, 192, 0.25)'
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                      boxShadow: '0 4px 12px rgba(21, 101, 192, 0.2)'
+                      boxShadow: '0 4px 12px rgba(33, 150, 243, 0.2)'
                     }
                   }}
                 >
