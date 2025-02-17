@@ -1,50 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Button, InputBase, Box } from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
-import SearchIcon from '@mui/icons-material/Search';
+import { AppBar, Toolbar, Button, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
-import logoURL from '@/assets/logo.png'
 import { useAuth } from '@/contexts/AuthContext';
 import { PATHS } from '@/constants/paths';
-
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.black, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(3),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: '20ch',
-    },
-  },
-}));
+import landpageIntro from '@/assets/landing_page_compiled.gif';
 
 const LandingPageAppBar: React.FC = () => {
   const auth = useAuth();
@@ -60,103 +19,213 @@ const LandingPageAppBar: React.FC = () => {
   }, [auth?.user]);
 
   return (
-    <AppBar position="absolute" sx={{ background: '#f0e8e861', boxShadow: 'none' }}>
-      <Toolbar 
-        sx={{ 
-          justifyContent: 'space-between',
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: { xs: 2, sm: 0 },
-          py: { xs: 2, sm: 0 }
+    <>
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            zIndex: 1
+          }
         }}
       >
-        <Search sx={{ 
-          order: { xs: 2, sm: 1 },
-          width: { xs: '100%', sm: 'auto' }
-        }}>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Find a publisher"
-            inputProps={{ 'aria-label': 'search' }}
-          />
-        </Search>
-        <Box sx={{ 
-          flexGrow: 1, 
-          textAlign: 'center',
-          order: { xs: 1, sm: 2 }
-        }}>
-          <img height={35} style={{marginTop: 5}} src={logoURL} alt="Logo" />
-        </Box>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center',
-          order: { xs: 3, sm: 3 },
-          width: { xs: '100%', sm: 'auto' },
-          justifyContent: { xs: 'center', sm: 'flex-end' },
-          gap: 2
-        }}>
-          {!signedIn ? (
-            <>
-              <Button 
-                color="primary" 
-                variant="outlined" 
-                size="large" 
-                component={Link} 
-                to={PATHS.LOGIN}
-                sx={{
-                  width: { xs: '45%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                Log in
-              </Button>
-              <Button 
-                color="secondary" 
-                variant="outlined" 
-                size="large" 
-                component={Link} 
-                to={PATHS.SIGNUP}
-                sx={{
-                  width: { xs: '45%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                Get Started
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button 
-                color="primary" 
-                variant="outlined" 
-                size="large" 
-                component={Link}
-                to={PATHS.APP_NEWS_MY_FEED}
-                sx={{
-                  width: { xs: '45%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                My Feed
-              </Button>
-              <Button 
-                color="secondary" 
-                variant="outlined" 
-                size="large" 
-                onClick={logout}
-                sx={{
-                  width: { xs: '45%', sm: 'auto' },
-                  fontSize: { xs: '0.875rem', sm: '1rem' }
-                }}
-              >
-                Log out
-              </Button>
-            </>
-          )}
-        </Box>
-      </Toolbar>
-    </AppBar>
+        <Box
+          component="img"
+          src={landpageIntro}
+          alt="Background"
+          sx={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'relative',
+            zIndex: 0
+          }}
+        />
+      </Box>
+      
+      <AppBar 
+        position="absolute" 
+        elevation={0}
+        sx={{ 
+          background: 'rgba(255, 255, 255, 0.01)',
+          zIndex: 2
+        }}
+      >
+        <Toolbar
+          sx={{
+            justifyContent: 'space-between',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 },
+            py: { xs: 2, sm: 1.5 },
+            px: { xs: 2, sm: 4 }
+          }}
+        >
+          <Box 
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5
+            }}
+          >
+            <Box sx={{ 
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -4,
+                left: 0,
+                width: '100%',
+                height: '2px',
+                background: 'linear-gradient(90deg, #2196F3 0%, transparent 100%)',
+                borderRadius: '2px'
+              }
+            }}>
+              <span style={{
+                color: '#1565C0',
+                textTransform: 'uppercase',
+                fontWeight: 800,
+                fontSize: '1.6rem',
+                letterSpacing: '1px'
+              }}>Meta</span>
+              <span style={{
+                color: '#0D47A1',
+                fontWeight: 600,
+                fontSize: '1.6rem'
+              }}>Journo</span>
+            </Box>
+          </Box>
+
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            order: { xs: 3, sm: 3 },
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: { xs: 'center', sm: 'flex-end' },
+            gap: 2
+          }}>
+            {!signedIn ? (
+              <>
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  size="large"
+                  component={Link}
+                  to={PATHS.LOGIN}
+                  sx={{
+                    width: { xs: '45%', sm: 'auto' },
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    px: 4,
+                    py: 1.2,
+                    borderRadius: '12px',
+                    borderWidth: '2px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      borderWidth: '2px',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(33, 150, 243, 0.2)'
+                    }
+                  }}
+                >
+                  Log in
+                </Button>
+                <Button
+                  color="primary"
+                  variant="contained"
+                  size="large"
+                  component={Link}
+                  to={PATHS.SIGNUP}
+                  sx={{
+                    width: { xs: '45%', sm: 'auto' },
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    px: 4,
+                    py: 1.2,
+                    borderRadius: '12px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 50%, #0D47A1 100%)',
+                    boxShadow: '0 8px 16px -4px rgba(33, 150, 243, 0.5)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #1E88E5 0%, #1565C0 50%, #0D47A1 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 20px -4px rgba(33, 150, 243, 0.6)'
+                    }
+                  }}
+                >
+                  Get Started
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  size="large"
+                  component={Link}
+                  to={PATHS.APP_NEWS_MY_FEED}
+                  sx={{
+                    width: { xs: '45%', sm: 'auto' },
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    px: 4,
+                    py: 1.2,
+                    borderRadius: '12px',
+                    borderWidth: '2px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      borderWidth: '2px',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(33, 150, 243, 0.2)'
+                    }
+                  }}
+                >
+                  My Feed
+                </Button>
+                <Button
+                  color="error"
+                  variant="contained"
+                  size="large"
+                  onClick={logout}
+                  sx={{
+                    width: { xs: '45%', sm: 'auto' },
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    px: 4,
+                    py: 1.2,
+                    borderRadius: '12px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    background: 'linear-gradient(135deg, #f44336 0%, #e53935 50%, #c62828 100%)',
+                    boxShadow: '0 8px 16px -4px rgba(244, 67, 54, 0.5)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #e53935 0%, #d32f2f 50%, #b71c1c 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 20px -4px rgba(244, 67, 54, 0.6)'
+                    }
+                  }}
+                >
+                  Log out
+                </Button>
+              </>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </>
   );
 };
 
