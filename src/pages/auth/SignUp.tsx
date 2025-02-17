@@ -110,7 +110,7 @@ const SignUp: React.FC = () => {
     <Container maxWidth="xs" sx={{ mt: 8 }}>
       <Box sx={{ textAlign: 'center', mb: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Welcome back!
+          Join the community!
         </Typography>
       </Box>
       {error && (
@@ -136,19 +136,16 @@ const SignUp: React.FC = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Box sx={{ textAlign: 'right', mb: 2 }}>
-          <Link href="#" variant="caption">
-            Did you forget your password?
-          </Link>
-        </Box>
+        <br />
+        <br />
         <Button type="submit" variant="outlined" color="secondary" fullWidth sx={{ mb: 2 }}>
-          Log In
+          Sign Up
         </Button>
       </Box>
       <Divider sx={{ my: 2 }}>OR</Divider>
       <Box sx={{ textAlign: 'center', mb: 2 }}>
         <Typography variant="body2" gutterBottom>
-          You can sign in or sign up our application with following providers
+          You can sign up our application with following providers
         </Typography>
       </Box>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -158,7 +155,7 @@ const SignUp: React.FC = () => {
             bgcolor="#DB4437"
             onClick={handleProviderLogin.bind(this, googleProvider)}
           >
-            Sign in with Google
+            Sign up with Google
           </SocialButton>
           <SocialButton
             variant="contained"
@@ -166,7 +163,7 @@ const SignUp: React.FC = () => {
             bgcolor="#1DA1F2"
             onClick={handleProviderLogin.bind(this, twitterProvider)}
           >
-            Sign in with X
+            Sign up with X
           </SocialButton>
           <SocialButton
             variant="contained"
@@ -174,7 +171,7 @@ const SignUp: React.FC = () => {
             bgcolor="#1877F2"
             onClick={handleProviderLogin.bind(this, facebookProvider)}
           >
-            Sign in with Facebook
+            Sign up with Facebook
           </SocialButton>
           <SocialButton
             variant="contained"
@@ -182,7 +179,7 @@ const SignUp: React.FC = () => {
             bgcolor="#000000"
             onClick={handleProviderLogin.bind(this, appleProvider)}
           >
-            Sign in with Apple
+            Sign up with Apple
           </SocialButton>
       </Box>
     </Container>
