@@ -5,49 +5,40 @@ import {
   Avatar,
   IconButton,
   Stack,
-  alpha
+  alpha,
+  Chip
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { Channel } from '@/APIs/ChannelAPI';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
-import CheckIcon from '@mui/icons-material/Check';
-import AddIcon from '@mui/icons-material/Add';
-import { useUserInfo } from '@/hooks/useUserInfo';
 import { PATHS } from '@/constants/paths';
 
 interface ChannelItemProps {
   channel: Channel;
-  onFollow: (channelId: string) => void;
-  onUnfollow: (channelId: string) => void;
+  onJoin: (channelId: string, tierId?: string) => void;
+  onCancel: (channelId: string) => void;
 }
 
 const ChannelItem: React.FC<ChannelItemProps> = ({ 
   channel, 
-  onFollow,
-  onUnfollow
+  onJoin,
+  onCancel
 }) => {
   const navigate = useNavigate();
-  const { 
-    channelRelations: {
-      isFollowing,
-      isSubscribed
-    }
-  } = useUserInfo();
-
-  const isUserFollowing = isFollowing(channel.id);
-  const hasSubscription = isSubscribed(channel.id);
+  const currentMembership = channel.currentUserMembership;
+  const defaultTier = channel.tiers?.find(tier => tier.isDefault);
 
   const handleClick = () => {
     navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', channel.id));
   };
 
-  const handleFollow = (e: React.MouseEvent) => {
+  const handleJoin = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isUserFollowing) {
-      onUnfollow(channel.id);
+    if (currentMembership) {
+      onCancel(channel.id);
     } else {
-      onFollow(channel.id);
+      onJoin(channel.id, defaultTier?.id);
     }
   };
 
@@ -98,21 +89,28 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             {channel.name}
           </Typography>
 
-          <IconButton
-            size="small"
-            onClick={handleFollow}
-            sx={{ 
-              bgcolor: isUserFollowing ? 'success.main' : 'primary.main',
-              color: 'white',
-              width: 32,
-              height: 32,
-              '&:hover': {
-                bgcolor: isUserFollowing ? 'success.dark' : 'primary.dark',
-              }
-            }}
-          >
-            {isUserFollowing ? <CheckIcon /> : <AddIcon />}
-          </IconButton>
+          {currentMembership ? (
+            <Chip
+              label={currentMembership.tier.name}
+              color="primary"
+              onDelete={handleJoin}
+              size="small"
+            />
+          ) : (
+            <IconButton
+              size="small"
+              onClick={handleJoin}
+              sx={{ 
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                }
+              }}
+            >
+              <WorkspacePremiumIcon />
+            </IconButton>
+          )}
         </Box>
 
         <Typography 
@@ -141,11 +139,10 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 0.5,
-            color: isUserFollowing ? 'primary.main' : 'inherit'
+            gap: 0.5
           }}>
             <PeopleIcon sx={{ fontSize: 16 }} />
-            {channel.followerCount.toLocaleString('en-US', { 
+            {channel.membershipCount.toLocaleString('en-US', { 
               notation: 'compact',
               maximumFractionDigits: 1 
             })}
@@ -153,14 +150,10 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 0.5,
-            color: hasSubscription ? 'primary.main' : 'inherit'
+            gap: 0.5
           }}>
             <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
-            {channel.subscriberCount.toLocaleString('en-US', { 
-              notation: 'compact',
-              maximumFractionDigits: 1 
-            })}
+            {channel.tiers?.length || 0} Tiers
           </Box>
         </Stack>
       </Box>

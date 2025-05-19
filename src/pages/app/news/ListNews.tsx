@@ -4,13 +4,13 @@ import {
   Typography, 
   Stack,
   Box,
-  Skeleton,
-  Card,
 } from '@mui/material';
 import { News } from '@/APIs/NewsAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import NewsEntry from '@/components/news/NewsEntry';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { EmptyState } from '@/components/common/EmptyState';
+import { alpha } from '@mui/material/styles';
 
 interface ListNewsProps {
   isSubscribed: boolean;
@@ -18,52 +18,40 @@ interface ListNewsProps {
 }
 
 const ListNewsSkeleton = () => (
-  <Box sx={{ mb: 4 }}>
-    {[1, 2, 3].map((index) => (
-      <Box key={index} sx={{ mb: 10 }}>
-        {/* Channel info skeleton */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, px: 0.5 }}>
-          <Skeleton 
-            variant="rounded" 
-            width={28} 
-            height={28} 
-            sx={{ borderRadius: 1.5, mr: 1.5 }} 
-          />
-          <Skeleton width={120} height={20} />
-        </Box>
-
-        {/* News card skeleton */}
-        <Card sx={{ 
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
+  <Stack spacing={2} sx={{ mt: 2 }}>
+    {[...Array(2)].map((_, index) => (
+      <Box
+        key={index}
+        sx={{
+          p: 2,
           borderRadius: 2,
-          overflow: 'hidden'
-        }}>
-          <Skeleton 
-            variant="rectangular" 
+          bgcolor: (theme) =>
+            theme.palette.mode === 'dark'
+              ? alpha(theme.palette.common.white, 0.05)
+              : alpha(theme.palette.common.black, 0.03)
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Box 
             sx={{ 
-              width: { xs: '100%', sm: '360px' },
-              minWidth: { sm: '360px' },
-              height: { xs: '220px', sm: '200px' }
+              width: 32, 
+              height: 32, 
+              borderRadius: 1,
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark'
+                  ? alpha(theme.palette.common.white, 0.1)
+                  : alpha(theme.palette.common.black, 0.1),
+              mr: 1
             }} 
           />
-          <Box sx={{ p: 3, flex: 1 }}>
-            <Skeleton width="90%" height={24} sx={{ mb: 2 }} />
-            <Skeleton width="80%" height={24} sx={{ mb: 2 }} />
-            <Skeleton width="95%" height={20} sx={{ mb: 1 }} />
-            <Skeleton width="90%" height={20} sx={{ mb: 3 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Skeleton width={100} height={20} />
-              <Box sx={{ display: 'flex', gap: 1.5 }}>
-                <Skeleton variant="circular" width={32} height={32} />
-                <Skeleton variant="circular" width={32} height={32} />
-              </Box>
-            </Box>
-          </Box>
-        </Card>
+          <Box sx={{ height: 20, width: '30%', borderRadius: 0.5, bgcolor: 'grey.300' }} />
+        </Box>
+        <Box sx={{ height: 24, width: '60%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
+        <Box sx={{ height: 100, width: '100%', borderRadius: 1, bgcolor: 'grey.200', mb: 2 }} />
+        <Box sx={{ height: 16, width: '40%', borderRadius: 0.5, bgcolor: 'grey.200' }} />
       </Box>
     ))}
-  </Box>
+  </Stack>
 );
 
 const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
@@ -73,15 +61,15 @@ const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
 
-  const fetchNews = async (pageNum: number = page) => {
+  const fetchNews = async (_page: number = page) => {
     try {
       setLoading(true);
       const response = isSubscribed 
-        ? await api?.newsApi.getFollowed({ page: pageNum, limit: 12 })
-        : await api?.newsApi.getTrending({ page: pageNum, limit: 12 });
+        ? await api?.newsApi.getFollowed({ page: _page, limit: 12 })
+        : await api?.newsApi.getTrending({ page: _page, limit: 12 });
 
       if (response) {
-        if (pageNum === 1) {
+        if (_page === 1) {
           setNews(response.items);
         } else {
           setNews(prev => [...prev, ...response.items]);
@@ -97,7 +85,8 @@ const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   };
 
   useEffect(() => {
-    fetchNews(page);
+    setPage(1);
+    fetchNews(1);
   }, [isSubscribed]);
 
   const fetchMoreData = () => {
@@ -106,46 +95,55 @@ const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
     }
   };
 
-  if (loading && news.length === 0) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          <Skeleton width={200} />
-        </Typography>
-        <Stack spacing={3}>
-          {[1, 2, 3].map((index) => (
-            <ListNewsSkeleton key={index} />
-          ))}
-        </Stack>
-      </Container>
-    );
-  }
-
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>      
-      <InfiniteScroll
-        dataLength={news.length}
-        next={fetchMoreData}
-        hasMore={hasMore}
-        loader={<ListNewsSkeleton />}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            px: 1,
-            mt: 6
-          }}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          {isSubscribed ? 'Your Feed' : 'Trending News'}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          {isSubscribed 
+            ? 'Latest news from journalists you follow'
+            : 'Discover the most popular news from our community'
+          }
+        </Typography>
+      </Box>
+
+      {news.length === 0 && !loading ? (
+        <EmptyState
+          title={isSubscribed ? "Your feed is empty" : "No news found"}
+          description={isSubscribed 
+            ? "Follow some journalists to see their latest news here"
+            : "There are no trending news articles at the moment"
+          }
+        />
+      ) : (
+        <InfiniteScroll
+          dataLength={news.length}
+          next={fetchMoreData}
+          hasMore={hasMore}
+          loader={<ListNewsSkeleton />}
+          endMessage={
+            <Box sx={{ 
+              textAlign: 'center', 
+              mt: 4, 
+              color: 'text.secondary',
+              fontSize: '0.875rem'
+            }}>
+              No more news to display
+            </Box>
+          }
         >
-          {news.map((item) => (
-            <NewsEntry 
-              key={item.id} 
-              news={item}
-            />
-          ))}
-        </Box>
-      </InfiniteScroll>
+          <Stack spacing={4}>
+            {news.map((item) => (
+              <NewsEntry 
+                key={item.id} 
+                news={item}
+              />
+            ))}
+          </Stack>
+        </InfiniteScroll>
+      )}
     </Container>
   );
 };

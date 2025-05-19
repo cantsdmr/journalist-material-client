@@ -8,6 +8,7 @@ import ExploreIcon from '@mui/icons-material/Explore';
 import PeopleIcon from '@mui/icons-material/People';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
+import PollIcon from '@mui/icons-material/Poll';
 import { PATHS } from '@/constants/paths';
 
 interface SidebarProps {
@@ -15,7 +16,7 @@ interface SidebarProps {
   toggleSidebar: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ }) => {
+const Sidebar: React.FC<SidebarProps> = () => {
   const location = useLocation();
 
   const menuItems = [
@@ -23,7 +24,8 @@ const Sidebar: React.FC<SidebarProps> = ({ }) => {
     { path: `${PATHS.APP_EXPLORE}`, icon: <ExploreIcon />, label: 'Explore' },
     { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <PeopleIcon />, label: 'Following' },
     { path: `${PATHS.APP_SUBSCRIPTIONS}`, icon: <SubscriptionsIcon />, label: 'Subscriptions' },
-    { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' }
+    { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' },
+    { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' }
   ];
 
   return (

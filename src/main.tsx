@@ -8,6 +8,8 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ApiProvider } from '@/contexts/ApiContext';
 import { UserProvider } from '@/contexts/UserContext';
 import { AppProvider } from './contexts/AppContext';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -17,7 +19,9 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
           <UserProvider>
             <ThemeProvider>
               <AppProvider>
-                <App />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <App />
+                </LocalizationProvider>
               </AppProvider>
             </ThemeProvider>
           </UserProvider>

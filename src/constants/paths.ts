@@ -25,6 +25,13 @@ export const CHANNEL = {
   VIEW: ':id',
 } as const;
 
+export const POLL = {
+  ROOT: 'polls',
+  CREATE: 'create',
+  EDIT: 'edit',
+  VIEW: ':id'
+} as const;
+
 const ENV_BASE = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash if present
 
 // Absolute paths
@@ -43,8 +50,11 @@ export const PATHS = {
   APP_NEWS_VIEW: `${ENV_BASE}${BASE.APP}/${NEWS.ROOT}/:id`,
   APP_CHANNELS: `${ENV_BASE}${BASE.APP}/${CHANNEL.ROOT}`,
   APP_CHANNEL_VIEW: `${ENV_BASE}${BASE.APP}/${CHANNEL.ROOT}/:channelId`,
+  APP_POLL_LIST: `${ENV_BASE}${BASE.APP}/${POLL.ROOT}`,
+  APP_POLL_VIEW: `${ENV_BASE}${BASE.APP}/${POLL.ROOT}/:id`,
   APP_EXPLORE: `${ENV_BASE}${BASE.APP}/explore`,
   APP_SUBSCRIPTIONS: `${ENV_BASE}${BASE.APP}/subscriptions`,
+  APP_POLLS: `${ENV_BASE}${BASE.APP}/${POLL.ROOT}`,
   
   // Studio
   STUDIO_ROOT: `${ENV_BASE}${BASE.STUDIO}`,
@@ -56,6 +66,10 @@ export const PATHS = {
   STUDIO_CHANNEL_CREATE: `${ENV_BASE}${BASE.STUDIO}/${CHANNEL.ROOT}/${CHANNEL.CREATE}`,
   STUDIO_CHANNEL_EDIT: `${ENV_BASE}${BASE.STUDIO}/${CHANNEL.ROOT}/${CHANNEL.EDIT}/:channelId`,
   STUDIO_CHANNEL_VIEW: `${ENV_BASE}${BASE.STUDIO}/${CHANNEL.ROOT}/:channelId`,
+  STUDIO_POLLS: `${ENV_BASE}${BASE.STUDIO}/${POLL.ROOT}`,
+  STUDIO_POLL_CREATE: `${ENV_BASE}${BASE.STUDIO}/${POLL.ROOT}/${POLL.CREATE}`,
+  STUDIO_POLL_EDIT: `${ENV_BASE}${BASE.STUDIO}/${POLL.ROOT}/${POLL.EDIT}/:id`,
+  STUDIO_POLL_VIEW: `${ENV_BASE}${BASE.STUDIO}/${POLL.ROOT}/:id`,
 } as const;
 
 export type PathsType = typeof PATHS;

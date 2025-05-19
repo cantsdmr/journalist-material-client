@@ -110,6 +110,10 @@ export class NewsAPI extends HTTPApi {
         return this._list<News>(`${API_PATH}/${SUB_PATH.FOLLOWED}`, pagination);
     }
 
+    public getNewsByTags = (tags: string[], pagination: PaginationObject = DEFAULT_PAGINATION) => {
+        return this._list<News>(`${API_PATH}/${SUB_PATH.TAGS}/${tags.join(',')}`, pagination);
+    }
+
     // Creator News
     public getCreatorNews = (creatorId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
         return this._list<News>(`${API_PATH}/${SUB_PATH.CREATOR}/${creatorId}`, pagination);

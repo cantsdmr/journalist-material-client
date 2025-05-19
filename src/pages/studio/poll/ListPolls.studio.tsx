@@ -9,16 +9,15 @@ import {
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useApiContext } from '@/contexts/ApiContext';
 import { alpha } from '@mui/material/styles';
-import AddToQueueIcon from '@mui/icons-material/AddToQueue';
+import AddChartIcon from '@mui/icons-material/AddChart';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
-import StudioChannelCard from '@/components/studio/channel/StudioChannelCard';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { ChannelUser } from '@/APIs/ChannelAPI';
 import { EmptyState } from '@/components/common/EmptyState';
+import StudioPollCard from '@/components/studio/poll/StudioPollCard';
 
-const ListChannelsStudio: React.FC = () => {
-  const [userChannels, setUserChannels] = useState<ChannelUser[]>([]);
+const ListPollsStudio: React.FC = () => {
+  const [polls, setPolls] = useState<any[]>([]);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,16 +27,16 @@ const ListChannelsStudio: React.FC = () => {
   const theme = useTheme();
 
   const fetchMoreData = () => {
-    getChannels(page + 1);
+    getPolls(page + 1);
   };
 
-  const getChannels = async (_page: number = page) => {
+  const getPolls = async (_page: number = page) => {
     try {
       if (!user?.id) return;
 
-      const result = await api?.userApi.getUserChannels(user.id);
+      const result = await api?.pollApi.getUserPolls(user.id);
       
-      setUserChannels(prev => _page === 1 
+      setPolls(prev => _page === 1 
         ? result?.items ?? [] 
         : [...prev, ...(result?.items ?? [])]
       );
@@ -45,17 +44,17 @@ const ListChannelsStudio: React.FC = () => {
       setPage(result?.metadata.currentPage ?? 1);
       setHasMore(result?.metadata.hasNext === true);
     } catch (error) {
-      console.error('Failed to fetch channels:', error);
+      console.error('Failed to fetch polls:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    getChannels(1);
+    getPolls(1);
   }, []);
 
-  const ChannelSkeleton = () => (
+  const PollSkeleton = () => (
     <Box 
       sx={{
         p: 2,
@@ -106,7 +105,7 @@ const ListChannelsStudio: React.FC = () => {
             fontSize: { xs: '1.25rem', sm: '1.5rem' }
           }}
         >
-          {isLoading ? <Skeleton width={150} /> : 'My Channels'}
+          {isLoading ? <Skeleton width={150} /> : 'My Polls'}
         </Typography>
       </Box>
 
@@ -114,41 +113,41 @@ const ListChannelsStudio: React.FC = () => {
         <Grid container spacing={2}>
           {[1, 2].map((index) => (
             <Grid item xs={12} sm={6} key={index}>
-              <ChannelSkeleton />
+              <PollSkeleton />
             </Grid>
           ))}
         </Grid>
-      ) : userChannels.length === 0 ? (
+      ) : polls.length === 0 ? (
         <EmptyState
-          title="No Channels Yet"
-          description="Create your first channel to start publishing news and connecting with subscribers."
-          icon={<AddToQueueIcon sx={{ fontSize: { xs: 40, sm: 48 } }} />}
+          title="No Polls Yet"
+          description="Create your first poll to start gathering opinions from your audience."
+          icon={<AddChartIcon sx={{ fontSize: { xs: 40, sm: 48 } }} />}
           action={{
-            label: "Create Channel",
-            onClick: () => navigate(PATHS.STUDIO_CHANNEL_CREATE)
+            label: "Create Poll",
+            onClick: () => navigate(PATHS.STUDIO_POLL_CREATE)
           }}
         />
       ) : (
         <InfiniteScroll
-          dataLength={userChannels.length}
+          dataLength={polls.length}
           next={fetchMoreData}
           hasMore={hasMore}
           loader={
             <Grid container spacing={2} sx={{ mt: 0.5 }}>
               {[1, 2].map((index) => (
                 <Grid item xs={12} sm={6} key={index}>
-                  <ChannelSkeleton />
+                  <PollSkeleton />
                 </Grid>
               ))}
             </Grid>
           }
         >
           <Grid container spacing={2}>
-            {userChannels.map((userChannel) => (
-              <Grid item xs={12} sm={6} key={userChannel.id}>
-                <StudioChannelCard 
-                  channel={userChannel.channel}
-                  onRefresh={() => getChannels(1)}
+            {polls.map((poll) => (
+              <Grid item xs={12} sm={6} key={poll.id}>
+                <StudioPollCard 
+                  poll={poll}
+                  onRefresh={() => getPolls(1)}
                 />
               </Grid>
             ))}
@@ -159,4 +158,4 @@ const ListChannelsStudio: React.FC = () => {
   );
 };
 
-export default ListChannelsStudio;
+export default ListPollsStudio; 

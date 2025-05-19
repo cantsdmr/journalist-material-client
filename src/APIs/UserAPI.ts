@@ -1,77 +1,113 @@
-import { AxiosJournalist } from "@/utils/axios";
 import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
-import { Channel, ChannelFollower, ChannelSubscription } from "./ChannelAPI";
+import { ChannelUser, ChannelMembership } from "./ChannelAPI";
+import { AxiosJournalist } from "@/utils/axios";
+
+export enum UserRole {
+    ADMIN = 1,
+    EDITOR = 2,
+    JOURNALIST = 3,
+    USER = 4
+}
+
+export enum UserStatus {
+    ACTIVE = 1,
+    INACTIVE = 2,
+    BANNED = 3
+}
 
 export type User = {
     id: string;
-    displayName: string | null;
-    email: string | null;
-    createdAt: Date;
-    photoUrl: string | null;
+    externalId: string;
+    email: string;
+    displayName: string;
+    photoUrl?: string;
     roleId: number;
     statusId: number;
-    externalId: string | null;
-    followings: ChannelFollower[];
-    subscriptions: ChannelSubscription[];
-    channels: ChannelUser[];
-}
+    createdAt: string;
+    updatedAt: string;
+    lastLogin?: string;
+    memberships?: ChannelMembership[];
+};
 
-export type ChannelUser = {
-    id: string;
-    userId: string;
-    channelId: string;
-    channelName: string;
-    channel: Channel;
-}
+export type CreateUserData = {
+    email: string;
+    externalId: string;
+    displayName: string;
+    photoUrl: string;
+    roleId: UserRole;
+    statusId: UserStatus;
+};
 
-export type CreateUserData = Omit<User, "id" | "createdAt" | "memberships">
-export type EditUserData = Omit<User, "id" | "createdAt" | "externalId" | "memberships">
+export type SignInData = {
+    idToken: string;
+};
 
-const API_PATH = 'api/users'
-const SUB_PATH = {
-    PROFILE: 'profile',
-    SIGN_IN: 'sign-in',
-    SIGN_UP: 'sign-up'
-}
+export type SignUpData = {
+    external_id: string | null;
+    email: string | null;
+    display_name: string | null;
+    photo_url: string | null;
+    role_id: number;
+};
+
+const API_PATH = '/api/users'
 
 export class UserAPI extends HTTPApi {
+    private readonly SUB_PATH = {
+        PROFILE: 'profile',
+        SIGN_IN: 'sign-in',
+        SIGN_UP: 'sign-up'
+    };
+
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
     }
 
-    public signUp = async ({
-        external_id,
-        email,
-        display_name,
-        photo_url,
-        role_id
-    }: {
-        external_id: string | null,
-        email: string | null,
-        display_name: string | null,
-        photo_url: string | null,
-        role_id: number
-    }) => {
-        return this._post<void>(`${API_PATH}/${SUB_PATH.SIGN_UP}`, { external_id, email, display_name, photo_url, role_id });
+    public getAll = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+        return this._list<User>(API_PATH, pagination);
     }
 
-    public signIn = async ({
-        idToken
-    }: {
-        idToken: string
-    }) => {
-        return this._post<void>(`${API_PATH}/${SUB_PATH.SIGN_IN}`, { idToken });
+    public get = (id: string) => {
+        return this._get<User>(`${API_PATH}/${id}`);
     }
 
-    public getUserInfo = async () => {
-        return this._get<User>(`${API_PATH}/${SUB_PATH.PROFILE}`);
+    public create = (data: CreateUserData) => {
+        return this._post<User>(API_PATH, data);
     }
 
-    public getUserInfoByExternalId = async (externalId: string) => {
-        return this._get<User>(`${API_PATH}/${SUB_PATH.PROFILE}/${externalId}`);
+    public update = (id: string, data: Partial<CreateUserData>) => {
+        return this._put<User>(`${API_PATH}/${id}`, data);
     }
 
-    public getUserChannels = async (userId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
-        return this._list<ChannelUser>(`${API_PATH}/${userId}/channel`, pagination);
+    public delete = (id: string) => {
+        return this._remove<void>(`${API_PATH}/${id}`);
+    }
+
+    public getProfile = () => {
+        return this._get<User>(`${API_PATH}/${this.SUB_PATH.PROFILE}`);
+    }
+
+    public getProfileByExternalId = (externalId: string) => {
+        return this._get<User>(`${API_PATH}/${this.SUB_PATH.PROFILE}/${externalId}`);
+    }
+
+    public getUserInfoByExternalId = (externalId: string) => {
+        return this._get<User>(`${API_PATH}/external/${externalId}`);
+    }
+
+    public getUserChannels = (userId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
+        return this._list<ChannelUser>(`${API_PATH}/${userId}/channels`, pagination);
+    }
+
+    public signIn = (data: SignInData) => {
+        return this._post<void>(`${API_PATH}/${this.SUB_PATH.SIGN_IN}`, data);
+    }
+
+    public signUp = (data: SignUpData) => {
+        return this._post<void>(`${API_PATH}/${this.SUB_PATH.SIGN_UP}`, data);
+    }
+
+    public getUserInfo = (userId: string) => {
+        return this._get<User>(`${API_PATH}/${userId}`);
     }
 }

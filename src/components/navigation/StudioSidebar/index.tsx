@@ -8,6 +8,8 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import AddToQueueIcon from '@mui/icons-material/AddToQueue';
+import PollIcon from '@mui/icons-material/Poll';
+import AddChartIcon from '@mui/icons-material/AddChart';
 import { PATHS } from '@/constants/paths';
 
 interface StudioSidebarProps {
@@ -46,6 +48,18 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
         icon: <AddToQueueIcon />, 
         label: 'Create Channel' 
       },
+    ],
+    polls: [
+      { 
+        path: PATHS.STUDIO_POLLS, 
+        icon: <PollIcon />, 
+        label: 'My Polls' 
+      },
+      {
+        path: PATHS.STUDIO_POLL_CREATE,
+        icon: <AddChartIcon />,
+        label: 'Create Poll'
+      }
     ]
   };
 
@@ -118,6 +132,58 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
           Channel Management
         </Typography>
         {menuItems.channels.map((item) => (
+          <ListItem
+            button
+            component={Link}
+            to={item.path}
+            key={item.path}
+            selected={location.pathname === item.path}
+            sx={{
+              borderRadius: 1,
+              mb: 0.5,
+              '&.Mui-selected': {
+                backgroundColor: 'action.selected',
+              },
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              }
+            }}
+          >
+            <ListItemIcon 
+              sx={{ 
+                minWidth: 40,
+                color: location.pathname === item.path ? 'primary.main' : 'inherit'
+              }}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText 
+              primary={item.label}
+              primaryTypographyProps={{
+                fontSize: '0.875rem',
+                fontWeight: location.pathname === item.path ? 600 : 400
+              }}
+            />
+          </ListItem>
+        ))}
+      </List>
+
+      {/* Poll Management Section */}
+      <Divider sx={{ my: 2 }} />
+      <List sx={{ px: 2 }}>
+        <Typography
+          variant="overline"
+          sx={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: 'text.secondary',
+            ml: 1,
+            mb: 1
+          }}
+        >
+          Poll Management
+        </Typography>
+        {menuItems.polls.map((item) => (
           <ListItem
             button
             component={Link}

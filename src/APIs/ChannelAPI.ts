@@ -14,34 +14,61 @@ export type Channel = {
     logoUrl?: string;
     bannerUrl?: string;
     status: number;
-    isFollowing: boolean;
-    isSubscribed: boolean;
-    followers?: any[];
-    followerCount: number;
-    subscriberCount: number;
-    subscriptions?: any[];
+    membershipCount: number;
+    currentUserMembership?: ChannelMembership | null;
+    memberships?: ChannelMembership[];
     news?: News[];
     polls?: Poll[];
     users?: User[];
     tiers?: ChannelTier[];
     tags?: string[];
+    stats?: {
+        memberCount: number;
+        newsCount: number;
+        pollCount: number;
+    };
 }
+
+export type ChannelUser = {
+    id: string;
+    userId: string;
+    channelId: string;
+    channelName: string;
+    user: User;
+    channel: Channel;
+};
 
 export type ChannelFollower = {
     id: string;
-    channelId: string;
     userId: string;
-    followedAt: Date;
-}
+    channelId: string;
+    user: User;
+    channel: Channel;
+    createdAt: string;
+};
+
+export type SubscriptionTier = {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    channelId: string;
+    order: number;
+    benefits: any[];
+};
 
 export type ChannelSubscription = {
     id: string;
     channelId: string;
-    userId: string;
-    subscribedAt: Date;
-    expiresAt: Date;
+    status: number;
+    subscribedAt: string;
+    expiresAt: string;
     tierId: string;
-}
+    createdAt: string;
+    tier: SubscriptionTier;
+    channel?: Channel;  // Optional as it might be populated in some contexts
+    user?: User;        // Optional as it might be populated in some contexts
+};
 
 export type ChannelTier = {
     id: string;
@@ -50,20 +77,41 @@ export type ChannelTier = {
     price: number;
     channelId: string;
     order: number;
+    isDefault: boolean;
+    maxSubscribers?: number;
     benefits: any[];
 }
 
-export type CreateChannelData = Omit<Channel, "id" | "createdAt" | "updatedAt" | "isFollowing" | "isSubscribed" | "followers" | "subscriptions" | "news" | "polls" | "users" | "tiers" | "followerCount" | "subscriberCount">
-export type EditChannelData = Omit<Channel, "id" | "createdAt" | "updatedAt" | "isFollowing" | "isSubscribed" | "followers" | "subscriptions" | "news" | "polls" | "users" | "tiers" | "followerCount" | "subscriberCount">
+export type CreateChannelData = Omit<Channel, "id" | "createdAt" | "updatedAt" | "membershipCount" | "currentUserMembership" | "memberships" | "news" | "polls" | "users" | "tiers" | "stats">;
+export type EditChannelData = Omit<Channel, "id" | "createdAt" | "updatedAt" | "membershipCount" | "currentUserMembership" | "memberships" | "news" | "polls" | "users" | "tiers" | "stats">;
 
-export type CreateChannelTierData = Omit<ChannelTier, "id" | "channelId" >;
+export type CreateChannelTierData = Omit<ChannelTier, "id" | "channelId">;
 export type EditChannelTierData = Omit<ChannelTier, "id" | "channelId">;
+
+export type ChannelMembership = {
+    id: string;
+    userId: string;
+    channelId: string;
+    tierId: string;
+    statusId: number;
+    notificationLevelId: number;
+    subscribedAt: Date;
+    expiresAt?: Date;
+    renewalDate?: Date;
+    paymentReference?: string;
+    totalContributions: number;
+    monthlyContribution: number;
+    autoContribute: boolean;
+    contributionLimit?: number;
+    tier: ChannelTier;
+    channel: Channel;
+    user: User;
+};
 
 const API_PATH = '/api/channels'
 const SUB_PATH = {
     TIER: 'tier',
-    FOLLOWER: 'follower',
-    SUBSCRIBER: 'subscriber'
+    MEMBERSHIP: 'membership'
 }
 
 export class ChannelAPI extends HTTPApi {
@@ -121,25 +169,32 @@ export class ChannelAPI extends HTTPApi {
         return this._remove<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}/${tierId}`);
     }
 
-    // Follower methods
-    public follow = (channelId: string) => {
-        return this._post<ChannelFollower>(`${API_PATH}/${channelId}/${SUB_PATH.FOLLOWER}`, {});
+    // Membership methods
+    public joinChannel = (channelId: string, options: { 
+        tierId?: string;
+        notificationLevel?: number;
+    } = {}) => {
+        return this._post<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`, options);
     }
 
-    public unfollow = (channelId: string) => {
-        return this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.FOLLOWER}`);
+    public updateMembership = (channelId: string, data: {
+        tierId?: string;
+        notificationLevel?: number;
+        autoContribute?: boolean;
+        contributionLimit?: number;
+    }) => {
+        return this._put<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`, data);
     }
 
-    // Subscriber methods
-    public subscribe = (channelId: string, tierId: string) => {
-        return this._post<ChannelSubscription>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, { tierId });
+    public cancelMembership = (channelId: string) => {
+        return this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`);
     }
 
-    public unsubscribe = (channelId: string) => {
-        return this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`);
+    public getChannelMembers = (channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
+        return this._list<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`, pagination);
     }
 
-    public changeSubscriptionTier = (channelId: string, tierId: string) => {
-        return this._put<ChannelSubscription>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, { tierId })
+    public getMembershipDetails = (channelId: string) => {
+        return this._get<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`);
     }
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useApiContext } from "./ApiContext";
 import { useAuth } from "./AuthContext";
 import { User } from "@/APIs/UserAPI";
+import { ChannelMembership } from "@/APIs/ChannelAPI";
 import { createCtx } from "./BaseContext";
 
 interface UserState {
@@ -9,9 +10,9 @@ interface UserState {
   isLoading: boolean;
   actions: {
     refreshUser: () => Promise<void>;
-    isFollowing: (channelId: string) => boolean;
-    isSubscribed: (channelId: string) => boolean;
-    getSubscriptionTier: (channelId: string) => string | undefined;
+    getMembership: (channelId: string) => ChannelMembership | null;
+    hasMembership: (channelId: string) => boolean;
+    getMembershipTier: (channelId: string) => string | undefined;
   };
 }
 
@@ -45,9 +46,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     actions: {
       refreshUser,
-      isFollowing: (channelId: string) => user?.followings?.some(f => f.channelId === channelId) ?? false,
-      isSubscribed: (channelId: string) => user?.subscriptions?.some(s => s.channelId === channelId) ?? false,
-      getSubscriptionTier: (channelId: string) => user?.subscriptions?.find(s => s.channelId === channelId)?.tierId
+      getMembership: (channelId: string) => user?.memberships?.find(m => m.channelId === channelId) ?? null,
+      hasMembership: (channelId: string) => user?.memberships?.some(m => m.channelId === channelId) ?? false,
+      getMembershipTier: (channelId: string) => user?.memberships?.find(m => m.channelId === channelId)?.tierId
     }
   };
 

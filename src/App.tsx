@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { PATHS, NEWS, CHANNEL } from '@/constants/paths';
+import { PATHS, NEWS, CHANNEL, POLL } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 
 // Layouts
@@ -28,6 +28,10 @@ import ViewNews from '@/pages/app/news/ViewNews';
 import ListChannels from '@/pages/app/channel/ListChannels';
 import ViewChannel from '@/pages/app/channel/ViewChannel';
 
+// Poll pages
+import ListPolls from '@/pages/app/poll/ListPoll';
+import ViewPoll from '@/pages/app/poll/ViewPoll';
+
 // Studio pages
 import CreateNewsStudio from '@/pages/studio/news/CreateNews.studio';
 import EditNewsStudio from '@/pages/studio/news/EditNews.studio';
@@ -44,6 +48,10 @@ import ViewChannelStudio from './pages/studio/channel/ViewChannel.studio';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import ErrorScreen from '@/components/common/ErrorScreen';
 import EditChannel from './pages/studio/channel/EditChannel.studio';
+import ListPollsStudio from '@/pages/studio/poll/ListPolls.studio';
+import CreatePollStudio from '@/pages/studio/poll/CreatePoll.studio';
+import EditPollStudio from '@/pages/studio/poll/EditPoll.studio';
+import ViewPollStudio from '@/pages/studio/poll/ViewPoll.studio';
 
 const App: React.FC = () => {
   const { isLoading, error } = useApp();
@@ -75,6 +83,10 @@ const App: React.FC = () => {
           <Route index element={<ListChannels />} />
           <Route path={`${CHANNEL.VIEW}`} element={<ViewChannel />} />
         </Route>
+        <Route path={`${POLL.ROOT}/*`}>
+          <Route index element={<ListPolls />} />
+          <Route path={`${POLL.VIEW}`} element={<ViewPoll />} />
+        </Route>
       </Route>
 
       {/* Studio Routes */}
@@ -91,6 +103,12 @@ const App: React.FC = () => {
           <Route path={`${CHANNEL.CREATE}`} element={<CreateChannelStudio />} />
           <Route path={`${CHANNEL.VIEW}`} element={<ViewChannelStudio />} />
           <Route path={`${CHANNEL.EDIT}/:id`} element={<EditChannel />} />
+        </Route>
+        <Route path={`${POLL.ROOT}/*`}>
+          <Route index element={<ListPollsStudio />} />
+          <Route path={`${POLL.CREATE}`} element={<CreatePollStudio />} />
+          <Route path={`${POLL.EDIT}/:id`} element={<EditPollStudio />} />
+          <Route path={`${POLL.VIEW}`} element={<ViewPollStudio />} />
         </Route>
       </Route>
 

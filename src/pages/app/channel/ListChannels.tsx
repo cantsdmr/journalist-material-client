@@ -48,21 +48,21 @@ const ListChannels: React.FC = () => {
     getChannels(page); 
   }, []);
 
-  const handleFollow = async (channelId: string) => {
+  const handleJoin = async (channelId: string, tierId?: string) => {
     try {
-      await api?.channelApi.follow(channelId);
+      await api?.channelApi.joinChannel(channelId, { tierId });
       await actions.refreshUser();
     } catch (error) {
-      console.error('Failed to follow channel:', error);
+      console.error('Failed to join channel:', error);
     }
   };
 
-  const handleUnfollow = async (channelId: string) => {
+  const handleCancel = async (channelId: string) => {
     try {
-      await api?.channelApi.unfollow(channelId);
+      await api?.channelApi.cancelMembership(channelId);
       await actions.refreshUser();
     } catch (error) {
-      console.error('Failed to unfollow channel:', error);
+      console.error('Failed to cancel membership:', error);
     }
   };
 
@@ -124,8 +124,8 @@ const ListChannels: React.FC = () => {
             <ChannelItem 
               key={channel.id}
               channel={channel}
-              onFollow={handleFollow}
-              onUnfollow={handleUnfollow}
+              onJoin={handleJoin}
+              onCancel={handleCancel}
             />
           ))}
         </Stack>
