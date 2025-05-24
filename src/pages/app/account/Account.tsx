@@ -47,8 +47,8 @@ function a11yProps(index: number) {
 
 const Account: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
-
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    console.log('handleTabChange', event, newValue);
     setTabValue(newValue);
   };
 
