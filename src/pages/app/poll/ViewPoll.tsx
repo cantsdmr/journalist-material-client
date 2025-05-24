@@ -8,7 +8,13 @@ import {
   Grid,
   Skeleton,
   Paper,
-  Stack
+  Stack,
+  IconButton,
+  Button,
+  alpha,
+  useTheme,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -17,7 +23,12 @@ import PollCard from '@/components/poll/PollCard';
 import { Link as RouterLink } from 'react-router-dom';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import PersonIcon from '@mui/icons-material/Person';
+import ShareIcon from '@mui/icons-material/Share';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import CommentIcon from '@mui/icons-material/Comment';
 import { PATHS } from '@/constants/paths';
+import { formatDistanceToNow } from 'date-fns';
 
 const ViewPollSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -78,9 +89,13 @@ const ViewPollSkeleton = () => (
 const ViewPoll: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { api } = useApiContext();
+  const theme = useTheme();
   const [poll, setPoll] = useState<Nullable<Poll>>(null);
   const [loading, setLoading] = useState(true);
   const [userVote, setUserVote] = useState<string | null>(null);
+  const [showResultsMode, setShowResultsMode] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -121,9 +136,43 @@ const ViewPoll: React.FC = () => {
       if (updatedPoll) {
         setPoll(updatedPoll);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to vote:', error);
+      setError(error.response?.data?.message || 'Failed to vote on poll');
     }
+  };
+
+  const handleViewResults = async (pollId: string) => {
+    try {
+      // Fetch the latest poll results
+      const updatedPoll = await api?.pollApi.get(pollId);
+      if (updatedPoll) {
+        setPoll(updatedPoll);
+      }
+      // Show results mode
+      setShowResultsMode(true);
+    } catch (error: any) {
+      console.error('Failed to fetch results:', error);
+      setError(error.response?.data?.message || 'Failed to fetch poll results');
+    }
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: poll?.title,
+        text: poll?.description,
+        url: window.location.href,
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      // TODO: Show a snackbar/toast notification
+    }
+  };
+
+  const toggleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    // TODO: Implement bookmark functionality
   };
 
   if (loading) {
@@ -193,9 +242,30 @@ const ViewPoll: React.FC = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Typography variant="subtitle1" color="text.secondary">
-                {new Date(poll.createdAt).toLocaleDateString()}
-              </Typography>
+              <Stack direction="row" spacing={1}>
+                <IconButton 
+                  onClick={handleShare}
+                  sx={{ 
+                    color: 'text.secondary',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.05)
+                    }
+                  }}
+                >
+                  <ShareIcon />
+                </IconButton>
+                <IconButton 
+                  onClick={toggleBookmark}
+                  sx={{ 
+                    color: isBookmarked ? 'primary.main' : 'text.secondary',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.05)
+                    }
+                  }}
+                >
+                  {isBookmarked ? <BookmarkIcon /> : <BookmarkBorderIcon />}
+                </IconButton>
+              </Stack>
             </Box>
           </Box>
         </Grid>
@@ -203,8 +273,9 @@ const ViewPoll: React.FC = () => {
           <PollCard
             poll={poll}
             onVote={handleVote}
+            onViewResults={handleViewResults}
             userVote={userVote}
-            showResults={!!userVote}
+            showResults={!!userVote || showResultsMode}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -238,14 +309,46 @@ const ViewPoll: React.FC = () => {
                     Time Remaining
                   </Typography>
                   <Typography variant="body1">
-                    {poll.endsAt ? new Date(poll.endsAt).toLocaleDateString() : 'No end date'}
+                    {poll.endDate ? formatDistanceToNow(new Date(poll.endDate), { addSuffix: true }) : 'No end date'}
                   </Typography>
                 </Box>
               </Stack>
             </Paper>
+
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Comments
+              </Typography>
+              <Button
+                startIcon={<CommentIcon />}
+                variant="outlined"
+                fullWidth
+                sx={{ 
+                  mt: 1,
+                  textTransform: 'none',
+                  borderRadius: 2
+                }}
+              >
+                Add a Comment
+              </Button>
+            </Paper>
           </Stack>
         </Grid>
       </Grid>
+      <Snackbar 
+        open={!!error} 
+        autoHideDuration={6000} 
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setError(null)} 
+          severity="error" 
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

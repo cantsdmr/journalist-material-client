@@ -28,7 +28,8 @@ const TierForm: React.FC<TierFormProps> = ({
     description: initialData?.description || '',
     channelId: channelId,
     order: initialData?.order || 0,
-    benefits: initialData?.benefits || ['']
+    benefits: initialData?.benefits || [''],
+    isDefault: initialData?.isDefault || false
   }));
 
   const handleSubmit = async (e: React.FormEvent) => {

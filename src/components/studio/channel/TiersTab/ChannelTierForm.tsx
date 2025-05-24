@@ -34,7 +34,8 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
     description: '',
     price: 0,
     benefits: [],
-    order: 0
+    order: 0,
+    isDefault: false
   });
   const [errors, setErrors] = useState<Partial<Record<TierFormFields, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,7 +47,8 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
         description: initialData.description,
         price: initialData.price,
         benefits: initialData.benefits,
-        order: initialData.order
+        order: initialData.order,
+        isDefault: initialData.isDefault
       });
     }
   }, [initialData]);

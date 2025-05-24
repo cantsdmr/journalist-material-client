@@ -1,6 +1,6 @@
 import { NEWS_STATUS } from "@/enums/NewsEnums";
 import { AxiosJournalist } from "@/utils/axios";
-import { HTTPApi, PaginationObject, DEFAULT_PAGINATION } from "@/utils/http";
+import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedCollection } from "@/utils/http";
 import { Channel } from "./ChannelAPI";
 import { User } from "./UserAPI";
 
@@ -77,50 +77,50 @@ export class NewsAPI extends HTTPApi {
     }
 
     // News CRUD
-    public createNews = (data: CreateNewsData) => {
+    public async createNews(data: CreateNewsData): Promise<News> {
         return this._post<News>(API_PATH, data);
     }
 
-    public get = (id: string) => {
+    public async get(id: string): Promise<News> {
         return this._get<News>(`${API_PATH}/${id}`);
     }
 
-    public update = (id: string, data: EditNewsData) => {
+    public async update(id: string, data: EditNewsData): Promise<News> {
         return this._patch<News>(`${API_PATH}/${id}`, data);
     }
 
-    public delete = (id: string) => {
+    public async delete(id: string): Promise<void> {
         return this._remove<void>(`${API_PATH}/${id}`);
     }
 
     // News Lists
-    public getNews = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getNews(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
         return this._list<News>(API_PATH, pagination);
     }
 
-    public getTrending = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
         return this._list<News>(`${API_PATH}/${SUB_PATH.TRENDING}`, pagination);
     }
 
-    public getSubscribed = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getSubscribed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
         return this._list<News>(`${API_PATH}/${SUB_PATH.SUBSCRIBED}`, pagination);
     }
 
-    public getFollowed = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getFollowed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
         return this._list<News>(`${API_PATH}/${SUB_PATH.FOLLOWED}`, pagination);
     }
 
-    public getNewsByTags = (tags: string[], pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getNewsByTags(tags: string[], pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
         return this._list<News>(`${API_PATH}/${SUB_PATH.TAGS}/${tags.join(',')}`, pagination);
     }
 
     // Creator News
-    public getCreatorNews = (creatorId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getCreatorNews(creatorId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
         return this._list<News>(`${API_PATH}/${SUB_PATH.CREATOR}/${creatorId}`, pagination);
     }
 
     // Tags
-    public getTags = () => {
-        return this._listAll<NewsTag>(`${API_PATH}/${SUB_PATH.TAGS}`);
+    public async getTags(): Promise<PaginatedCollection<NewsTag>> {
+        return this._list<NewsTag>(`${API_PATH}/${SUB_PATH.TAGS}`);
     }
 }

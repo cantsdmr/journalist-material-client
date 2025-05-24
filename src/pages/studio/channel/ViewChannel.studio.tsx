@@ -4,45 +4,22 @@ import {
     Box,
     Typography,
     Avatar,
-    Button,
     Grid,
     Card,
     CardContent,
     Skeleton,
     Divider,
-    Stack,
-    CircularProgress
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { Channel } from '@/APIs/ChannelAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import JCard from '@/components/common/Card';
-import { useUserInfo } from '@/hooks/useUserInfo';
 
 const ViewChannelStudio: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
     const [loading, setLoading] = useState(true);
-    const [followLoading, setFollowLoading] = useState(false);
-    const [cancelLoading, setCancelLoading] = useState(false);
-    const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
     const { channelId } = useParams();
     const { api } = useApiContext();
-    const {
-        // Channel relationship methods
-        channelRelations: {
-            isFollowing,
-            isSubscribed,
-            getSubscriptionTier,
-        },
-        actions: {
-            refreshUser
-        }
-    } = useUserInfo();
-
-    // Use them in your component
-    const isUserFollowing = isFollowing(channelId ?? '');
-    const hasSubscription = isSubscribed(channelId ?? '');
-    const currentTierId = getSubscriptionTier(channelId ?? '');
 
     const fetchChannel = async () => {
         try {
@@ -59,75 +36,6 @@ const ViewChannelStudio: React.FC = () => {
         }
     };
 
-    const handleFollow = async () => {
-        try {
-            if (!channel) return;
-            setFollowLoading(true);
-            await api?.channelApi.follow(channel.id);
-        } catch (error) {
-            console.error('Failed to follow channel:', error);
-        } finally {
-            await refreshUser();
-            setFollowLoading(false);
-        }
-    };
-
-    const handleUnfollow = async () => {
-        try {
-            if (!channel) return;
-            setFollowLoading(true);
-            await api?.channelApi.unfollow(channel.id);
-        } catch (error) {
-            console.error('Failed to unfollow channel:', error);
-        } finally {
-            await refreshUser();
-            setFollowLoading(false);
-        }
-    };
-
-    const handleJoin = async (tierId: string) => {
-        try {
-            if (!channel) return;
-            setLoadingTierId(tierId);
-            await api?.channelApi.subscribe(channel.id, tierId);
-        } catch (error) {
-            console.error('Failed to join channel:', error);
-        } finally {
-            await refreshUser();
-            setLoadingTierId(null);
-        }
-    };
-
-    const handleChangeTier = async (tierId: string) => {
-        try {
-            if (!channel) return;
-            setLoadingTierId(tierId);
-            await api?.channelApi.changeSubscriptionTier(channel.id, tierId);
-            setChannel(prev => prev ? {
-                ...prev,
-                subscriptions: [{ tierId, userId: 'current-user' }]
-            } : null);
-        } catch (error) {
-            console.error('Failed to change subscription tier:', error);
-        } finally {
-            await refreshUser();
-            setLoadingTierId(null);
-        }
-    };
-
-    const handleCancelSubscription = async () => {
-        try {
-            if (!channel) return;
-            setCancelLoading(true);
-            await api?.channelApi.unsubscribe(channel.id);
-        } catch (error) {
-            console.error('Failed to cancel subscription:', error);
-        } finally {
-            await refreshUser();
-            setCancelLoading(false);
-        }
-    };
-
     useEffect(() => {
         fetchChannel();
     }, []);
@@ -139,7 +47,6 @@ const ViewChannelStudio: React.FC = () => {
                     <Skeleton variant="circular" width={100} height={100} sx={{ mx: 'auto', mb: 2 }} />
                     <Skeleton variant="text" width="60%" sx={{ mx: 'auto', mb: 1 }} />
                     <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 2 }} />
-                    <Skeleton variant="rectangular" width={120} height={36} sx={{ mx: 'auto' }} />
                 </Box>
                 <Grid container spacing={3}>
                     {[...Array(3)].map((_, index) => (
@@ -149,7 +56,6 @@ const ViewChannelStudio: React.FC = () => {
                                     <Skeleton variant="text" width="80%" />
                                     <Skeleton variant="text" width="60%" />
                                     <Skeleton variant="rectangular" height={100} sx={{ my: 2 }} />
-                                    <Skeleton variant="rectangular" width={100} height={36} />
                                 </CardContent>
                             </Card>
                         </Grid>
@@ -219,32 +125,6 @@ const ViewChannelStudio: React.FC = () => {
                     <Typography variant="body1" sx={{ mb: 3 }}>
                         {channel.description}
                     </Typography>
-                    <Stack
-                        direction="row"
-                        spacing={2}
-                        justifyContent="center"
-                        sx={{ mb: 4 }}
-                    >
-                        <Button
-                            variant={isUserFollowing ? "outlined" : "contained"}
-                            onClick={isUserFollowing ? handleUnfollow : handleFollow}
-                            disabled={followLoading}
-                            startIcon={followLoading && <CircularProgress size={20} color="inherit" />}
-                        >
-                            {followLoading ? 'Processing...' : (isUserFollowing ? 'Unfollow' : 'Follow')}
-                        </Button>
-                        {hasSubscription && (
-                            <Button
-                                variant="outlined"
-                                color="error"
-                                onClick={handleCancelSubscription}
-                                disabled={cancelLoading}
-                                startIcon={cancelLoading && <CircularProgress size={20} color="inherit" />}
-                            >
-                                {cancelLoading ? 'Canceling...' : 'Cancel Subscription'}
-                            </Button>
-                        )}
-                    </Stack>
                     <Divider sx={{ mb: 4 }} />
                 </Box>
             </Box>
@@ -259,21 +139,17 @@ const ViewChannelStudio: React.FC = () => {
             <Grid container spacing={3}>
                 {channel.tiers?.map((tier) => (
                     <Grid item xs={12} md={4} key={tier.id}>
-                        <JCard
-                            isHighlighted={currentTierId === tier.id}
-                        >
+                        <JCard>
                             <Box sx={{ mb: 3 }}>
                                 <Typography variant="h6" gutterBottom sx={{
                                     fontWeight: 600,
-                                    fontSize: '1rem',
-                                    color: currentTierId === tier.id ? 'primary.main' : 'text.primary'
+                                    fontSize: '1rem'
                                 }}>
                                     {tier.name}
                                 </Typography>
                                 <Typography variant="h4" sx={{
                                     fontWeight: 700,
                                     fontSize: '2rem',
-                                    color: currentTierId === tier.id ? 'primary.main' : 'text.primary',
                                     display: 'flex',
                                     alignItems: 'baseline',
                                     gap: 0.5
@@ -302,25 +178,6 @@ const ViewChannelStudio: React.FC = () => {
                             >
                                 {tier.description}
                             </Typography>
-
-                            <Button
-                                variant={currentTierId === tier.id ? "outlined" : "contained"}
-                                fullWidth
-                                onClick={() => hasSubscription ? handleChangeTier(tier.id) : handleJoin(tier.id)}
-                                disabled={currentTierId === tier.id || loadingTierId === tier.id}
-                                sx={{
-                                    py: 1.5,
-                                    textTransform: 'none',
-                                    fontWeight: 600
-                                }}
-                                startIcon={loadingTierId === tier.id &&
-                                    <CircularProgress size={20} color="inherit" />
-                                }
-                            >
-                                {loadingTierId === tier.id ? 'Processing...' :
-                                    currentTierId === tier.id ? 'Current Plan' :
-                                        hasSubscription ? 'Switch to This Plan' : 'Subscribe'}
-                            </Button>
                         </JCard>
                     </Grid>
                 ))}

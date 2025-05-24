@@ -1,5 +1,5 @@
 import { User } from "@/APIs/UserAPI";
-import { ChannelMembership } from "@/APIs/ChannelAPI";
+import { ChannelMembership, ChannelTier } from "@/APIs/ChannelAPI";
 import { useUser } from "@/contexts/UserContext";
 
 interface UserInfo {
@@ -8,7 +8,8 @@ interface UserInfo {
   channelRelations: {
     getMembership: (channelId: string) => ChannelMembership | null;
     hasMembership: (channelId: string) => boolean;
-    getMembershipTier: (channelId: string) => string | undefined;
+    getMembershipTier: (channelId: string) => ChannelTier;
+    getMemberships: () => ChannelMembership[];
   };
   actions: {
     refreshUser: () => Promise<void>;
@@ -25,6 +26,7 @@ export const useUserInfo = (): UserInfo => {
       getMembership: actions.getMembership,
       hasMembership: actions.hasMembership,
       getMembershipTier: actions.getMembershipTier,
+      getMemberships: actions.getMemberships
     },
     actions: {
       refreshUser: actions.refreshUser

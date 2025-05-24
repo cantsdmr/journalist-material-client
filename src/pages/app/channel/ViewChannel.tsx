@@ -38,7 +38,7 @@ const ViewChannel: React.FC = () => {
 
     // Use them in your component
     const isMember = hasMembership(id ?? '');
-    const currentTierId = getMembershipTier(id ?? '');
+    const currentTierId = getMembershipTier(id ?? '')?.id;
 
     useEffect(() => {
         const fetchChannel = async () => {

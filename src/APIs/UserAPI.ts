@@ -1,4 +1,4 @@
-import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
+import { DEFAULT_PAGINATION, HTTPApi, PaginationObject, PaginatedCollection } from "@/utils/http";
 import { ChannelUser, ChannelMembership } from "./ChannelAPI";
 import { AxiosJournalist } from "@/utils/axios";
 
@@ -27,6 +27,7 @@ export type User = {
     updatedAt: string;
     lastLogin?: string;
     memberships?: ChannelMembership[];
+    channels?: ChannelUser[];
 };
 
 export type CreateUserData = {
@@ -63,51 +64,47 @@ export class UserAPI extends HTTPApi {
         super(axiosJ, API_PATH);
     }
 
-    public getAll = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<User>> {
         return this._list<User>(API_PATH, pagination);
     }
 
-    public get = (id: string) => {
+    public async get(id: string): Promise<User> {
         return this._get<User>(`${API_PATH}/${id}`);
     }
 
-    public create = (data: CreateUserData) => {
+    public async create(data: CreateUserData): Promise<User> {
         return this._post<User>(API_PATH, data);
     }
 
-    public update = (id: string, data: Partial<CreateUserData>) => {
+    public async update(id: string, data: Partial<CreateUserData>): Promise<User> {
         return this._put<User>(`${API_PATH}/${id}`, data);
     }
 
-    public delete = (id: string) => {
+    public async delete(id: string): Promise<void> {
         return this._remove<void>(`${API_PATH}/${id}`);
     }
 
-    public getProfile = () => {
+    public async getProfile(): Promise<User> {
         return this._get<User>(`${API_PATH}/${this.SUB_PATH.PROFILE}`);
     }
 
-    public getProfileByExternalId = (externalId: string) => {
+    public async getUserInfoByExternalId(externalId: string): Promise<User> {
         return this._get<User>(`${API_PATH}/${this.SUB_PATH.PROFILE}/${externalId}`);
     }
 
-    public getUserInfoByExternalId = (externalId: string) => {
-        return this._get<User>(`${API_PATH}/external/${externalId}`);
-    }
-
-    public getUserChannels = (userId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getUserChannels(userId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<ChannelUser>> {
         return this._list<ChannelUser>(`${API_PATH}/${userId}/channels`, pagination);
     }
 
-    public signIn = (data: SignInData) => {
+    public async signIn(data: SignInData): Promise<void> {
         return this._post<void>(`${API_PATH}/${this.SUB_PATH.SIGN_IN}`, data);
     }
 
-    public signUp = (data: SignUpData) => {
+    public async signUp(data: SignUpData): Promise<void> {
         return this._post<void>(`${API_PATH}/${this.SUB_PATH.SIGN_UP}`, data);
     }
 
-    public getUserInfo = (userId: string) => {
+    public async getUserInfo(userId: string): Promise<User> {
         return this._get<User>(`${API_PATH}/${userId}`);
     }
 }

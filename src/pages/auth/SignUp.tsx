@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { USER_ROLE } from '@/enums/UserEnums';
 import { AuthProvider } from 'firebase/auth';
 import { useApiContext } from '@/contexts/ApiContext';
+import { PATHS } from '@/constants/paths';
 
 interface SocialButtonProps {
   bgcolor: string;
@@ -64,6 +65,7 @@ const SignUp: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isNewSignup, setIsNewSignup] = useState(false);
   const auth = useAuth();
   const { api } = useApiContext();
   const navigate = useNavigate();
@@ -73,13 +75,14 @@ const SignUp: React.FC = () => {
     try {
       const userCredential = await auth?.signUp(email, password);
       if (userCredential) {
-      await api?.userApi.signUp({
-        external_id: userCredential.uid,
+        await api?.userApi.signUp({
+          external_id: userCredential.uid,
           email: userCredential.email,   
           display_name: userCredential.displayName ?? '',
           photo_url: userCredential.photoURL ?? '',
           role_id: USER_ROLE.REGULAR_USER
         });
+        setIsNewSignup(true);
       }
     } catch (error) {
       setError('Failed to sign up with email and password');
@@ -90,20 +93,32 @@ const SignUp: React.FC = () => {
     try {
       const token = await auth?.signInWithProvider(provider);
       if (token) {
-        await api?.userApi.signIn({
-          idToken: token
-        });
+        try {
+          await api?.userApi.signIn({
+            idToken: token
+          });
+          // If signIn succeeds, user already exists - redirect to main app
+          // The useEffect will handle navigation
+        } catch (signInError) {
+          // If signIn fails, this might be a new user with social auth
+          // Let the useEffect handle the PostSignUpFlow navigation
+          setIsNewSignup(true);
+        }
       }
     } catch (error) {
-      setError('Failed to login with Google');
+      setError('Failed to login with social provider');
     }
   };
 
   useEffect(() => {
     if (auth?.user) {
-      navigate('/app/news/trending')
+      if (isNewSignup) {
+        navigate(PATHS.POST_SIGNUP);
+      } else {
+        navigate(PATHS.APP_NEWS_TRENDING);
+      }
     }
-  }, [auth?.user != null])
+  }, [auth?.user, isNewSignup, navigate]);
   
 
   return (

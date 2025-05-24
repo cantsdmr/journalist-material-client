@@ -3,6 +3,7 @@ import { ChannelAPI } from "./ChannelAPI";
 import { NewsAPI } from "./NewsAPI";
 import { PollAPI } from "./PollAPI";
 import { UserAPI } from "./UserAPI";
+import { AccountAPI } from "./AccountAPI";
 
 export class AppAPI {
     private axiosJ: AxiosJournalist
@@ -10,6 +11,7 @@ export class AppAPI {
     public pollApi: PollAPI;
     public newsApi: NewsAPI;
     public channelApi: ChannelAPI;
+    public accountApi: AccountAPI;
 
     constructor() {
         this.axiosJ = new AxiosJournalist()
@@ -30,6 +32,7 @@ export class AppAPI {
         this.pollApi = new PollAPI(this.axiosJ)
         this.newsApi = new NewsAPI(this.axiosJ)
         this.channelApi = new ChannelAPI(this.axiosJ)
+        this.accountApi = new AccountAPI(this.axiosJ)
 
         return this
     }

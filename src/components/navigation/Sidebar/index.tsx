@@ -9,6 +9,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import PollIcon from '@mui/icons-material/Poll';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { PATHS } from '@/constants/paths';
 
 interface SidebarProps {
@@ -25,7 +26,8 @@ const Sidebar: React.FC<SidebarProps> = () => {
     { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <PeopleIcon />, label: 'Following' },
     { path: `${PATHS.APP_SUBSCRIPTIONS}`, icon: <SubscriptionsIcon />, label: 'Subscriptions' },
     { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' },
-    { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' }
+    { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' },
+    { path: `${PATHS.APP_ACCOUNT}`, icon: <AccountCircleIcon />, label: 'Account' }
   ];
 
   return (

@@ -63,7 +63,7 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
 
   const handleDelete = async () => {
     try {
-      await api?.pollApi.deletePoll(poll.id);
+      await api?.pollApi.delete(poll.id);
       onRefresh();
     } catch (error) {
       console.error('Failed to delete poll:', error);
@@ -191,7 +191,7 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
         title="Delete Poll"
         content="Are you sure you want to delete this poll? This action cannot be undone."
         onConfirm={handleDelete}
-        onCancel={() => setDeleteDialogOpen(false)}
+        onClose={() => setDeleteDialogOpen(false)}
       />
     </Card>
   );

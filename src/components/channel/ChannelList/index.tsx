@@ -10,7 +10,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Channel } from '@/APIs/ChannelAPI';
 import PeopleIcon from '@mui/icons-material/People';
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+// import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import CheckIcon from '@mui/icons-material/Check';
 import AddIcon from '@mui/icons-material/Add';
 import { useUserInfo } from '@/hooks/useUserInfo';
@@ -30,13 +30,11 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
   const navigate = useNavigate();
   const { 
     channelRelations: {
-      isFollowing,
-      isSubscribed
+      hasMembership,
     }
   } = useUserInfo();
 
-  const isUserFollowing = isFollowing(channel.id);
-  const hasSubscription = isSubscribed(channel.id);
+  const isUserFollowing = hasMembership(channel.id);
 
   const handleClick = () => {
     navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', channel.id));
@@ -150,7 +148,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
               maximumFractionDigits: 1 
             })}
           </Box>
-          <Box sx={{ 
+          {/* <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
             gap: 0.5,
@@ -161,7 +159,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
               notation: 'compact',
               maximumFractionDigits: 1 
             })}
-          </Box>
+          </Box> */}
         </Stack>
       </Box>
     </Box>

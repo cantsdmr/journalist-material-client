@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { PATHS, NEWS, CHANNEL, POLL } from '@/constants/paths';
+import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 
 // Layouts
@@ -14,6 +14,7 @@ import PrivateRoute from '@/components/navigation/PrivateRoute';
 // Auth pages
 import Login from '@/pages/auth/Login';
 import SignUp from '@/pages/auth/SignUp';
+import PostSignUpFlow from '@/pages/auth/PostSignUpFlow';
 
 // Main app pages
 import LandingPage from '@/pages/LandingPage';
@@ -31,6 +32,9 @@ import ViewChannel from '@/pages/app/channel/ViewChannel';
 // Poll pages
 import ListPolls from '@/pages/app/poll/ListPoll';
 import ViewPoll from '@/pages/app/poll/ViewPoll';
+
+// Account pages
+import Account from '@/pages/app/account/Account';
 
 // Studio pages
 import CreateNewsStudio from '@/pages/studio/news/CreateNews.studio';
@@ -71,6 +75,7 @@ const App: React.FC = () => {
       {/* Auth Routes */}
       <Route path={PATHS.LOGIN} element={<Login />} />
       <Route path={PATHS.SIGNUP} element={<SignUp />} />
+      <Route path={PATHS.POST_SIGNUP} element={<PostSignUpFlow />} />
 
       {/* Main App Routes */}
       <Route path={`${PATHS.APP_ROOT}/*`} element={<PrivateRoute><MainLayout /></PrivateRoute>}>
@@ -86,6 +91,9 @@ const App: React.FC = () => {
         <Route path={`${POLL.ROOT}/*`}>
           <Route index element={<ListPolls />} />
           <Route path={`${POLL.VIEW}`} element={<ViewPoll />} />
+        </Route>
+        <Route path={`${ACCOUNT.ROOT}/*`}>
+          <Route index element={<Account />} />
         </Route>
       </Route>
 

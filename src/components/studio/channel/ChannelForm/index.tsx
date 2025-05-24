@@ -26,7 +26,8 @@ const ChannelForm: React.FC<ChannelFormProps> = ({
     handle: initialData?.handle || '',
     status: initialData?.status || CHANNEL_STATUS.ACTIVE,
     logoUrl: initialData?.logoUrl || '',
-    bannerUrl: initialData?.bannerUrl || ''
+    bannerUrl: initialData?.bannerUrl || '',
+    tags: initialData?.tags || []
   }));
 
   const [logo, setLogo] = useState<Nullable<string>>(initialData?.logoUrl || undefined);

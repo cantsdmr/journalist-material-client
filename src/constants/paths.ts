@@ -32,6 +32,13 @@ export const POLL = {
   VIEW: ':id'
 } as const;
 
+export const ACCOUNT = {
+  ROOT: 'account',
+  PROFILE: 'profile',
+  PAYMENT_METHODS: 'payment-methods',
+  SUBSCRIPTIONS: 'subscriptions'
+} as const;
+
 const ENV_BASE = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove trailing slash if present
 
 // Absolute paths
@@ -41,6 +48,7 @@ export const PATHS = {
   // Auth
   LOGIN: `${ENV_BASE}${BASE.AUTH}/login`,
   SIGNUP: `${ENV_BASE}${BASE.AUTH}/signup`,
+  POST_SIGNUP: `${ENV_BASE}${BASE.AUTH}/welcome`,
   
   // App
   APP_ROOT: `${ENV_BASE}${BASE.APP}`,
@@ -55,6 +63,10 @@ export const PATHS = {
   APP_EXPLORE: `${ENV_BASE}${BASE.APP}/explore`,
   APP_SUBSCRIPTIONS: `${ENV_BASE}${BASE.APP}/subscriptions`,
   APP_POLLS: `${ENV_BASE}${BASE.APP}/${POLL.ROOT}`,
+  APP_ACCOUNT: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}`,
+  APP_ACCOUNT_PROFILE: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}/${ACCOUNT.PROFILE}`,
+  APP_ACCOUNT_PAYMENT_METHODS: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}/${ACCOUNT.PAYMENT_METHODS}`,
+  APP_ACCOUNT_SUBSCRIPTIONS: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}/${ACCOUNT.SUBSCRIPTIONS}`,
   
   // Studio
   STUDIO_ROOT: `${ENV_BASE}${BASE.STUDIO}`,

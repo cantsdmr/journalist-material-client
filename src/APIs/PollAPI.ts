@@ -1,7 +1,6 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, PaginationObject, DEFAULT_PAGINATION } from "@/utils/http";
-import { User } from "./UserAPI";
-import { Channel } from "./ChannelAPI";
+import { PaginatedCollection } from "@/utils/http";
 
 export type PollStatus = {
     id: number;
@@ -59,58 +58,44 @@ export type PollFunding = {
 export type Poll = {
     id: string;
     title: string;
-    description: string;
-    
-    // Relations
-    channel: Channel;
-    creator: User;
-    status: PollStatus;
-    requiredTier: {
+    description?: string;
+    channelId: string;
+    creatorId: string;
+    createdAt: string;
+    updatedAt: string;
+    endDate?: string;
+    options: {
+        id: string;
+        text: string;
+        voteCount: number;
+    }[];
+    channel: {
         id: string;
         name: string;
-    } | null;
-    options: PollOption[];
-    votes: any[];
-    goals: PollGoal[];
-    tags: PollTag[];
-    funds: PollFund[];
-    stats: any;
-    statistics: PollStatistics;
-    journalist?: User;
-    funding?: PollFunding;
-
-    // Timestamps
-    endsAt: Date;
-    createdAt: Date;
-    updatedAt: Date;
-    deletedAt: Date | null;
-
-    // Status fields
-    statusId: number;
-    claimedBy?: string;
-    claimedAt?: Date;
-    isTrending: boolean;
-    isConverted: boolean;
-    fundingAmount: number;
-    fundingGoal?: number;
-
-    // Counts
+    };
+    creator: {
+        id: string;
+        displayName: string;
+    };
+    stats: PollStatistics;
     voteCount: number;
-    viewCount: number;
+    tags: PollTag[];
+    isTrending: boolean;
 }
 
 export type CreatePollData = {
     title: string;
-    description: string;
+    description?: string;
     channelId: string;
-    options: Array<{
-        text: string;
-    }>;
-    endsAt: Date;
-    requiredTierId?: string;
+    options: string[];
+    endDate?: string;
 }
 
-export type EditPollData = Partial<CreatePollData>
+export type EditPollData = {
+    title?: string;
+    description?: string;
+    endDate?: string;
+}
 
 export type VoteData = {
     optionId: string;
@@ -124,66 +109,70 @@ export class PollAPI extends HTTPApi {
     }
 
     // Public routes (authenticated)
-    public getAll = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
         return this._list<Poll>(API_PATH, pagination);
     }
 
-    public getTrending = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
         return this._list<Poll>(`${API_PATH}/trending`, pagination);
     }
 
-    public getFunded = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getFunded(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
         return this._list<Poll>(`${API_PATH}/funded`, pagination);
     }
 
-    public get = (id: string) => {
+    public async get(id: string): Promise<Poll> {
         return this._get<Poll>(`${API_PATH}/${id}`);
     }
 
-    public getResults = (id: string) => {
+    public async getResults(id: string): Promise<any> {
         return this._get<any>(`${API_PATH}/${id}/results`);
     }
 
-    public getFunding = (id: string) => {
+    public async getFunding(id: string): Promise<any> {
         return this._get<any>(`${API_PATH}/${id}/funding`);
     }
 
-    public getPollsByChannel = (channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getPollsByChannel(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
         return this._list<Poll>(`${API_PATH}/channel/${channelId}`, pagination);
     }
 
     // Member routes
-    public vote = (id: string, data: VoteData) => {
-        return this._post<any>(`${API_PATH}/${id}/vote`, data);
+    public async vote(id: string, data: VoteData): Promise<void> {
+        return this._post<void>(`${API_PATH}/${id}/vote`, data);
     }
 
-    public getUserVote = (id: string) => {
-        return this._get<any>(`${API_PATH}/${id}/vote`);
+    public async getUserVote(id: string): Promise<{ optionId: string | null }> {
+        return this._get<{ optionId: string | null }>(`${API_PATH}/${id}/vote`);
     }
 
     // Journalist routes
-    public getClaimed = (pagination: PaginationObject = DEFAULT_PAGINATION) => {
+    public async getClaimed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
         return this._list<Poll>(`${API_PATH}/claimed`, pagination);
     }
 
-    public claim = (id: string) => {
+    public async claim(id: string): Promise<Poll> {
         return this._post<Poll>(`${API_PATH}/${id}/claim`, {});
     }
 
-    public convertToNews = (id: string, newsData: any) => {
+    public async convertToNews(id: string, newsData: any): Promise<any> {
         return this._post<any>(`${API_PATH}/${id}/convert`, newsData);
     }
 
     // Admin/Editor routes
-    public create = (data: CreatePollData) => {
+    public async create(data: CreatePollData): Promise<Poll> {
         return this._post<Poll>(API_PATH, data);
     }
 
-    public update = (id: string, data: EditPollData) => {
+    public async update(id: string, data: EditPollData): Promise<Poll> {
         return this._put<Poll>(`${API_PATH}/${id}`, data);
     }
 
-    public delete = (id: string) => {
+    public async delete(id: string): Promise<void> {
         return this._remove<void>(`${API_PATH}/${id}`);
+    }
+
+    public async getUserPolls(userId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
+        return this._list<Poll>(`${API_PATH}/user/${userId}`, pagination);
     }
 }
