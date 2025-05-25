@@ -71,13 +71,14 @@ const PostSignUpFlow: React.FC = () => {
   const updateUserRole = async (roleId: number) => {
     setLoading(true);
     try {
-      // Get current user to get the ID for update
-      const currentUser = await api?.userApi.getProfile();
-      if (currentUser?.id) {
-        await api?.userApi.update(currentUser.id, { roleId: roleId as any });
-      }
+      console.log('PostSignUpFlow: Updating user role to:', roleId);
+      // Update user role via account API
+      await api?.accountApi.updateProfile({ roleId });
+      console.log('PostSignUpFlow: User role updated successfully');
     } catch (error) {
-      console.error('Error updating user role:', error);
+      console.error('PostSignUpFlow: Error updating user role:', error);
+      // Don't block the UI flow even if role update fails
+      // The user can always update their role later in settings
     } finally {
       setLoading(false);
     }

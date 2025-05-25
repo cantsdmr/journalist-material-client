@@ -75,7 +75,7 @@ const SignUp: React.FC = () => {
     try {
       const userCredential = await auth?.signUp(email, password);
       if (userCredential) {
-        await api?.userApi.signUp({
+        await api?.authApi.signUp({
           external_id: userCredential.uid,
           email: userCredential.email,   
           display_name: userCredential.displayName ?? '',
@@ -94,7 +94,7 @@ const SignUp: React.FC = () => {
       const token = await auth?.signInWithProvider(provider);
       if (token) {
         try {
-          await api?.userApi.signIn({
+          await api?.authApi.signIn({
             idToken: token
           });
           // If signIn succeeds, user already exists - redirect to main app
@@ -118,7 +118,7 @@ const SignUp: React.FC = () => {
         navigate(PATHS.APP_NEWS_TRENDING);
       }
     }
-  }, [auth?.user, isNewSignup, navigate]);
+  }, [isNewSignup, navigate]);
   
 
   return (

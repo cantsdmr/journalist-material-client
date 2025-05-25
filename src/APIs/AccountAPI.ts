@@ -6,7 +6,6 @@ export type UserProfile = {
   email: string;
   display_name: string;
   photo_url?: string;
-  handle?: string;
   role: number;
   status: number;
   last_login?: string;
@@ -15,7 +14,7 @@ export type UserProfile = {
 export type UpdateProfileData = {
   display_name?: string;
   photo_url?: string;
-  handle?: string;
+  roleId?: number;
 };
 
 export type PaymentMethodType = {

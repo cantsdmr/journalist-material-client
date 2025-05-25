@@ -7,8 +7,6 @@ import {
   Typography, 
   Box,
   useTheme as useMuiTheme,
-  InputBase,
-  alpha,
   useMediaQuery,
   Drawer,
   Menu,
@@ -21,13 +19,13 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
 import Sidebar from '@/components/navigation/Sidebar';
-import SearchIcon from '@mui/icons-material/Search';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import { PATHS } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
+import SearchBar from '@/components/search/SearchBar';
 
 const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -59,6 +57,14 @@ const MainLayout: React.FC = () => {
   const handleNavigate = (path: string) => {
     navigate(path);
     handleMenuClose();
+  };
+
+  const handleSearch = (query: string) => {
+    navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(query)}`);
+  };
+
+  const handleSuggestionSelect = (suggestion: any) => {
+    navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(suggestion.text)}`);
   };
 
   const profileMenuItems = [
@@ -167,52 +173,13 @@ const MainLayout: React.FC = () => {
             display: 'flex',
             justifyContent: 'center'
           }}>
-            <Box sx={{
-              position: 'relative',
-              borderRadius: '12px',
-              backgroundColor: (theme) => 
-                theme.palette.mode === 'dark' 
-                  ? alpha(theme.palette.common.white, 0.08)
-                  : alpha(theme.palette.common.black, 0.04),
-              '&:hover': {
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? alpha(theme.palette.common.white, 0.12)
-                    : alpha(theme.palette.common.black, 0.08),
-              },
-              width: '100%',
-              maxWidth: '600px',
-              margin: '0 16px',
-              border: '1px solid',
-              borderColor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? alpha(theme.palette.common.white, 0.1)
-                  : alpha(theme.palette.common.black, 0.1),
-            }}>
-              <Box sx={{
-                padding: '0 16px',
-                height: '100%',
-                position: 'absolute',
-                pointerEvents: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'text.secondary'
-              }}>
-                <SearchIcon />
-              </Box>
-              <InputBase
-                placeholder="Search news..."
-                sx={{
-                  color: 'inherit',
-                  width: '100%',
-                  '& .MuiInputBase-input': {
-                    padding: '10px 8px 10px 48px',
-                    width: '100%',
-                  },
-                }}
-              />
-            </Box>
+            <SearchBar
+              onSearch={handleSearch}
+              onSuggestionSelect={handleSuggestionSelect}
+              placeholder="Search articles, channels, journalists..."
+              popularSearches={['cryptocurrency', 'climate change', 'technology', 'politics']}
+              className="app-search-bar"
+            />
           </Box>
 
           <IconButton onClick={toggleTheme} color="inherit">

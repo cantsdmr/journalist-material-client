@@ -10,6 +10,7 @@ import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import PollIcon from '@mui/icons-material/Poll';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SearchIcon from '@mui/icons-material/Search';
 import { PATHS } from '@/constants/paths';
 
 interface SidebarProps {
@@ -22,6 +23,7 @@ const Sidebar: React.FC<SidebarProps> = () => {
 
   const menuItems = [
     { path: `${PATHS.APP_NEWS_TRENDING}`, icon: <TrendingUpIcon />, label: 'Trending' },
+    { path: `${PATHS.APP_SEARCH}`, icon: <SearchIcon />, label: 'Search' },
     { path: `${PATHS.APP_EXPLORE}`, icon: <ExploreIcon />, label: 'Explore' },
     { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <PeopleIcon />, label: 'Following' },
     { path: `${PATHS.APP_SUBSCRIPTIONS}`, icon: <SubscriptionsIcon />, label: 'Subscriptions' },

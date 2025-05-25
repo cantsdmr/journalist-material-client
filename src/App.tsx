@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT } from '@/constants/paths';
+import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT, SEARCH, EXPENSE_ORDER } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 
 // Layouts
@@ -36,6 +36,13 @@ import ViewPoll from '@/pages/app/poll/ViewPoll';
 // Account pages
 import Account from '@/pages/app/account/Account';
 
+// Expense Order pages
+import ListExpenseOrders from '@/pages/app/expense-order/ListExpenseOrders';
+import ViewExpenseOrder from '@/pages/app/expense-order/ViewExpenseOrder';
+
+// Search page
+import SearchPage from '@/pages/SearchPage';
+
 // Studio pages
 import CreateNewsStudio from '@/pages/studio/news/CreateNews.studio';
 import EditNewsStudio from '@/pages/studio/news/EditNews.studio';
@@ -56,6 +63,12 @@ import ListPollsStudio from '@/pages/studio/poll/ListPolls.studio';
 import CreatePollStudio from '@/pages/studio/poll/CreatePoll.studio';
 import EditPollStudio from '@/pages/studio/poll/EditPoll.studio';
 import ViewPollStudio from '@/pages/studio/poll/ViewPoll.studio';
+
+// Studio Expense Order pages
+import ListExpenseOrdersStudio from '@/pages/studio/expense-order/ListExpenseOrders.studio';
+import CreateExpenseOrderStudio from '@/pages/studio/expense-order/CreateExpenseOrder.studio';
+import EditExpenseOrderStudio from '@/pages/studio/expense-order/EditExpenseOrder.studio';
+import ViewExpenseOrderStudio from '@/pages/studio/expense-order/ViewExpenseOrder.studio';
 
 const App: React.FC = () => {
   const { isLoading, error } = useApp();
@@ -95,6 +108,11 @@ const App: React.FC = () => {
         <Route path={`${ACCOUNT.ROOT}/*`}>
           <Route index element={<Account />} />
         </Route>
+        <Route path={`${EXPENSE_ORDER.ROOT}/*`}>
+          <Route index element={<ListExpenseOrders />} />
+          <Route path={`${EXPENSE_ORDER.VIEW}`} element={<ViewExpenseOrder />} />
+        </Route>
+        <Route path={SEARCH.ROOT} element={<SearchPage />} />
       </Route>
 
       {/* Studio Routes */}
@@ -118,6 +136,13 @@ const App: React.FC = () => {
           <Route path={`${POLL.EDIT}/:id`} element={<EditPollStudio />} />
           <Route path={`${POLL.VIEW}`} element={<ViewPollStudio />} />
         </Route>
+        <Route path={`${EXPENSE_ORDER.ROOT}/*`}>
+          <Route index element={<ListExpenseOrdersStudio />} />
+          <Route path={`${EXPENSE_ORDER.CREATE}`} element={<CreateExpenseOrderStudio />} />
+          <Route path={`${EXPENSE_ORDER.EDIT}/:id`} element={<EditExpenseOrderStudio />} />
+          <Route path={`${EXPENSE_ORDER.VIEW}`} element={<ViewExpenseOrderStudio />} />
+        </Route>
+        <Route path={SEARCH.ROOT} element={<SearchPage />} />
       </Route>
 
       {/* Catch-all route */}

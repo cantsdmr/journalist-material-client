@@ -14,6 +14,7 @@ import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
 import StudioSidebar from '../StudioSidebar';
 import { PATHS } from '@/constants/paths';
+import SearchBar from '@/components/search/SearchBar';
 
 const StudioLayout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -38,6 +39,14 @@ const StudioLayout: React.FC = () => {
   const handleNavigate = (path: string) => {
     navigate(path);
     handleMenuClose();
+  };
+
+  const handleSearch = (query: string) => {
+    navigate(`${PATHS.STUDIO_SEARCH}?q=${encodeURIComponent(query)}`);
+  };
+
+  const handleSuggestionSelect = (suggestion: any) => {
+    navigate(`${PATHS.STUDIO_SEARCH}?q=${encodeURIComponent(suggestion.text)}`);
   };
 
   if (isLoading) {
@@ -94,7 +103,19 @@ const StudioLayout: React.FC = () => {
             </Typography>
           </Box>
 
-          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ 
+            flexGrow: 1,
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <SearchBar
+              onSearch={handleSearch}
+              onSuggestionSelect={handleSuggestionSelect}
+              placeholder="Search your content and analytics..."
+              popularSearches={['performance', 'engagement', 'subscribers', 'trending']}
+              className="studio-search-bar"
+            />
+          </Box>
 
           <IconButton onClick={toggleTheme} color="inherit">
             {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}

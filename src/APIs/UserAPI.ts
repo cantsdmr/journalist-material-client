@@ -39,25 +39,11 @@ export type CreateUserData = {
     statusId: UserStatus;
 };
 
-export type SignInData = {
-    idToken: string;
-};
-
-export type SignUpData = {
-    external_id: string | null;
-    email: string | null;
-    display_name: string | null;
-    photo_url: string | null;
-    role_id: number;
-};
-
 const API_PATH = '/api/users'
 
 export class UserAPI extends HTTPApi {
     private readonly SUB_PATH = {
-        PROFILE: 'profile',
-        SIGN_IN: 'sign-in',
-        SIGN_UP: 'sign-up'
+        PROFILE: 'profile'
     };
 
     constructor(axiosJ: AxiosJournalist) {
@@ -94,14 +80,6 @@ export class UserAPI extends HTTPApi {
 
     public async getUserChannels(userId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<ChannelUser>> {
         return this._list<ChannelUser>(`${API_PATH}/${userId}/channels`, pagination);
-    }
-
-    public async signIn(data: SignInData): Promise<void> {
-        return this._post<void>(`${API_PATH}/${this.SUB_PATH.SIGN_IN}`, data);
-    }
-
-    public async signUp(data: SignUpData): Promise<void> {
-        return this._post<void>(`${API_PATH}/${this.SUB_PATH.SIGN_UP}`, data);
     }
 
     public async getUserInfo(userId: string): Promise<User> {
