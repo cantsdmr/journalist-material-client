@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Alert,
   Button,
   CircularProgress
 } from '@mui/material';
@@ -15,6 +14,7 @@ import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useUser } from '@/contexts/UserContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const EditExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
@@ -26,8 +26,7 @@ const EditExpenseOrderStudio: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saveLoading, setSaveLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { execute, loading: saveLoading } = useApiCall();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,53 +34,72 @@ const EditExpenseOrderStudio: React.FC = () => {
       
       try {
         setLoading(true);
-        setError(null);
         
-        // Fetch expense order, user's channels, and expense types
-        const [expenseOrderResult, channelsResult, typesResult] = await Promise.all([
-          api.expenseOrderApi.getExpenseOrder(id),
-          api.userApi.getUserChannels(user.id),
-          api.expenseOrderApi.getExpenseTypes()
-        ]);
+        // Fetch expense order
+        const expenseOrderResult = await execute(
+          () => api.expenseOrderApi.getExpenseOrder(id),
+          { showErrorToast: true }
+        );
         
-        setExpenseOrder(expenseOrderResult);
-        setChannels(channelsResult.items.map(cu => cu.channel));
-        setExpenseTypes(typesResult);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load expense order');
+        if (expenseOrderResult) {
+          setExpenseOrder(expenseOrderResult);
+        }
+        
+        // Fetch user's channels
+        const channelsResult = await execute(
+          () => api.userApi.getUserChannels(user.id),
+          { showErrorToast: true }
+        );
+        
+        if (channelsResult) {
+          setChannels(channelsResult.items.map(cu => cu.channel));
+        }
+        
+        // Fetch expense types
+        const typesResult = await execute(
+          () => api.expenseOrderApi.getExpenseTypes(),
+          { showErrorToast: true }
+        );
+        
+        if (typesResult) {
+          setExpenseTypes(typesResult);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id, user]);
+  }, [id, user, execute]);
 
   const handleSave = async (data: UpdateExpenseOrderData) => {
     if (!id) return;
     
-    setSaveLoading(true);
-    setError(null);
+    const result = await execute(
+      () => api.expenseOrderApi.updateExpenseOrder(id, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order updated successfully!'
+      }
+    );
     
-    try {
-      const result = await api.expenseOrderApi.updateExpenseOrder(id, data);
+    if (result) {
       setExpenseOrder(result);
-      // Navigate to the updated expense order
       navigate(PATHS.STUDIO_EXPENSE_ORDER_VIEW.replace(':id', result.id));
-    } catch (err: any) {
-      setError(err.message || 'Failed to update expense order');
-    } finally {
-      setSaveLoading(false);
     }
   };
 
   const handleSubmit = async (expenseOrder: ExpenseOrder) => {
-    try {
-      await api.expenseOrderApi.submitExpenseOrder(expenseOrder.id);
-      // Navigate to the submitted expense order
+    const result = await execute(
+      () => api.expenseOrderApi.submitExpenseOrder(expenseOrder.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order submitted successfully!'
+      }
+    );
+    
+    if (result) {
       navigate(PATHS.STUDIO_EXPENSE_ORDER_VIEW.replace(':id', expenseOrder.id));
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit expense order');
     }
   };
 
@@ -101,19 +119,25 @@ const EditExpenseOrderStudio: React.FC = () => {
     );
   }
 
-  if (error || !expenseOrder) {
+  if (!expenseOrder) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">
-          {error || 'Expense order not found'}
-        </Alert>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mt: 2 }}
-        >
-          Back
-        </Button>
+        <Box sx={{ 
+          textAlign: 'center', 
+          py: 8,
+          bgcolor: 'background.paper',
+          borderRadius: 1
+        }}>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            Expense Order Not Found
+          </Typography>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+        </Box>
       </Box>
     );
   }
@@ -122,16 +146,25 @@ const EditExpenseOrderStudio: React.FC = () => {
   if (expenseOrder.status !== ExpenseOrderStatus.DRAFT) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="warning">
-          This expense order cannot be edited because it has already been submitted.
-        </Alert>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mt: 2 }}
-        >
-          Back to Expense Order
-        </Button>
+        <Box sx={{ 
+          textAlign: 'center', 
+          py: 8,
+          bgcolor: 'background.paper',
+          borderRadius: 1
+        }}>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            Cannot Edit Expense Order
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            This expense order cannot be edited because it has already been submitted.
+          </Typography>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={handleBack}
+          >
+            Back to Expense Order
+          </Button>
+        </Box>
       </Box>
     );
   }
@@ -150,12 +183,6 @@ const EditExpenseOrderStudio: React.FC = () => {
           Edit Expense Order
         </Typography>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       <ExpenseOrderForm
         expenseOrder={expenseOrder}

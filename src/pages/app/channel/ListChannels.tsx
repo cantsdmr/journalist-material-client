@@ -10,6 +10,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import ChannelItem from '@/components/channel/ChannelItem/index';
 import { alpha } from '@mui/material/styles';
 import { useUser } from '@/contexts/UserContext';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ListChannels: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -18,29 +19,31 @@ const ListChannels: React.FC = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { api } = useApiContext();
   const { actions } = useUser();
+  const { execute } = useApiCall();
 
   const fetchMoreData = () => {
     getChannels(page + 1);
   };
 
   const getChannels = async (_page: number = page) => {
-    try {
-      const result = await api?.channelApi.getChannels({
+    const result = await execute(
+      () => api?.channelApi.getChannels({
         page: _page,
         limit
-      });
-      
+      }),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
       if (_page === 1) {
-        setChannels(result?.items ?? []);
+        setChannels(result.items ?? []);
       } else {
-        setChannels(prev => [...prev, ...(result?.items ?? [])]);
+        setChannels(prev => [...prev, ...(result.items ?? [])]);
       }
       
-      setPage(result?.metadata.currentPage ?? 1);
-      setLimit(result?.metadata.limit ?? 10);
-      setHasMore(result?.metadata.hasNext === true);
-    } catch (error) {
-      console.error('Failed to fetch channels:', error);
+      setPage(result.metadata.currentPage ?? 1);
+      setLimit(result.metadata.limit ?? 10);
+      setHasMore(result.metadata.hasNext === true);
     }
   };
 
@@ -49,20 +52,30 @@ const ListChannels: React.FC = () => {
   }, []);
 
   const handleJoin = async (channelId: string, tierId?: string) => {
-    try {
-      await api?.channelApi.joinChannel(channelId, { tierId });
+    const result = await execute(
+      () => api?.channelApi.joinChannel(channelId, { tierId }),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Successfully joined channel!'
+      }
+    );
+    
+    if (result) {
       await actions.refreshUser();
-    } catch (error) {
-      console.error('Failed to join channel:', error);
     }
   };
 
   const handleCancel = async (channelId: string) => {
-    try {
-      await api?.channelApi.cancelMembership(channelId);
+    const result = await execute(
+      () => api?.channelApi.cancelMembership(channelId),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Membership cancelled successfully!'
+      }
+    );
+    
+    if (result) {
       await actions.refreshUser();
-    } catch (error) {
-      console.error('Failed to cancel membership:', error);
     }
   };
 

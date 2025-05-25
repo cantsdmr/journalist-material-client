@@ -1,26 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Container, Typography } from '@mui/material';
 import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import PollForm from '@/components/studio/poll/PollForm';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const CreatePollStudio: React.FC = () => {
   const { api } = useApiContext();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   const handleCreate = async (data: any) => {
     if (!data) return;
-    try {
-      const result = await api?.pollApi.create(data);
-      if (result) {
-        navigate(`${PATHS.STUDIO_POLLS}`);
+    
+    const result = await execute(
+      () => api?.pollApi.create(data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Poll created successfully!'
       }
-    } catch (error) {
-      console.error('Failed to create poll:', error);
-      setError('Failed to create poll');
+    );
+    
+    if (result) {
+      navigate(`${PATHS.STUDIO_POLLS}`);
     }
   };
 
@@ -40,13 +43,6 @@ const CreatePollStudio: React.FC = () => {
       <PollForm
         onSubmit={handleCreate}
         submitButtonText="Create Poll"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Container>
   );

@@ -3,39 +3,46 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
 import PollForm from '@/components/studio/poll/PollForm';
 import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const EditPollStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { api } = useApiContext();
   const [initialData, setInitialData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   useEffect(() => {
     const fetchPoll = async () => {
-      try {
-        if (!id) return;
-        const poll = await api?.pollApi.get(id);
-        setInitialData(poll);
-      } catch (error) {
-        console.error('Failed to fetch poll:', error);
-        setError('Failed to fetch poll');
+      if (!id) return;
+      
+      const result = await execute(
+        () => api?.pollApi.get(id),
+        { showErrorToast: true }
+      );
+      
+      if (result) {
+        setInitialData(result);
       }
     };
 
     fetchPoll();
-  }, [id, api?.pollApi]);
+  }, [id, api?.pollApi, execute]);
 
   const handleUpdate = async (data: any) => {
-    try {
-      if (!id) return;
-      await api?.pollApi.update(id, data);
+    if (!id) return;
+    
+    const result = await execute(
+      () => api?.pollApi.update(id, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Poll updated successfully!'
+      }
+    );
+    
+    if (result) {
       navigate(PATHS.STUDIO_POLL_VIEW.replace(':id', id));
-    } catch (error) {
-      console.error('Failed to update poll:', error);
-      setError('Failed to update poll');
     }
   };
 
@@ -60,13 +67,6 @@ const EditPollStudio: React.FC = () => {
         initialData={initialData}
         onSubmit={handleUpdate}
         submitButtonText="Update Poll"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Container>
   );

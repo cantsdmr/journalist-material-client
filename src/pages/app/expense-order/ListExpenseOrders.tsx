@@ -6,7 +6,6 @@ import {
   Tabs,
   Tab,
   Button,
-  Alert,
   CircularProgress
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
@@ -16,6 +15,7 @@ import { ExpenseOrder } from '@/APIs/ExpenseOrderAPI';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -46,7 +46,7 @@ const ListExpenseOrders: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
   const [expenseOrders, setExpenseOrders] = useState<ExpenseOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   const statusFilters = [
     { label: 'All', status: undefined },
@@ -58,21 +58,23 @@ const ListExpenseOrders: React.FC = () => {
   ];
 
   const fetchExpenseOrders = async (status?: ExpenseOrderStatus) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await api.expenseOrderApi.getMyExpenseOrders({ page: 1, limit: 50 }, status);
+    setLoading(true);
+    
+    const result = await execute(
+      () => api.expenseOrderApi.getMyExpenseOrders({ page: 1, limit: 50 }, status),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
       setExpenseOrders(result.items);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch expense orders');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchExpenseOrders(statusFilters[tabValue].status);
-  }, [tabValue]);
+  }, [tabValue, execute]);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -87,22 +89,32 @@ const ListExpenseOrders: React.FC = () => {
   };
 
   const handleSubmitExpenseOrder = async (expenseOrder: ExpenseOrder) => {
-    try {
-      await api.expenseOrderApi.submitExpenseOrder(expenseOrder.id);
+    const result = await execute(
+      () => api.expenseOrderApi.submitExpenseOrder(expenseOrder.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order submitted successfully!'
+      }
+    );
+    
+    if (result) {
       // Refresh the list
       fetchExpenseOrders(statusFilters[tabValue].status);
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit expense order');
     }
   };
 
   const handleCancelExpenseOrder = async (expenseOrder: ExpenseOrder) => {
-    try {
-      await api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id);
+    const result = await execute(
+      () => api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order cancelled successfully!'
+      }
+    );
+    
+    if (result) {
       // Refresh the list
       fetchExpenseOrders(statusFilters[tabValue].status);
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel expense order');
     }
   };
 
@@ -124,12 +136,6 @@ const ListExpenseOrders: React.FC = () => {
           Create New
         </Button>
       </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="expense order status tabs">

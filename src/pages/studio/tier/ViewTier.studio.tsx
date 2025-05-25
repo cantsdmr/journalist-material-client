@@ -1,49 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Box, Typography, Button, Stack, 
-  Card, CardContent, CircularProgress 
-} from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Button, Grid } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
-import EditIcon from '@mui/icons-material/Edit';
 import { ChannelTier } from '@/APIs/ChannelAPI';
+import TierCard from '@/components/tier/TierCard';
+import EditIcon from '@mui/icons-material/Edit';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewTier: React.FC = () => {
   const { channelId, tierId } = useParams<{ channelId: string; tierId: string }>();
   const navigate = useNavigate();
   const { api } = useApiContext();
-  const [tier, setTier] = useState<Nullable<ChannelTier>>(null);
-  const [loading, setLoading] = useState(true);
+  const [tier, setTier] = useState<ChannelTier | null>(null);
+  const { execute } = useApiCall();
 
   useEffect(() => {
     loadTier();
   }, [channelId, tierId]);
 
   const loadTier = async () => {
-    try {
-      if (channelId && tierId) {
-        const result = await api?.channelApi.getTier(channelId, tierId);
-        setTier(result);
-      }
-    } catch (error) {
-      console.error('Failed to load tier:', error);
-    } finally {
-      setLoading(false);
+    if (!channelId || !tierId) return;
+    
+    const result = await execute(
+      () => api?.channelApi.getTier(channelId, tierId),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
+      setTier(result);
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   if (!tier) {
-    return (
-      <Typography color="error">Tier not found</Typography>
-    );
+    return null; // or loading spinner
   }
 
   return (
@@ -54,45 +44,42 @@ const ViewTier: React.FC = () => {
         alignItems: 'center',
         mb: 4 
       }}>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          {tier.name}
-        </Typography>
+        <Box>
+          <Button
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(`/studio/channels/${channelId}/tiers`)}
+            sx={{ mb: 2 }}
+          >
+            Back to Tiers
+          </Button>
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              fontSize: { xs: '1.125rem', sm: '1.25rem' },
+              fontWeight: 600,
+              mb: 1
+            }}
+          >
+            {tier.name}
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Tier details and management
+          </Typography>
+        </Box>
         <Button
-          variant="outlined"
+          variant="contained"
           startIcon={<EditIcon />}
-          onClick={() => navigate(`/app/channels/${channelId}/tiers/${tierId}/edit`)}
+          onClick={() => navigate(`/studio/channels/${channelId}/tiers/${tierId}/edit`)}
         >
           Edit Tier
         </Button>
       </Box>
 
-      <Card sx={{ mb: 4 }}>
-        <CardContent>
-          <Stack spacing={3}>
-            <Box>
-              <Typography variant="h4" color="primary" sx={{ mb: 1 }}>
-                ${tier.price}/month
-              </Typography>
-              <Typography variant="body1">
-                {tier.description}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="h6" sx={{ mb: 2 }}>
-                Benefits
-              </Typography>
-              <Stack spacing={1}>
-                {tier.benefits.map((benefit: string, index: number) => (
-                  <Typography key={index} variant="body1">
-                    • {benefit}
-                  </Typography>
-                ))}
-              </Stack>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <TierCard tier={tier} />
+        </Grid>
+      </Grid>
     </Box>
   );
 };

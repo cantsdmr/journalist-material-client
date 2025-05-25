@@ -18,11 +18,11 @@ import { Channel } from '@/APIs/ChannelAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import JCard from '@/components/common/Card';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewChannel: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
     const [loading, setLoading] = useState(true);
-    const [joinLoading, setJoinLoading] = useState(false);
     const [loadingTierId, setLoadingTierId] = useState<string | null>(null);
     const { id } = useParams();
     const { api } = useApiContext();
@@ -35,6 +35,7 @@ const ViewChannel: React.FC = () => {
             refreshUser
         }
     } = useUserInfo();
+    const { execute } = useApiCall();
 
     // Use them in your component
     const isMember = hasMembership(id ?? '');
@@ -42,41 +43,52 @@ const ViewChannel: React.FC = () => {
 
     useEffect(() => {
         const fetchChannel = async () => {
-            try {
-                if (id) {
-                    const result = await api?.channelApi.getChannel(id);
-                    if (result) {
-                        setChannel(result);
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to fetch channel:', error);
-            } finally {
-                setLoading(false);
+            if (!id) return;
+            
+            const result = await execute(
+                () => api?.channelApi.getChannel(id),
+                { showErrorToast: true }
+            );
+            
+            if (result) {
+                setChannel(result);
             }
+            
+            setLoading(false);
         };
 
         fetchChannel();
-    }, [id]);
+    }, [id, execute]);
 
     const handleJoin = async (tierId?: string) => {
-        try {
-            if (!channel) return;
-            setJoinLoading(true);
-            await api?.channelApi.joinChannel(channel.id, { tierId });
-        } catch (error) {
-            console.error('Failed to join channel:', error);
-        } finally {
+        if (!channel) return;
+        
+        const result = await execute(
+            () => api?.channelApi.joinChannel(channel.id, { tierId }),
+            {
+                showSuccessMessage: true,
+                successMessage: 'Successfully joined channel!'
+            }
+        );
+        
+        if (result) {
             await refreshUser();
-            setJoinLoading(false);
         }
     };
 
     const handleUpdateMembership = async (tierId: string) => {
-        try {
-            if (!channel) return;
-            setLoadingTierId(tierId);
-            await api?.channelApi.updateMembership(channel.id, { tierId });
+        if (!channel) return;
+        setLoadingTierId(tierId);
+        
+        const result = await execute(
+            () => api?.channelApi.updateMembership(channel.id, { tierId }),
+            {
+                showSuccessMessage: true,
+                successMessage: 'Membership updated successfully!'
+            }
+        );
+        
+        if (result) {
             const updatedTier = channel.tiers?.find(t => t.id === tierId);
             if (updatedTier && channel.currentUserMembership) {
                 setChannel(prev => prev ? {
@@ -88,24 +100,25 @@ const ViewChannel: React.FC = () => {
                     }
                 } : null);
             }
-        } catch (error) {
-            console.error('Failed to update membership:', error);
-        } finally {
             await refreshUser();
-            setLoadingTierId(null);
         }
+        
+        setLoadingTierId(null);
     };
 
     const handleCancelMembership = async () => {
-        try {
-            if (!channel) return;
-            setJoinLoading(true);
-            await api?.channelApi.cancelMembership(channel.id);
-        } catch (error) {
-            console.error('Failed to cancel membership:', error);
-        } finally {
+        if (!channel) return;
+        
+        const result = await execute(
+            () => api?.channelApi.cancelMembership(channel.id),
+            {
+                showSuccessMessage: true,
+                successMessage: 'Membership cancelled successfully!'
+            }
+        );
+        
+        if (result) {
             await refreshUser();
-            setJoinLoading(false);
         }
     };
 
@@ -205,10 +218,10 @@ const ViewChannel: React.FC = () => {
                         <Button
                             variant={isMember ? "outlined" : "contained"}
                             onClick={() => isMember ? handleCancelMembership() : handleJoin()}
-                            disabled={joinLoading}
-                            startIcon={joinLoading && <CircularProgress size={20} color="inherit" />}
+                            disabled={loadingTierId !== null}
+                            startIcon={loadingTierId && <CircularProgress size={20} color="inherit" />}
                         >
-                            {joinLoading ? 'Processing...' : (isMember ? 'Cancel Membership' : 'Join Channel')}
+                            {loadingTierId ? 'Processing...' : (isMember ? 'Cancel Membership' : 'Join Channel')}
                         </Button>
                     </Stack>
                     <Divider sx={{ mb: 4 }} />

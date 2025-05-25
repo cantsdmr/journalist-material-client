@@ -1,26 +1,28 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
 import NewsForm from '@/components/news/NewsForm';
 import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
 import { useNavigate } from 'react-router-dom';
 import { CreateNewsData } from '@/APIs/NewsAPI';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const CreateNewsStudio: React.FC = () => {
   const { api } = useApiContext();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   const handleCreate = async (data: CreateNewsData) => {
-    try {
-      const result = await api?.newsApi.createNews(data);
-      if (result) {
-        navigate(PATHS.APP_NEWS_VIEW.replace(':id', result.id));
+    const result = await execute(
+      () => api?.newsApi.createNews(data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'News article created successfully!'
       }
-    } catch (error) {
-      console.error('Failed to create news:', error);
-      setError('Failed to create news');
+    );
+    
+    if (result) {
+      navigate(PATHS.APP_NEWS_VIEW.replace(':id', result.id));
     }
   };
 
@@ -40,13 +42,6 @@ const CreateNewsStudio: React.FC = () => {
       <NewsForm
         onSubmit={handleCreate}
         submitButtonText="Create News"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Box>
   );

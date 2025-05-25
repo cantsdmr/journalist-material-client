@@ -1,27 +1,31 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, Typography } from '@mui/material';
 import TierForm from '@/components/tier/TierForm';
 import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CreateChannelTierData } from '@/APIs/ChannelAPI';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const CreateTier: React.FC = () => {
   const { channelId } = useParams<{ channelId: string }>();
   const { api } = useApiContext();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   const handleCreate = async (data: CreateChannelTierData) => {
-    try {
-      if (channelId) {
-        await api?.channelApi.createTier(channelId, data);
-        navigate(PATHS.STUDIO_CHANNEL_VIEW.replace(':channelId', channelId));
+    if (!channelId) return;
+    
+    const result = await execute(
+      () => api?.channelApi.createTier(channelId, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Tier created successfully!'
       }
-    } catch (error) {
-      console.error('Failed to create tier:', error);
-      setError('Failed to create tier');
+    );
+    
+    if (result) {
+      navigate(PATHS.STUDIO_CHANNEL_VIEW.replace(':channelId', channelId));
     }
   };
 
@@ -49,13 +53,6 @@ const CreateTier: React.FC = () => {
         channelId={channelId!}
         onSubmit={handleCreate}
         submitButtonText="Create Tier"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Box>
   );

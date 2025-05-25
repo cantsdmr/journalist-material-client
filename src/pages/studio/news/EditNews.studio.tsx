@@ -3,32 +3,46 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Typography } from '@mui/material';
 import NewsForm from '@/components/news/NewsForm';
 import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const EditNewsStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { api } = useApiContext();
   const [initialData, setInitialData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   useEffect(() => {
     const fetchNews = async () => {
-      try {
-        const news = await api?.newsApi.get(id!);
-        setInitialData(news);
-      } catch (error) {
-        console.error('Failed to fetch news:', error);
-        setError('Failed to fetch news');
+      if (!id) return;
+      
+      const result = await execute(
+        () => api?.newsApi.get(id),
+        { showErrorToast: true }
+      );
+      
+      if (result) {
+        setInitialData(result);
       }
     };
 
     fetchNews();
-  }, []);
+  }, [id, api?.newsApi, execute]);
 
   const handleUpdate = async (data: any) => {
-    await api?.newsApi.update(id!, data);
-    navigate(`/news/${id}`);
+    if (!id) return;
+    
+    const result = await execute(
+      () => api?.newsApi.update(id, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'News article updated successfully!'
+      }
+    );
+    
+    if (result) {
+      navigate(`/news/${id}`);
+    }
   };
 
   if (!initialData) return null; // or loading spinner
@@ -50,13 +64,6 @@ const EditNewsStudio: React.FC = () => {
         initialData={initialData}
         onSubmit={handleUpdate}
         submitButtonText="Update News"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Container>
   );

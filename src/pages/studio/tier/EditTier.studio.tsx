@@ -1,61 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
-import { ChannelTier, EditChannelTierData } from '@/APIs/ChannelAPI';
+import { Box, Typography } from '@mui/material';
 import TierForm from '@/components/tier/TierForm';
+import { useApiContext } from '@/contexts/ApiContext';
+import { useNavigate, useParams } from 'react-router-dom';
+import { EditChannelTierData } from '@/APIs/ChannelAPI';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
+
 const EditTier: React.FC = () => {
   const { channelId, tierId } = useParams<{ channelId: string; tierId: string }>();
-  const navigate = useNavigate();
   const { api } = useApiContext();
-  const [error, setError] = useState<string | null>(null);
-  const [tier, setTier] = useState<Nullable<ChannelTier>>(null);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [initialData, setInitialData] = useState<any>(null);
+  const { execute } = useApiCall();
 
   useEffect(() => {
-    loadTier();
-  }, [channelId, tierId]);
-
-  const loadTier = async () => {
-    try {
-      if (channelId && tierId) {
-        const result = await api?.channelApi.getTier(channelId, tierId);
-        setTier(result);
+    const loadTier = async () => {
+      if (!channelId || !tierId) return;
+      
+      const result = await execute(
+        () => api?.channelApi.getTier(channelId, tierId),
+        { showErrorToast: true }
+      );
+      
+      if (result) {
+        setInitialData(result);
       }
-    } catch (error) {
-      console.error('Failed to load tier:', error);
-      setError('Failed to load tier');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadTier();
+  }, [channelId, tierId, api?.channelApi, execute]);
 
   const handleUpdate = async (data: EditChannelTierData) => {
-    try {
-      if (channelId && tierId) {
-        await api?.channelApi.updateTier(channelId, tierId, data);
-        navigate(PATHS.STUDIO_CHANNEL_VIEW.replace(':channelId', channelId));
+    if (!channelId || !tierId) return;
+    
+    const result = await execute(
+      () => api?.channelApi.updateTier(channelId, tierId, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Tier updated successfully!'
       }
-    } catch (error) {
-      console.error('Failed to update tier:', error);
-      setError('Failed to update tier');
+    );
+    
+    if (result) {
+      navigate(PATHS.STUDIO_CHANNEL_VIEW.replace(':channelId', channelId));
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (!tier) {
-    return (
-      <Typography color="error">Tier not found</Typography>
-    );
+  if (!initialData) {
+    return null; // or loading spinner
   }
 
   return (
@@ -75,21 +68,14 @@ const EditTier: React.FC = () => {
         color="text.secondary"
         sx={{ maxWidth: 600, mb: 3 }}
       >
-        Update your membership tier details and benefits.
+        Update the details and benefits of this membership tier.
       </Typography>
 
       <TierForm
-        initialData={tier}
         channelId={channelId!}
+        initialData={initialData}
         onSubmit={handleUpdate}
         submitButtonText="Update Tier"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Box>
   );

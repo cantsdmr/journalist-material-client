@@ -1,27 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Container, Typography } from '@mui/material';
 import ChannelForm from '@/components/studio/channel/ChannelForm';
 import { useApiContext } from '@/contexts/ApiContext';
-import Notification from '@/components/common/Notification';
 import { useNavigate } from 'react-router-dom';
 import { CreateChannelData, EditChannelData } from '@/APIs/ChannelAPI';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const CreateChannelStudio: React.FC = () => {
   const { api } = useApiContext();
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   const handleCreate = async (data: EditChannelData | CreateChannelData | null | undefined) => {
     if (!data) return;
-    try {
-      const result = await api?.channelApi.createChannel(data as CreateChannelData);
-      if (result) {
-        navigate(`${PATHS.STUDIO_CHANNELS}`);
+    
+    const result = await execute(
+      () => api?.channelApi.createChannel(data as CreateChannelData),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Channel created successfully!'
       }
-    } catch (error) {
-      console.error('Failed to create channel:', error);
-      setError('Failed to create channel');
+    );
+    
+    if (result) {
+      navigate(`${PATHS.STUDIO_CHANNELS}`);
     }
   };
 
@@ -41,13 +44,6 @@ const CreateChannelStudio: React.FC = () => {
       <ChannelForm
         onSubmit={handleCreate}
         submitButtonText="Create Channel"
-      />
-
-      <Notification
-        open={!!error}
-        message={error}
-        severity="error"
-        onClose={() => setError(null)}
       />
     </Container>
   );

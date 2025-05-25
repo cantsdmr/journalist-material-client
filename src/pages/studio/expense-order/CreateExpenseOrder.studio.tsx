@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Alert,
   Button
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
@@ -13,6 +12,7 @@ import { Channel } from '@/APIs/ChannelAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useUser } from '@/contexts/UserContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const CreateExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
@@ -21,42 +21,47 @@ const CreateExpenseOrderStudio: React.FC = () => {
   
   const [channels, setChannels] = useState<Channel[]>([]);
   const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { execute, loading } = useApiCall();
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        if (!user) return;
-        
-        // Fetch user's channels and expense types
-        const [channelsResult, typesResult] = await Promise.all([
-          api.userApi.getUserChannels(user.id),
-          api.expenseOrderApi.getExpenseTypes()
-        ]);
-        
+      if (!user) return;
+      
+      // Fetch user's channels
+      const channelsResult = await execute(
+        () => api.userApi.getUserChannels(user.id),
+        { showErrorToast: true }
+      );
+      
+      if (channelsResult) {
         setChannels(channelsResult.items.map(cu => cu.channel));
+      }
+      
+      // Fetch expense types
+      const typesResult = await execute(
+        () => api.expenseOrderApi.getExpenseTypes(),
+        { showErrorToast: true }
+      );
+      
+      if (typesResult) {
         setExpenseTypes(typesResult);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load data');
       }
     };
 
     fetchData();
-  }, [user]);
+  }, [user, execute]);
 
   const handleSave = async (data: CreateExpenseOrderData) => {
-    setLoading(true);
-    setError(null);
+    const result = await execute(
+      () => api.expenseOrderApi.createExpenseOrder(data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order created successfully!'
+      }
+    );
     
-    try {
-      const result = await api.expenseOrderApi.createExpenseOrder(data);
-      // Navigate to the created expense order
+    if (result) {
       navigate(PATHS.STUDIO_EXPENSE_ORDER_VIEW.replace(':id', result.id));
-    } catch (err: any) {
-      setError(err.message || 'Failed to create expense order');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -79,16 +84,20 @@ const CreateExpenseOrderStudio: React.FC = () => {
         </Typography>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {channels.length === 0 && !error ? (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          You need to be a member of at least one channel to create expense orders.
-        </Alert>
+      {channels.length === 0 && !loading ? (
+        <Box sx={{ 
+          textAlign: 'center', 
+          py: 8,
+          bgcolor: 'background.paper',
+          borderRadius: 1
+        }}>
+          <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+            No Channels Available
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            You need to be a member of at least one channel to create expense orders.
+          </Typography>
+        </Box>
       ) : (
         <ExpenseOrderForm
           channels={channels}
