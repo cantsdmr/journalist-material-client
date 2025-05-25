@@ -72,7 +72,7 @@ const Login: React.FC = () => {
     try {
       const token = await auth?.signIn(email, password);
       if (token) {
-        await api?.userApi.signIn({
+        await api?.authApi.signIn({
           idToken: token
         });
       }
@@ -85,7 +85,7 @@ const Login: React.FC = () => {
     try {
       const token = await auth?.signInWithProvider(provider);
       if (token) {
-        await api?.userApi.signIn({
+        await api?.authApi.signIn({
           idToken: token
         });
       }

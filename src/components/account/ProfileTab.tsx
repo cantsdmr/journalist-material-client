@@ -37,8 +37,7 @@ const ProfileTab: React.FC = () => {
       setProfile(profileData);
       setFormData({
         display_name: profileData.display_name,
-        photo_url: profileData.photo_url,
-        handle: profileData.handle
+        photo_url: profileData.photo_url
       });
     } catch (err: any) {
       setError(err.message || 'Failed to load profile');
@@ -58,8 +57,7 @@ const ProfileTab: React.FC = () => {
     if (profile) {
       setFormData({
         display_name: profile.display_name,
-        photo_url: profile.photo_url,
-        handle: profile.handle
+        photo_url: profile.photo_url
       });
     }
     setError(null);
@@ -98,7 +96,6 @@ const ProfileTab: React.FC = () => {
         <Stack spacing={3} alignItems="center">
           <Skeleton variant="circular" width={120} height={120} />
           <Skeleton variant="text" width="50%" height={40} />
-          <Skeleton variant="rectangular" width="100%" height={56} />
           <Skeleton variant="rectangular" width="100%" height={56} />
           <Skeleton variant="rectangular" width="100%" height={56} />
         </Stack>
@@ -140,16 +137,6 @@ const ProfileTab: React.FC = () => {
           disabled={!editing}
           fullWidth
           variant="outlined"
-        />
-
-        <TextField
-          label="Handle"
-          value={formData.handle || ''}
-          onChange={handleInputChange('handle')}
-          disabled={!editing}
-          fullWidth
-          variant="outlined"
-          placeholder="@username"
         />
 
         <TextField
