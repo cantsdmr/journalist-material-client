@@ -86,6 +86,7 @@ export type ChannelTier = {
     isDefault: boolean;
     maxSubscribers?: number;
     benefits: any[];
+    currency: string;
 }
 
 export type CreateChannelData = {
@@ -115,6 +116,8 @@ export type CreateChannelTierData = {
     benefits: string[];
     order: number;
     isDefault: boolean;
+    currency: string;
+    channel_id: string;
 };
 
 export type EditChannelTierData = Omit<ChannelTier, "id" | "channelId">;
@@ -124,7 +127,7 @@ export type ChannelMembership = {
     channelId: string;
     userId: string;
     tierId?: string;
-    status: 'active' | 'cancelled';
+    status: 'active' | 'cancelled' | 'expired' | 'suspended';
     createdAt: string;
     updatedAt: string;
     tier: ChannelTier;
@@ -132,10 +135,23 @@ export type ChannelMembership = {
     user: User;
 };
 
+// Unified subscription data for channel operations
+export type ChannelSubscribeData = {
+    tier_id?: string;
+    payment_method_id?: string;
+};
+
+// Response wrapper types
+export type ApiResponse<T> = {
+    success: boolean;
+    data: T;
+    message?: string;
+};
+
 const API_PATH = '/api/channels'
 const SUB_PATH = {
     TIER: 'tier',
-    MEMBERSHIP: 'membership'
+    SUBSCRIBER: 'subscriber'  // Updated to match backend
 }
 
 export class ChannelAPI extends HTTPApi {
@@ -181,8 +197,8 @@ export class ChannelAPI extends HTTPApi {
         return this._put<ChannelTier[]>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`, tiers);
     }
 
-    public async getTiers(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<ChannelTier>> {
-        return this._list<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`, pagination);
+    public async getTiers(channelId: string): Promise<PaginatedCollection<ChannelTier>> {
+        return this._list<ChannelTier>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`);
     }
 
     public async getTier(channelId: string, tierId: string): Promise<ChannelTier> {
@@ -193,73 +209,80 @@ export class ChannelAPI extends HTTPApi {
         return this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}/${tierId}`);
     }
 
-    // Membership methods
+    // CHANNEL VIEWPOINT: Unified subscription methods
+    public async subscribeToChannel(channelId: string, data: ChannelSubscribeData = {}): Promise<ChannelMembership> {
+        const response = await this._post<ApiResponse<ChannelMembership>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, data);
+        return response.data;
+    }
+
+    public async unsubscribeFromChannel(channelId: string): Promise<void> {
+        await this._remove<ApiResponse<void>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`);
+    }
+
+    // CREATOR/OWNER VIEWPOINT: Channel subscriber management
+    public async getChannelSubscribers(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<ChannelMembership>> {
+        return this._list<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, pagination);
+    }
+
+    public async getSubscriptionDetails(channelId: string, subscriptionId: string): Promise<ChannelMembership> {
+        const response = await this._get<ApiResponse<ChannelMembership>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}/${subscriptionId}`);
+        return response.data;
+    }
+
+    // Legacy methods for backward compatibility (deprecated)
+    /** @deprecated Use subscribeToChannel instead */
     public async joinChannel(channelId: string, options: { 
         tierId?: string;
         notificationLevel?: number;
     } = {}): Promise<ChannelMembership> {
-        return this._post<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`, options);
+        return this.subscribeToChannel(channelId, { tier_id: options.tierId });
     }
 
-    public async updateMembership(channelId: string, data: {
-        tierId?: string;
-        notificationLevel?: number;
-        autoContribute?: boolean;
-        contributionLimit?: number;
-    }): Promise<ChannelMembership> {
-        return this._put<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`, data);
-    }
-
-    public async cancelMembership(channelId: string): Promise<void> {
-        return this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`);
-    }
-
-    public async getChannelMembers(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<ChannelMembership>> {
-        return this._list<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`, pagination);
-    }
-
-    public async getMembershipDetails(channelId: string): Promise<ChannelMembership> {
-        return this._get<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.MEMBERSHIP}`);
-    }
-
+    /** @deprecated Use subscribeToChannel instead */
     public async subscribe(channelId: string, tierId: string): Promise<ChannelMembership> {
-        return this._post<ChannelMembership>(`${API_PATH}/${channelId}/subscribe`, { tierId });
+        return this.subscribeToChannel(channelId, { tier_id: tierId });
     }
 
+    /** @deprecated Use unsubscribeFromChannel instead */
     public async unsubscribe(channelId: string): Promise<void> {
-        return this._post<void>(`${API_PATH}/${channelId}/unsubscribe`, {});
+        return this.unsubscribeFromChannel(channelId);
     }
 
-    public async changeSubscriptionTier(channelId: string, tierId: string): Promise<ChannelMembership> {
-        return this._post<ChannelMembership>(`${API_PATH}/${channelId}/change-subscription`, { tierId });
+    /** @deprecated Use unsubscribeFromChannel instead */
+    public async cancelMembership(channelId: string): Promise<void> {
+        return this.unsubscribeFromChannel(channelId);
     }
 
-    public async getMembership(channelId: string): Promise<ChannelMembership> {
-        return this._get<ChannelMembership>(`${API_PATH}/${channelId}/membership`);
+    // Utility methods for checking subscription status
+    public async getMembership(channelId: string): Promise<ChannelMembership | null> {
+        try {
+            const channel = await this.getChannel(channelId);
+            return channel.currentUserMembership || null;
+        } catch {
+            return null;
+        }
     }
 
     public async hasMembership(channelId: string): Promise<boolean> {
         const membership = await this.getMembership(channelId);
-        return !!membership;
+        return membership !== null && membership.status === 'active';
     }
 
-    public async getMembershipTier(channelId: string): Promise<string> {
+    public async getMembershipTier(channelId: string): Promise<string | null> {
         const membership = await this.getMembership(channelId);
-        return membership?.tierId || null;
+        return membership?.tier?.name || null;
     }
 
     public async isFollowing(channelId: string): Promise<boolean> {
-        const channel = await this.getChannel(channelId);
-        return !!channel?.isFollowing;
+        return this.hasMembership(channelId);
     }
 
     public async isSubscribed(channelId: string): Promise<boolean> {
-        const channel = await this.getChannel(channelId);
-        return !!channel?.isSubscribed;
+        const membership = await this.getMembership(channelId);
+        return membership !== null && membership.status === 'active' && (membership.tier?.price || 0) > 0;
     }
 
-    public async getSubscriptionTier(channelId: string): Promise<string> {
-        const channel = await this.getChannel(channelId);
-        return channel?.subscriptionTier || '';
+    public async getSubscriptionTier(channelId: string): Promise<string | null> {
+        return this.getMembershipTier(channelId);
     }
 }

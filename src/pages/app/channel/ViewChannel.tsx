@@ -81,7 +81,7 @@ const ViewChannel: React.FC = () => {
         setLoadingTierId(tierId);
         
         const result = await execute(
-            () => api?.channelApi.updateMembership(channel.id, { tierId }),
+            () => api?.channelApi.subscribeToChannel(channel.id, { tier_id: tierId }),
             {
                 showSuccessMessage: true,
                 successMessage: 'Membership updated successfully!'

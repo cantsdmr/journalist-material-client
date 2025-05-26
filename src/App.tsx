@@ -1,11 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT, SEARCH, EXPENSE_ORDER } from '@/constants/paths';
+import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT, SEARCH, EXPENSE_ORDER, ADMIN, SUBSCRIPTION } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 
 // Layouts
 import MainLayout from '@/components/navigation/MainLayout';
 import StudioLayout from '@/components/navigation/StudioLayout';
+import AdminLayout from '@/components/navigation/AdminLayout';
 import PrivateRoute from '@/components/navigation/PrivateRoute';
 
 // Home pages
@@ -69,6 +70,17 @@ import ListExpenseOrdersStudio from '@/pages/studio/expense-order/ListExpenseOrd
 import CreateExpenseOrderStudio from '@/pages/studio/expense-order/CreateExpenseOrder.studio';
 import EditExpenseOrderStudio from '@/pages/studio/expense-order/EditExpenseOrder.studio';
 import ViewExpenseOrderStudio from '@/pages/studio/expense-order/ViewExpenseOrder.studio';
+
+// Admin pages
+import AdminDashboard from '@/pages/admin/Dashboard';
+import UserManagement from '@/pages/admin/users';
+import ChannelManagement from '@/pages/admin/channels';
+import SubscriptionIndex from '@/pages/admin/subscriptions';
+import SubscriptionManagement from '@/pages/admin/subscriptions/Management';
+import SubscriptionAnalytics from '@/pages/admin/subscriptions/Analytics';
+import RevenueTracking from '@/pages/admin/subscriptions/Revenue';
+import PlatformAnalytics from '@/pages/admin/analytics';
+import AdminSettings from '@/pages/admin/settings';
 
 const App: React.FC = () => {
   const { isLoading, error } = useApp();
@@ -143,6 +155,22 @@ const App: React.FC = () => {
           <Route path={`${EXPENSE_ORDER.VIEW}`} element={<ViewExpenseOrderStudio />} />
         </Route>
         <Route path={SEARCH.ROOT} element={<SearchPage />} />
+      </Route>
+
+      {/* Admin Routes */}
+      <Route path={`${PATHS.ADMIN_ROOT}/*`} element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
+        <Route index element={<AdminDashboard />} />
+        <Route path={ADMIN.DASHBOARD} element={<AdminDashboard />} />
+        <Route path={ADMIN.USERS} element={<UserManagement />} />
+        <Route path={ADMIN.CHANNELS} element={<ChannelManagement />} />
+        <Route path={`${ADMIN.SUBSCRIPTIONS}/*`}>
+          <Route index element={<SubscriptionIndex />} />
+          <Route path={SUBSCRIPTION.MANAGEMENT} element={<SubscriptionManagement />} />
+          <Route path={SUBSCRIPTION.ANALYTICS} element={<SubscriptionAnalytics />} />
+          <Route path={SUBSCRIPTION.REVENUE} element={<RevenueTracking />} />
+        </Route>
+        <Route path={ADMIN.ANALYTICS} element={<PlatformAnalytics />} />
+        <Route path={ADMIN.SETTINGS} element={<AdminSettings />} />
       </Route>
 
       {/* Catch-all route */}

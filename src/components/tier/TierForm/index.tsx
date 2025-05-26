@@ -7,6 +7,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/APIs/ChannelAPI';
+import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 
 interface TierFormProps {
   initialData?: ChannelTier;
@@ -26,8 +27,9 @@ const TierForm: React.FC<TierFormProps> = ({
     name: initialData?.name || '',
     price: initialData?.price || 0,
     description: initialData?.description || '',
-    channelId: channelId,
     order: initialData?.order || 0,
+    channel_id: channelId,
+    currency: initialData?.currency || SUPPORTED_CURRENCIES.USD.code,
     benefits: initialData?.benefits || [''],
     isDefault: initialData?.isDefault || false
   }));

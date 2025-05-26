@@ -79,7 +79,7 @@ export type Subscription = {
   tier_name: string;
   tier_price: number;
   currency: string;
-  status: 'active' | 'canceled' | 'expired';
+  status: 'active' | 'canceled' | 'expired' | 'suspended';
   started_at: string;
   expires_at?: string;
   canceled_at?: string;
@@ -90,6 +90,12 @@ export type SubscribeData = {
   payment_method_id?: string;
 };
 
+export type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  message?: string;
+};
+
 const API_PATH = '/api/account';
 
 export class AccountAPI extends HTTPApi {
@@ -97,57 +103,56 @@ export class AccountAPI extends HTTPApi {
     super(axiosJ, API_PATH);
   }
 
-  // Profile methods
   public async getProfile(): Promise<UserProfile> {
-    return this._get<UserProfile>(`${API_PATH}/profile`);
+    const response = await this._get<ApiResponse<UserProfile>>(`${API_PATH}/profile`);
+    return response.data;
   }
 
   public async updateProfile(data: UpdateProfileData): Promise<UserProfile> {
-    return this._put<UserProfile>(`${API_PATH}/profile`, data);
+    const response = await this._put<ApiResponse<UserProfile>>(`${API_PATH}/profile`, data);
+    return response.data;
   }
 
-  // Payment Methods
   public async getPaymentMethods(): Promise<PaymentMethod[]> {
-    const response = await this._get<{ success: boolean; data: PaymentMethod[] }>(`${API_PATH}/payment-methods`);
+    const response = await this._get<ApiResponse<PaymentMethod[]>>(`${API_PATH}/payment-methods`);
     return response.data;
   }
 
   public async addPaymentMethod(data: AddPaymentMethodData): Promise<PaymentMethod> {
-    const response = await this._post<{ success: boolean; data: PaymentMethod; message: string }>(`${API_PATH}/payment-methods`, data);
+    const response = await this._post<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods`, data);
     return response.data;
   }
 
   public async updatePaymentMethod(paymentMethodId: string, data: UpdatePaymentMethodData): Promise<PaymentMethod> {
-    const response = await this._put<{ success: boolean; data: PaymentMethod; message: string }>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
+    const response = await this._put<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
     return response.data;
   }
 
   public async deletePaymentMethod(paymentMethodId: string): Promise<void> {
-    await this._remove<{ success: boolean; message: string }>(`${API_PATH}/payment-methods/${paymentMethodId}`);
+    await this._remove<ApiResponse<void>>(`${API_PATH}/payment-methods/${paymentMethodId}`);
   }
 
   public async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethod> {
-    const response = await this._patch<{ success: boolean; data: PaymentMethod; message: string }>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
+    const response = await this._patch<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
     return response.data;
   }
 
   public async getAvailablePaymentMethods(): Promise<PaymentMethodType[]> {
-    const response = await this._get<{ success: boolean; data: PaymentMethodType[] }>(`${API_PATH}/payment-methods/available`);
+    const response = await this._get<ApiResponse<PaymentMethodType[]>>(`${API_PATH}/payment-methods/available`);
     return response.data;
   }
 
-  // Subscriptions
   public async getSubscriptions(): Promise<Subscription[]> {
-    const response = await this._get<{ success: boolean; data: Subscription[] }>(`${API_PATH}/subscriptions`);
+    const response = await this._get<ApiResponse<Subscription[]>>(`${API_PATH}/subscriptions`);
     return response.data;
   }
 
   public async subscribe(channelId: string, data: SubscribeData): Promise<Subscription> {
-    const response = await this._post<{ success: boolean; data: Subscription; message: string }>(`${API_PATH}/subscriptions/${channelId}`, data);
+    const response = await this._post<ApiResponse<Subscription>>(`${API_PATH}/subscriptions/${channelId}`, data);
     return response.data;
   }
 
   public async cancelSubscription(subscriptionId: string): Promise<void> {
-    await this._remove<{ success: boolean; message: string }>(`${API_PATH}/subscriptions/${subscriptionId}`);
+    await this._remove<ApiResponse<void>>(`${API_PATH}/subscriptions/${subscriptionId}`);
   }
 } 

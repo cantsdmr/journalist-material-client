@@ -10,6 +10,7 @@ import {
   InputAdornment
 } from '@mui/material';
 import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/APIs/ChannelAPI';
+import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 
 type TierFormFields = keyof (CreateChannelTierData & EditChannelTierData);
 type TierFormData = CreateChannelTierData & EditChannelTierData;
@@ -35,7 +36,9 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
     price: 0,
     benefits: [],
     order: 0,
-    isDefault: false
+    isDefault: false,
+    currency: SUPPORTED_CURRENCIES.USD.code,
+    channel_id: ''
   });
   const [errors, setErrors] = useState<Partial<Record<TierFormFields, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +51,9 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
         price: initialData.price,
         benefits: initialData.benefits,
         order: initialData.order,
-        isDefault: initialData.isDefault
+        isDefault: initialData.isDefault,
+        currency: initialData.currency || SUPPORTED_CURRENCIES.USD.code,
+        channel_id: initialData.channelId
       });
     }
   }, [initialData]);

@@ -14,12 +14,12 @@ import {
   DialogActions,
   Chip,
   Avatar,
-  Grid,
-  Divider
+  Grid
 } from '@mui/material';
 import { Cancel, Subscriptions as SubscriptionsIcon } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Subscription } from '@/APIs/AccountAPI';
+import { getMembershipStatusColor, getMembershipStatusLabel, canCancelMembership } from '@/constants/membership-status';
 
 const SubscriptionsTab: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -60,6 +60,9 @@ const SubscriptionsTab: React.FC = () => {
       setCancelDialogOpen(false);
       setSelectedSubscription(null);
       setSuccess('Subscription canceled successfully');
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(null), 5000);
     } catch (err: any) {
       setError(err.message || 'Failed to cancel subscription');
     } finally {
@@ -78,16 +81,11 @@ const SubscriptionsTab: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'success';
-      case 'canceled':
-        return 'warning';
-      case 'expired':
-        return 'error';
-      default:
-        return 'default';
-    }
+    return getMembershipStatusColor(status);
+  };
+
+  const getStatusLabel = (status: string) => {
+    return getMembershipStatusLabel(status);
   };
 
   const formatDate = (dateString: string) => {
@@ -102,7 +100,11 @@ const SubscriptionsTab: React.FC = () => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.toUpperCase()
-    }).format(price);
+    }).format(price / 100); // Convert from cents to dollars
+  };
+
+  const canCancelSubscription = (subscription: Subscription) => {
+    return canCancelMembership(subscription.status);
   };
 
   if (loading) {
@@ -132,13 +134,27 @@ const SubscriptionsTab: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Stack spacing={3}>
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
+        {error && (
+          <Alert 
+            severity="error" 
+            onClose={() => setError(null)}
+          >
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert 
+            severity="success" 
+            onClose={() => setSuccess(null)}
+          >
+            {success}
+          </Alert>
+        )}
         
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6">My Subscriptions</Typography>
           <Typography variant="body2" color="text.secondary">
-            {subscriptions.length} active subscription{subscriptions.length !== 1 ? 's' : ''}
+            {subscriptions.filter(s => s.status === 'active').length} active subscription{subscriptions.filter(s => s.status === 'active').length !== 1 ? 's' : ''}
           </Typography>
         </Box>
 
@@ -147,7 +163,7 @@ const SubscriptionsTab: React.FC = () => {
             <CardContent sx={{ textAlign: 'center', py: 6 }}>
               <SubscriptionsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                No Active Subscriptions
+                No Subscriptions Found
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 You haven't subscribed to any channels yet. Explore channels to find content you love!
@@ -178,9 +194,9 @@ const SubscriptionsTab: React.FC = () => {
                         <Typography variant="body2" color="text.secondary" gutterBottom>
                           {subscription.tier_name} • {formatPrice(subscription.tier_price, subscription.currency)}
                         </Typography>
-                        <Stack direction="row" spacing={1} alignItems="center">
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                           <Chip 
-                            label={subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                            label={getStatusLabel(subscription.status)}
                             color={getStatusColor(subscription.status) as any}
                             size="small"
                           />
@@ -192,11 +208,16 @@ const SubscriptionsTab: React.FC = () => {
                               • Expires: {formatDate(subscription.expires_at)}
                             </Typography>
                           )}
+                          {subscription.canceled_at && (
+                            <Typography variant="caption" color="text.secondary">
+                              • Canceled: {formatDate(subscription.canceled_at)}
+                            </Typography>
+                          )}
                         </Stack>
                       </Box>
 
                       <Stack spacing={1} alignItems="flex-end">
-                        {subscription.status === 'active' && (
+                        {canCancelSubscription(subscription) && (
                           <Button
                             variant="outlined"
                             color="error"
@@ -216,55 +237,48 @@ const SubscriptionsTab: React.FC = () => {
                         </Button>
                       </Stack>
                     </Stack>
-
-                    {subscription.canceled_at && (
-                      <>
-                        <Divider sx={{ my: 2 }} />
-                        <Alert severity="info" sx={{ mt: 2 }}>
-                          This subscription was canceled on {formatDate(subscription.canceled_at)}.
-                          {subscription.expires_at && (
-                            <> You'll continue to have access until {formatDate(subscription.expires_at)}.</>
-                          )}
-                        </Alert>
-                      </>
-                    )}
                   </CardContent>
                 </Card>
               </Grid>
             ))}
           </Grid>
         )}
-      </Stack>
 
-      {/* Cancel Confirmation Dialog */}
-      <Dialog open={cancelDialogOpen} onClose={closeCancelDialog}>
-        <DialogTitle>Cancel Subscription</DialogTitle>
-        <DialogContent>
-          <Typography gutterBottom>
-            Are you sure you want to cancel your subscription to{' '}
-            <strong>{selectedSubscription?.channel_name}</strong>?
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            You'll lose access to premium content and features for this channel.
-            {selectedSubscription?.expires_at && (
-              <> Your access will continue until {formatDate(selectedSubscription.expires_at)}.</>
-            )}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeCancelDialog} disabled={canceling}>
-            Keep Subscription
-          </Button>
-          <Button
-            onClick={handleCancelSubscription}
-            color="error"
-            variant="contained"
-            disabled={canceling}
-          >
-            {canceling ? 'Canceling...' : 'Cancel Subscription'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        {/* Cancel Subscription Dialog */}
+        <Dialog
+          open={cancelDialogOpen}
+          onClose={closeCancelDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>Cancel Subscription</DialogTitle>
+          <DialogContent>
+            <Typography variant="body1" gutterBottom>
+              Are you sure you want to cancel your subscription to{' '}
+              <strong>{selectedSubscription?.channel_name}</strong>?
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              You will continue to have access until your current billing period ends
+              {selectedSubscription?.expires_at && (
+                <> on {formatDate(selectedSubscription.expires_at)}</>
+              )}.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeCancelDialog} disabled={canceling}>
+              Keep Subscription
+            </Button>
+            <Button
+              onClick={handleCancelSubscription}
+              color="error"
+              variant="contained"
+              disabled={canceling}
+            >
+              {canceling ? 'Canceling...' : 'Cancel Subscription'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Stack>
     </Box>
   );
 };
