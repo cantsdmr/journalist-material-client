@@ -1,5 +1,7 @@
-import { HTTPApi } from "@/utils/http";
+import { DEFAULT_PAGINATION, HTTPApi, PaginatedCollection, PaginationObject } from "@/utils/http";
 import { AxiosJournalist } from "@/utils/axios";
+import { Channel } from "./ChannelAPI";
+import { ApiResponse, ChannelTier } from "./ChannelAPI";
 
 export type UserProfile = {
   id: string;
@@ -90,10 +92,17 @@ export type SubscribeData = {
   payment_method_id?: string;
 };
 
-export type ApiResponse<T> = {
-  success: boolean;
-  data: T;
-  message?: string;
+export type ChannelUser = {
+  id: string;
+  name: string;
+  description: string;
+  userRole: {
+    id: number;
+    name: string;
+    joinedAt: string;
+    lastActiveAt: string;
+  };
+  tiers: ChannelTier[];
 };
 
 const API_PATH = '/api/account';
@@ -103,56 +112,51 @@ export class AccountAPI extends HTTPApi {
     super(axiosJ, API_PATH);
   }
 
-  public async getProfile(): Promise<UserProfile> {
-    const response = await this._get<ApiResponse<UserProfile>>(`${API_PATH}/profile`);
-    return response.data;
+  public async getProfile() {
+    return this._get<ApiResponse<UserProfile>>(`${API_PATH}/profile`);
   }
 
-  public async updateProfile(data: UpdateProfileData): Promise<UserProfile> {
-    const response = await this._put<ApiResponse<UserProfile>>(`${API_PATH}/profile`, data);
-    return response.data;
+  public async updateProfile(data: UpdateProfileData) {
+    return this._put<ApiResponse<UserProfile>>(`${API_PATH}/profile`, data);
   }
 
-  public async getPaymentMethods(): Promise<PaymentMethod[]> {
-    const response = await this._get<ApiResponse<PaymentMethod[]>>(`${API_PATH}/payment-methods`);
-    return response.data;
+  public async getPaymentMethods() {
+    return this._get<PaginatedCollection<PaymentMethod>>(`${API_PATH}/payment-methods`);
   }
 
-  public async addPaymentMethod(data: AddPaymentMethodData): Promise<PaymentMethod> {
-    const response = await this._post<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods`, data);
-    return response.data;
+  public async addPaymentMethod(data: AddPaymentMethodData) {
+    return this._post<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods`, data);
   }
 
-  public async updatePaymentMethod(paymentMethodId: string, data: UpdatePaymentMethodData): Promise<PaymentMethod> {
-    const response = await this._put<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
-    return response.data;
+  public async updatePaymentMethod(paymentMethodId: string, data: UpdatePaymentMethodData) {
+    return this._put<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
   }
 
-  public async deletePaymentMethod(paymentMethodId: string): Promise<void> {
-    await this._remove<ApiResponse<void>>(`${API_PATH}/payment-methods/${paymentMethodId}`);
+  public async deletePaymentMethod(paymentMethodId: string) {
+    return this._remove<ApiResponse<void>>(`${API_PATH}/payment-methods/${paymentMethodId}`);
   }
 
   public async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethod> {
-    const response = await this._patch<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
-    return response.data;
+    return this._patch<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
   }
 
-  public async getAvailablePaymentMethods(): Promise<PaymentMethodType[]> {
-    const response = await this._get<ApiResponse<PaymentMethodType[]>>(`${API_PATH}/payment-methods/available`);
-    return response.data;
+  public async getAvailablePaymentMethods(): Promise<PaginatedCollection<PaymentMethodType>> {
+    return this._list<PaymentMethodType>(`${API_PATH}/payment-methods/available`);
   }
 
-  public async getSubscriptions(): Promise<Subscription[]> {
-    const response = await this._get<ApiResponse<Subscription[]>>(`${API_PATH}/subscriptions`);
-    return response.data;
+  public async getSubscriptions(): Promise<PaginatedCollection<Subscription>> {
+    return this._list<Subscription>(`${API_PATH}/subscriptions`);
   }
 
   public async subscribe(channelId: string, data: SubscribeData): Promise<Subscription> {
-    const response = await this._post<ApiResponse<Subscription>>(`${API_PATH}/subscriptions/${channelId}`, data);
-    return response.data;
+    return this._post<Subscription>(`${API_PATH}/subscriptions/${channelId}`, data);
   }
 
-  public async cancelSubscription(subscriptionId: string): Promise<void> {
-    await this._remove<ApiResponse<void>>(`${API_PATH}/subscriptions/${subscriptionId}`);
+  public async cancelSubscription(subscriptionId: string){
+    return this._remove<ApiResponse<void>>(`${API_PATH}/subscriptions/${subscriptionId}`);
+  }
+
+  public async getUserChannels(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+    return this._list<Channel>(`${API_PATH}/channels`, pagination);
   }
 } 

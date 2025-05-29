@@ -14,11 +14,11 @@ import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import StudioChannelCard from '@/components/studio/channel/StudioChannelCard';
 import { useUserInfo } from '@/hooks/useUserInfo';
-import { ChannelUser } from '@/APIs/ChannelAPI';
 import { EmptyState } from '@/components/common/EmptyState';
+import { Channel } from '@/APIs/ChannelAPI';
 
 const ListChannelsStudio: React.FC = () => {
-  const [userChannels, setUserChannels] = useState<ChannelUser[]>([]);
+  const [userChannels, setUserChannels] = useState<Channel[]>([]);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,7 +35,7 @@ const ListChannelsStudio: React.FC = () => {
     try {
       if (!user?.id) return;
 
-      const result = await api?.userApi.getUserChannels(user.id);
+      const result = await api?.accountApi.getUserChannels(user.id);
       
       setUserChannels(prev => _page === 1 
         ? result?.items ?? [] 
@@ -147,7 +147,7 @@ const ListChannelsStudio: React.FC = () => {
             {userChannels.map((userChannel) => (
               <Grid item xs={12} sm={6} key={userChannel.id}>
                 <StudioChannelCard 
-                  channel={userChannel.channel}
+                  channel={userChannel}
                   onRefresh={() => getChannels(1)}
                 />
               </Grid>

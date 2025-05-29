@@ -115,12 +115,9 @@ export type CreateChannelTierData = {
     price: number;
     benefits: string[];
     order: number;
-    isDefault: boolean;
-    currency: string;
-    channel_id: string;
 };
 
-export type EditChannelTierData = Omit<ChannelTier, "id" | "channelId">;
+export type EditChannelTierData = CreateChannelTierData;
 
 export type ChannelMembership = {
     id: string;
@@ -194,7 +191,12 @@ export class ChannelAPI extends HTTPApi {
     }
 
     public async updateTiers(channelId: string, tiers: ChannelTier[]): Promise<ChannelTier[]> {
-        return this._put<ChannelTier[]>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`, tiers);
+        const tiersWithoutCurrency = tiers.map(tier => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { currency, channelId, isDefault, ...rest } = tier;
+            return rest;
+        });
+        return this._put<ChannelTier[]>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}`, tiersWithoutCurrency);
     }
 
     public async getTiers(channelId: string): Promise<PaginatedCollection<ChannelTier>> {

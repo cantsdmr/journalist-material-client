@@ -32,6 +32,12 @@ export const DEFAULT_PAGINATION: PaginationObject = {
   order: 'desc'
 };
 
+export type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+  message?: string;
+};
+
 export class HTTPApi {
   protected axiosJ: AxiosJournalist;
   protected apiPath: string;

@@ -10,7 +10,6 @@ import {
   InputAdornment
 } from '@mui/material';
 import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/APIs/ChannelAPI';
-import { SUPPORTED_CURRENCIES } from '@/constants/currencies';
 
 type TierFormFields = keyof (CreateChannelTierData & EditChannelTierData);
 type TierFormData = CreateChannelTierData & EditChannelTierData;
@@ -21,6 +20,7 @@ interface ChannelTierFormProps {
   onSubmit: (data: TierFormData) => Promise<void>;
   initialData: Nullable<ChannelTier>;
   isEdit?: boolean;
+  tierCount: number;
 }
 
 export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
@@ -28,6 +28,7 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
   onClose,
   onSubmit,
   initialData,
+  tierCount,
   isEdit = false
 }) => {
   const [formData, setFormData] = useState<TierFormData>({
@@ -35,10 +36,7 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
     description: '',
     price: 0,
     benefits: [],
-    order: 0,
-    isDefault: false,
-    currency: SUPPORTED_CURRENCIES.USD.code,
-    channel_id: ''
+    order: isEdit ? initialData.order : (tierCount + 1),
   });
   const [errors, setErrors] = useState<Partial<Record<TierFormFields, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,13 +48,14 @@ export const ChannelTierForm: React.FC<ChannelTierFormProps> = ({
         description: initialData.description,
         price: initialData.price,
         benefits: initialData.benefits,
-        order: initialData.order,
-        isDefault: initialData.isDefault,
-        currency: initialData.currency || SUPPORTED_CURRENCIES.USD.code,
-        channel_id: initialData.channelId
+        order: isEdit ? initialData.order : tierCount + 1,
       });
     }
   }, [initialData]);
+
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, order: tierCount + 1 }));
+  }, [tierCount]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<TierFormFields, string>> = {};

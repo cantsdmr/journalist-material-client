@@ -79,6 +79,7 @@ export const TiersTab = memo<TiersTabProps>(({ channelId }) => {
           (data) => handleUpdate(selectedTier.id, data) : 
           handleCreate}
         initialData={selectedTier}
+        tierCount={tiers.length}
         isEdit={!!selectedTier}
       />
 
