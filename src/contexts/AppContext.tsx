@@ -23,9 +23,7 @@ const PUBLIC_ROUTES = [
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname as typeof PUBLIC_ROUTES[number]);
-  const { isLoading: apiLoading } = useApiContext();
-  const { user, isLoading: authLoading } = useAuth();
-  const { isLoading: userLoading } = useProfile();
+  const { isLoading: apiLoading, isAuthenticated } = useApiContext();
   const [state, setState] = useState<AppState>({
     isLoading: true,
     error: null
@@ -40,14 +38,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
     } else {
       // For private routes, we need auth, API, and user info to be ready
-      if(!authLoading && !apiLoading && !userLoading){
+      if(isAuthenticated){
         setState(prev => ({
           ...prev,
           isLoading: false,
         }));
       }
     }
-  }, [apiLoading, user, authLoading, userLoading, isPublicRoute]);
+  }, [apiLoading, isAuthenticated, isPublicRoute]);
 
   return <AppContext.Provider value={state}>{children}</AppContext.Provider>;
 }; 
