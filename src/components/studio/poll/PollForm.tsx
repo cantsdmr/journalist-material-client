@@ -41,7 +41,7 @@ const PollForm: React.FC<PollFormProps> = ({
   onSubmit,
   submitButtonText = 'Submit'
 }) => {
-  const { profile : { channels } } = useProfile();
+  const { profile  } = useProfile();
   const [formData, setFormData] = useState<PollFormData>({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -92,7 +92,7 @@ const PollForm: React.FC<PollFormProps> = ({
               onChange={(e) => handleChange('channelId', e.target.value)}
               required
             >
-              {channels?.map((channel) => (
+              {profile?.channelUsers?.map((channel) => (
                 <MenuItem key={channel.channel.id} value={channel.channel.id}>
                   {channel.channel.name}
                 </MenuItem>

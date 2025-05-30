@@ -1,6 +1,5 @@
 import { AxiosJournalist } from "@/utils/axios";
-import { HTTPApi, PaginationObject, DEFAULT_PAGINATION } from "@/utils/http";
-import { PaginatedCollection } from "@/utils/http";
+import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from "@/utils/http";
 
 export type PollStatus = {
     id: number;
@@ -109,15 +108,15 @@ export class PollAPI extends HTTPApi {
     }
 
     // Public routes (authenticated)
-    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
+    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<Poll>> {
         return this._list<Poll>(API_PATH, pagination);
     }
 
-    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
+    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<Poll>> {
         return this._list<Poll>(`${API_PATH}/trending`, pagination);
     }
 
-    public async getFunded(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
+    public async getFunded(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<Poll>> {
         return this._list<Poll>(`${API_PATH}/funded`, pagination);
     }
 
@@ -133,7 +132,7 @@ export class PollAPI extends HTTPApi {
         return this._get<any>(`${API_PATH}/${id}/funding`);
     }
 
-    public async getPollsByChannel(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
+    public async getPollsByChannel(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<Poll>> {
         return this._list<Poll>(`${API_PATH}/channel/${channelId}`, pagination);
     }
 
@@ -147,7 +146,7 @@ export class PollAPI extends HTTPApi {
     }
 
     // Journalist routes
-    public async getClaimed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
+    public async getClaimed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<Poll>> {
         return this._list<Poll>(`${API_PATH}/claimed`, pagination);
     }
 
@@ -172,7 +171,7 @@ export class PollAPI extends HTTPApi {
         return this._remove<void>(`${API_PATH}/${id}`);
     }
 
-    public async getUserPolls(userId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Poll>> {
-        return this._list<Poll>(`${API_PATH}/user/${userId}`, pagination);
+    public async getCreatorPolls(userId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<Poll>> {
+        return this._list<Poll>(`${API_PATH}/creator/${userId}`, pagination);
     }
 }

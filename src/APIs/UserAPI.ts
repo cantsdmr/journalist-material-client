@@ -14,7 +14,7 @@ export type User = {
     updatedAt: string;
     lastLogin?: string;
     memberships?: ChannelMembership[];
-    channels?: ChannelUser[];
+    channelUsers?: ChannelUser[];
 };
 
 export type CreateUserData = {

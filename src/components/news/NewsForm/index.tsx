@@ -27,12 +27,12 @@ const NewsForm: React.FC<NewsFormProps> = ({
   onSubmit,
   submitButtonText
 }) => {
-  const { profile } = useProfile();
+  const { profile, channelRelations: { hasChannel } } = useProfile();
   const navigate = useNavigate();
   
   // Check if profile has channels
   useEffect(() => {
-    if (profile && (!profile.channels || profile.channels.length === 0)) {
+    if (profile && (!profile.channelUsers || profile.channelUsers.length === 0)) {
       // Profile has no channels
       return;
     }
@@ -82,9 +82,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
     }));
   }, []);
 
-  const hasChannel = profile?.channels && profile.channels.length > 0;
-
-  return !hasChannel ? (
+  return !hasChannel() ? (
     <Box sx={{ 
       width: '100%',
       height: '100%',
@@ -114,7 +112,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
         )}
 
         {/* Warning Alert when no channels */}
-        {profile && (!profile.channels || profile.channels.length === 0) && (
+        {profile && !hasChannel() && (
           <Alert 
             severity="warning"
             action={
@@ -132,7 +130,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
         )}
 
         {/* Rest of your form components */}
-        {profile?.channels && profile.channels.length > 0 ? (
+        {hasChannel() ? (
           <>
             {/* Media Section */}
             <Box>
@@ -209,7 +207,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
                       }))}
                       required
                     >
-                      {profile?.channels.map((channel) => (
+                      {profile?.channelUsers.map((channel) => (
                         <MenuItem key={channel.channelId} value={channel.channelId}>
                           {channel.channelName}
                         </MenuItem>
@@ -347,7 +345,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
             <Button
               type="submit"
               variant="contained"
-              disabled={loading || !profile?.channels?.length}
+              disabled={loading || !hasChannel()}
               sx={{
                 py: 1.5,
                 textTransform: 'none',

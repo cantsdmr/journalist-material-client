@@ -36,7 +36,7 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
     <Box sx={{ mb: 4 }}>
       <Box 
         component={RouterLink}
-        to={`/app/channels/${news.channel.id}`}
+        to={`/app/channels/${news.channelId}`}
         sx={{ 
           display: 'inline-flex',
           alignItems: 'center',

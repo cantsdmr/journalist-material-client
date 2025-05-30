@@ -36,7 +36,7 @@ const ListPollsStudio: React.FC = () => {
     if (!profile?.id) return;
 
     const result = await execute(
-      () => api?.pollApi.getUserPolls(profile.id),
+      () => api?.pollApi.getCreatorPolls(profile.id),
       { showErrorToast: true }
     );
     

@@ -13,6 +13,7 @@ interface ProfileState {
     getMembership: (channelId: string) => ChannelMembership | null;
     getMemberships: () => ChannelMembership[];
     hasMembership: (channelId: string) => boolean;
+    hasChannel: () => boolean;
     getMembershipTier: (channelId: string) => ChannelTier;
   };
   actions: {
@@ -59,6 +60,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
       getMemberships: () => profile?.memberships ?? [],
       getMembership: (channelId: string) => profile?.memberships?.find(m => m.channelId === channelId) ?? null,
       hasMembership: (channelId: string) => profile?.memberships?.some(m => m.channelId === channelId) ?? false,
+      hasChannel: () => profile?.channelUsers?.length && profile.channelUsers.length > 0,
       getMembershipTier: (channelId: string) => profile?.memberships?.find(m => m.channelId === channelId)?.tier ?? null
     },
     actions: {
