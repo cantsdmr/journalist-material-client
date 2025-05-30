@@ -20,6 +20,7 @@ import { Add, Delete, Star, StarBorder, CreditCard, AccountBalanceWallet } from 
 import { useApiContext } from '@/contexts/ApiContext';
 import { PaymentMethod, PaymentMethodType } from '@/APIs/AccountAPI';
 import { AddPaymentMethodDialog } from '@/components/account/AddPaymentMethodDialog';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const PaymentMethodsTab: React.FC = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -32,51 +33,71 @@ const PaymentMethodsTab: React.FC = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const [methods, types] = await Promise.all([
-        api.accountApi.getPaymentMethods(),
-        api.accountApi.getAvailablePaymentMethods()
-      ]);
-      setPaymentMethods(methods.items ?? []);
-      setAvailableTypes(types.items ?? []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load payment methods');
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    setError(null);
+    
+    const [methodsResult, typesResult] = await Promise.all([
+      execute(
+        () => api.accountApi.getPaymentMethods(),
+        { showErrorToast: true }
+      ),
+      execute(
+        () => api.accountApi.getAvailablePaymentMethods(),
+        { showErrorToast: true }
+      )
+    ]);
+    
+    if (methodsResult) {
+      setPaymentMethods(methodsResult.items ?? []);
     }
+    
+    if (typesResult) {
+      setAvailableTypes(typesResult.items ?? []);
+    }
+    
+    setLoading(false);
   };
 
   const handleSetDefault = async (paymentMethod: PaymentMethod) => {
-    try {
-      setError(null);
-      await api.accountApi.setDefaultPaymentMethod(paymentMethod.id);
+    setError(null);
+    
+    const result = await execute(
+      () => api.accountApi.setDefaultPaymentMethod(paymentMethod.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Default payment method updated'
+      }
+    );
+    
+    if (result) {
       await fetchData();
-      setSuccess('Default payment method updated');
-    } catch (err: any) {
-      setError(err.message || 'Failed to set default payment method');
     }
   };
 
   const handleDelete = async () => {
     if (!selectedPaymentMethod) return;
     
-    try {
-      setError(null);
-      await api.accountApi.deletePaymentMethod(selectedPaymentMethod.id);
+    setError(null);
+    
+    const result = await execute(
+      () => api.accountApi.deletePaymentMethod(selectedPaymentMethod.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Payment method deleted successfully'
+      }
+    );
+    
+    if (result) {
       await fetchData();
       setDeleteDialogOpen(false);
       setSelectedPaymentMethod(null);
-      setSuccess('Payment method deleted successfully');
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete payment method');
     }
   };
 

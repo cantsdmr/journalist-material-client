@@ -12,6 +12,7 @@ import { USER_ROLE } from '@/enums/UserEnums';
 import { AuthProvider } from 'firebase/auth';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface SocialButtonProps {
   bgcolor: string;
@@ -68,21 +69,33 @@ const SignUp: React.FC = () => {
   const [isNewSignup, setIsNewSignup] = useState(false);
   const auth = useAuth();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const navigate = useNavigate();
 
   const handleEmailSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError('');
+    
     try {
       const userCredential = await auth?.signUp(email, password);
       if (userCredential) {
-        await api?.authApi.signUp({
-          external_id: userCredential.uid,
-          email: userCredential.email,   
-          display_name: userCredential.displayName ?? '',
-          photo_url: userCredential.photoURL ?? '',
-          role_id: USER_ROLE.REGULAR_USER
-        });
-        setIsNewSignup(true);
+        const result = await execute(
+          () => api?.authApi.signUp({
+            external_id: userCredential.uid,
+            email: userCredential.email,   
+            display_name: userCredential.displayName ?? '',
+            photo_url: userCredential.photoURL ?? '',
+            role_id: USER_ROLE.REGULAR_USER
+          }),
+          {
+            showSuccessMessage: true,
+            successMessage: 'Account created successfully!'
+          }
+        );
+        
+        if (result) {
+          setIsNewSignup(true);
+        }
       }
     } catch (error) {
       setError('Failed to sign up with email and password');
@@ -90,18 +103,22 @@ const SignUp: React.FC = () => {
   };
 
   const handleProviderLogin = async (provider: AuthProvider) => {
+    setError('');
+    
     try {
       const token = await auth?.signInWithProvider(provider);
       if (token) {
-        try {
-          await api?.authApi.signIn({
-            idToken: token
-          });
-          // If signIn succeeds, user already exists - redirect to main app
-          // The useEffect will handle navigation
-        } catch (signInError) {
-          // If signIn fails, this might be a new user with social auth
-          // Let the useEffect handle the PostSignUpFlow navigation
+        // Try to sign in first (user might already exist)
+        const signInResult = await execute(
+          () => api?.authApi.signIn({ idToken: token }),
+          { showErrorToast: false } // Don't show error if user doesn't exist yet
+        );
+        
+        if (signInResult) {
+          // User already exists, they'll be redirected by useEffect
+          return;
+        } else {
+          // User doesn't exist, this is a new signup
           setIsNewSignup(true);
         }
       }

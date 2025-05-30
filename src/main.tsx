@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ApiProvider } from '@/contexts/ApiContext';
-import { UserProvider } from '@/contexts/UserContext';
+import { ProfileProvider } from '@/contexts/ProfileContext';
 import { AppProvider } from './contexts/AppContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <NotificationProvider>
         <AuthProvider>
           <ApiProvider>
-            <UserProvider>
+            <ProfileProvider>
               <ThemeProvider>
                 <AppProvider>
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -26,7 +26,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                   </LocalizationProvider>
                 </AppProvider>
               </ThemeProvider>
-            </UserProvider>
+            </ProfileProvider>
           </ApiProvider>
         </AuthProvider>
       </NotificationProvider>

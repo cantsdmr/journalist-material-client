@@ -15,6 +15,7 @@ import { PATHS } from '@/constants/paths';
 import StudioChannelCard from '@/components/studio/channel/StudioChannelCard';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Channel } from '@/APIs/ChannelAPI';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ListChannelsStudio: React.FC = () => {
   const [userChannels, setUserChannels] = useState<Channel[]>([]);
@@ -24,15 +25,19 @@ const ListChannelsStudio: React.FC = () => {
   const { api } = useApiContext();
   const navigate = useNavigate();
   const theme = useTheme();
+  const { execute } = useApiCall();
 
   const fetchMoreData = () => {
     getChannels(page + 1);
   };
 
   const getChannels = async (_page: number = page) => {
-    try {
-      const result = await api?.accountApi.getUserChannels();
-      
+    const result = await execute(
+      () => api?.accountApi.getUserChannels(),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
       setUserChannels(prev => _page === 1 
         ? result?.items ?? [] 
         : [...prev, ...(result?.items ?? [])]
@@ -40,11 +45,9 @@ const ListChannelsStudio: React.FC = () => {
       
       setPage(result?.metadata.currentPage ?? 1);
       setHasMore(result?.metadata.hasNext === true);
-    } catch (error) {
-      console.error('Failed to fetch channels:', error);
-    } finally {
-      setIsLoading(false);
     }
+    
+    setIsLoading(false);
   };
 
   useEffect(() => {

@@ -10,14 +10,14 @@ import ExpenseOrderForm from '@/components/expense-order/ExpenseOrderForm';
 import { CreateExpenseOrderData, ExpenseType } from '@/APIs/ExpenseOrderAPI';
 import { Channel } from '@/APIs/ChannelAPI';
 import { useApiContext } from '@/contexts/ApiContext';
-import { useUser } from '@/contexts/UserContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const CreateExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
   const { api } = useApiContext();
-  const { user } = useUser();
+  const { profile } = useProfile();
   
   const [channels, setChannels] = useState<Channel[]>([]);
   const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
@@ -25,11 +25,11 @@ const CreateExpenseOrderStudio: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!profile) return;
       
       // Fetch user's channels
       const channelsResult = await execute(
-        () => api.userApi.getUserChannels(user.id),
+        () => api.accountApi.getUserChannels(),
         { showErrorToast: true }
       );
       
@@ -49,7 +49,7 @@ const CreateExpenseOrderStudio: React.FC = () => {
     };
 
     fetchData();
-  }, [user, execute]);
+  }, [profile, execute]);
 
   const handleSave = async (data: CreateExpenseOrderData) => {
     const result = await execute(

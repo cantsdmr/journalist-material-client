@@ -9,7 +9,7 @@ import { Channel } from '../../../APIs/ChannelAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import ChannelItem from '@/components/channel/ChannelItem/index';
 import { alpha } from '@mui/material/styles';
-import { useUser } from '@/contexts/UserContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const ListChannels: React.FC = () => {
@@ -18,7 +18,7 @@ const ListChannels: React.FC = () => {
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { api } = useApiContext();
-  const { actions } = useUser();
+  const { actions, channelRelations } = useProfile();
   const { execute } = useApiCall();
 
   const fetchMoreData = () => {
@@ -61,7 +61,7 @@ const ListChannels: React.FC = () => {
     );
     
     if (result) {
-      await actions.refreshUser();
+      await actions.refreshProfile();
     }
   };
 
@@ -75,7 +75,7 @@ const ListChannels: React.FC = () => {
     );
     
     if (result) {
-      await actions.refreshUser();
+      await actions.refreshProfile();
     }
   };
 
@@ -137,7 +137,8 @@ const ListChannels: React.FC = () => {
             <ChannelItem 
               key={channel.id}
               channel={channel}
-              hasMembership={actions.hasMembership(channel.id)}
+              hasMembership={channelRelations.hasMembership(channel.id)}
+              membershipTier={channelRelations.getMembershipTier(channel.id)}
               onJoin={handleJoin}
               onCancel={handleCancel}
             />

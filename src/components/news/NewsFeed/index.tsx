@@ -11,6 +11,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { News } from '@/APIs/NewsAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import NewsEntry from '@/components/news/NewsEntry';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface NewsFeedProps {
   selectedTag: string;
@@ -24,21 +25,28 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   const fetchMoreData = () => {
     getNews(page + 1);
   };
 
   const getNews = async (_page: number = page) => {
-    try {
-      let newsResult;
-      
-      if (isSubscribed) {
-        newsResult = await api?.newsApi.getFollowed({ page: _page, limit: limit });
-      } else {
-        newsResult = await api?.newsApi.getTrending({ page: _page, limit: limit });
-      }
-      
+    let newsResult;
+    
+    if (isSubscribed) {
+      newsResult = await execute(
+        () => api?.newsApi.getFollowed({ page: _page, limit: limit }),
+        { showErrorToast: true }
+      );
+    } else {
+      newsResult = await execute(
+        () => api?.newsApi.getTrending({ page: _page, limit: limit }),
+        { showErrorToast: true }
+      );
+    }
+    
+    if (newsResult) {
       if (_page === 1) {
         setAllNews(newsResult?.items ?? []);
       } else {
@@ -48,11 +56,9 @@ const NewsFeed: React.FC<NewsFeedProps> = ({ selectedTag, isSubscribed = false }
       setPage(newsResult?.metadata.currentPage ?? 1);
       setLimit(newsResult?.metadata.limit ?? 10);
       setHasMore(newsResult?.metadata.hasNext === true);
-    } catch (error) {
-      console.error('Failed to fetch news:', error);
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   useEffect(() => {

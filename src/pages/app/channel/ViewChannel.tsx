@@ -17,7 +17,7 @@ import { useParams } from 'react-router-dom';
 import { Channel } from '@/APIs/ChannelAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import JCard from '@/components/common/Card';
-import { useUserInfo } from '@/hooks/useUserInfo';
+import { useProfile } from '@/contexts/ProfileContext';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewChannel: React.FC = () => {
@@ -32,9 +32,9 @@ const ViewChannel: React.FC = () => {
             getMembershipTier
         },
         actions: {
-            refreshUser
+            refreshProfile
         }
-    } = useUserInfo();
+    } = useProfile();
     const { execute } = useApiCall();
 
     // Use them in your component
@@ -72,7 +72,7 @@ const ViewChannel: React.FC = () => {
         );
         
         if (result) {
-            await refreshUser();
+            await refreshProfile();
         }
     };
 
@@ -89,18 +89,7 @@ const ViewChannel: React.FC = () => {
         );
         
         if (result) {
-            const updatedTier = channel.tiers?.find(t => t.id === tierId);
-            if (updatedTier && channel.currentUserMembership) {
-                setChannel(prev => prev ? {
-                    ...prev,
-                    currentUserMembership: {
-                        ...prev.currentUserMembership,
-                        tierId,
-                        tier: updatedTier
-                    }
-                } : null);
-            }
-            await refreshUser();
+            await refreshProfile();
         }
         
         setLoadingTierId(null);
@@ -118,7 +107,7 @@ const ViewChannel: React.FC = () => {
         );
         
         if (result) {
-            await refreshUser();
+            await refreshProfile();
         }
     };
 

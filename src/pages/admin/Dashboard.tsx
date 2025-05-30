@@ -25,6 +25,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface DashboardStats {
   totalUsers: number;
@@ -42,37 +43,53 @@ const AdminDashboard: React.FC = () => {
   
   const navigate = useNavigate();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   useEffect(() => {
     fetchDashboardStats();
   }, []);
 
   const fetchDashboardStats = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch analytics data for dashboard
-      const subscriptionAnalytics = await api.subscriptionApi.getSubscriptionAnalytics({ period: '30d' });
-      const revenueMetrics = await api.subscriptionApi.getRevenueMetrics({ period: '30d' });
+    setLoading(true);
+    setError(null);
+    
+    // Fetch analytics data for dashboard
+    const [subscriptionAnalytics, revenueMetrics] = await Promise.all([
+      execute(
+        () => api.subscriptionApi.getSubscriptionAnalytics({ period: '30d' }),
+        { showErrorToast: true }
+      ),
+      execute(
+        () => api.subscriptionApi.getRevenueMetrics({ period: '30d' }),
+        { showErrorToast: true }
+      )
+    ]);
+    
+    if (subscriptionAnalytics && revenueMetrics) {
+      // Calculate monthly revenue safely
+      let monthlyRevenue = 0;
+      if (revenueMetrics.metrics?.[0]?.channels) {
+        const channels = revenueMetrics.metrics[0].channels;
+        for (const channelKey in channels) {
+          const channel = channels[channelKey] as any;
+          monthlyRevenue += channel.revenue || 0;
+        }
+      }
       
       // Mock data for other stats (in real implementation, you'd have dedicated endpoints)
       const mockStats: DashboardStats = {
         totalUsers: 12543,
         totalChannels: 1247,
         totalSubscriptions: subscriptionAnalytics.total_subscriptions,
-        monthlyRevenue: Object.values(revenueMetrics.metrics[0]?.channels || {})
-          .reduce((sum, channel) => sum + channel.revenue, 0),
+        monthlyRevenue,
         activeSubscriptions: subscriptionAnalytics.active_subscriptions,
         newUsersThisMonth: 342
       };
       
       setStats(mockStats);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard statistics');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const formatCurrency = (amount: number) => {

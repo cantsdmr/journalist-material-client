@@ -3,7 +3,7 @@ import { useApiContext } from './ApiContext';
 import { PATHS } from '@/constants/paths';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { useUser } from './UserContext';
+import { useProfile } from './ProfileContext';
 import { createCtx } from './BaseContext';
 
 export interface AppState {
@@ -25,7 +25,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname as typeof PUBLIC_ROUTES[number]);
   const { isLoading: apiLoading } = useApiContext();
   const { user, isLoading: authLoading } = useAuth();
-  const { isLoading: userLoading } = useUser();
+  const { isLoading: userLoading } = useProfile();
   const [state, setState] = useState<AppState>({
     isLoading: true,
     error: null

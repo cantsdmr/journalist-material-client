@@ -11,6 +11,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthProvider } from 'firebase/auth';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
+
 interface SocialButtonProps {
   bgcolor: string;
 }
@@ -66,15 +68,22 @@ const Login: React.FC = () => {
   const auth = useAuth();
   const { api } = useApiContext();
   const navigate = useNavigate();
+  const { execute } = useApiCall();
 
   const handleEmailLogin = async (event: React.FormEvent) => {
     event.preventDefault();
+    setError('');
+    
     try {
       const token = await auth?.signIn(email, password);
       if (token) {
-        await api?.authApi.signIn({
-          idToken: token
-        });
+        await execute(
+          () => api?.authApi.signIn({ idToken: token }),
+          {
+            showSuccessMessage: true,
+            successMessage: 'Successfully logged in!'
+          }
+        );
       }
     } catch (error) {
       setError('Failed to login with email and password');
@@ -82,12 +91,18 @@ const Login: React.FC = () => {
   };
 
   const handleProviderLogin = async (provider: AuthProvider) => {
+    setError('');
+    
     try {
       const token = await auth?.signInWithProvider(provider);
       if (token) {
-        await api?.authApi.signIn({
-          idToken: token
-        });
+        await execute(
+          () => api?.authApi.signIn({ idToken: token }),
+          {
+            showSuccessMessage: true,
+            successMessage: 'Successfully logged in!'
+          }
+        );
       }
     } catch (error) {
       setError('Failed to login with Google');

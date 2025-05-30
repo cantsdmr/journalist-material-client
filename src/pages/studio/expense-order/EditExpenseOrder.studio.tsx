@@ -12,7 +12,7 @@ import { ExpenseOrder, UpdateExpenseOrderData, ExpenseType } from '@/APIs/Expens
 import { Channel } from '@/APIs/ChannelAPI';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
-import { useUser } from '@/contexts/UserContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 
@@ -20,7 +20,7 @@ const EditExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { api } = useApiContext();
-  const { user } = useUser();
+  const { profile } = useProfile();
   
   const [expenseOrder, setExpenseOrder] = useState<ExpenseOrder | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -30,7 +30,7 @@ const EditExpenseOrderStudio: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id || !user) return;
+      if (!id || !profile) return;
       
       try {
         setLoading(true);
@@ -47,7 +47,7 @@ const EditExpenseOrderStudio: React.FC = () => {
         
         // Fetch user's channels
         const channelsResult = await execute(
-          () => api.userApi.getUserChannels(user.id),
+          () => api.accountApi.getUserChannels(),
           { showErrorToast: true }
         );
         
@@ -70,7 +70,7 @@ const EditExpenseOrderStudio: React.FC = () => {
     };
 
     fetchData();
-  }, [id, user, execute]);
+  }, [id, profile, execute]);
 
   const handleSave = async (data: UpdateExpenseOrderData) => {
     if (!id) return;

@@ -24,6 +24,7 @@ import { ExpenseOrder } from '@/APIs/ExpenseOrderAPI';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewExpenseOrder: React.FC = () => {
   const navigate = useNavigate();
@@ -34,20 +35,24 @@ const ViewExpenseOrder: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   const fetchExpenseOrder = async () => {
     if (!id) return;
     
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await api.expenseOrderApi.getExpenseOrder(id);
+    setLoading(true);
+    setError(null);
+    
+    const result = await execute(
+      () => api.expenseOrderApi.getExpenseOrder(id),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
       setExpenseOrder(result);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch expense order');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -75,28 +80,40 @@ const ViewExpenseOrder: React.FC = () => {
     if (!expenseOrder) return;
 
     setActionLoading(true);
-    try {
-      await api.expenseOrderApi.submitExpenseOrder(expenseOrder.id);
+    
+    const result = await execute(
+      () => api.expenseOrderApi.submitExpenseOrder(expenseOrder.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order submitted successfully!'
+      }
+    );
+    
+    if (result) {
       await fetchExpenseOrder(); // Refresh data
-    } catch (err: any) {
-      setError(err.message || 'Failed to submit expense order');
-    } finally {
-      setActionLoading(false);
     }
+    
+    setActionLoading(false);
   };
 
   const handleCancel = async () => {
     if (!expenseOrder) return;
 
     setActionLoading(true);
-    try {
-      await api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id);
+    
+    const result = await execute(
+      () => api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Expense order cancelled successfully!'
+      }
+    );
+    
+    if (result) {
       await fetchExpenseOrder(); // Refresh data
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel expense order');
-    } finally {
-      setActionLoading(false);
     }
+    
+    setActionLoading(false);
   };
 
   if (loading) {

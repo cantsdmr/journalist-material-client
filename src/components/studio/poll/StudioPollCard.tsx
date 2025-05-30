@@ -22,6 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useApiContext } from '@/contexts/ApiContext';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface StudioPollCardProps {
   poll: any; // TODO: Replace with proper Poll type
@@ -36,6 +37,7 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const theme = useTheme();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -62,14 +64,19 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
   };
 
   const handleDelete = async () => {
-    try {
-      await api?.pollApi.delete(poll.id);
+    const result = await execute(
+      () => api?.pollApi.delete(poll.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Poll deleted successfully'
+      }
+    );
+    
+    if (result) {
       onRefresh();
-    } catch (error) {
-      console.error('Failed to delete poll:', error);
-    } finally {
-      setDeleteDialogOpen(false);
     }
+    
+    setDeleteDialogOpen(false);
   };
 
   const getPollStatus = () => {

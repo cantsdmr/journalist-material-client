@@ -14,8 +14,9 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { EmptyState } from '@/components/common/EmptyState';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
+import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface ListNewsProps {
   isSubscribed: boolean;
@@ -77,29 +78,31 @@ const ListNewsStudio: React.FC<ListNewsProps> = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
-  const { user } = useUser();
+  const { profile } = useProfile();
   const navigate = useNavigate();
+  const { execute } = useApiCall();
 
   const fetchNews = async (pageNum: number = page) => {
-    try {
-      if (!user) return;
-      setLoading(true);
-      const response = await api?.newsApi.getCreatorNews(user.id, { page: pageNum, limit: 12 });
+    if (!profile) return;
+    
+    setLoading(true);
+    
+    const response = await execute(
+      () => api?.newsApi.getCreatorNews(profile.id, { page: pageNum, limit: 12 }),
+      { showErrorToast: true }
+    );
 
-      if (response) {
-        if (pageNum === 1) {
-          setNews(response.items);
-        } else {
-          setNews(prev => [...prev, ...response.items]);
-        }
-        setHasMore(response.metadata.hasNext);
-        setPage(response.metadata.currentPage);
+    if (response) {
+      if (pageNum === 1) {
+        setNews(response.items);
+      } else {
+        setNews(prev => [...prev, ...response.items]);
       }
-    } catch (error) {
-      console.error('Failed to fetch news:', error);
-    } finally {
-      setLoading(false);
+      setHasMore(response.metadata.hasNext);
+      setPage(response.metadata.currentPage);
     }
+    
+    setLoading(false);
   };
 
   useEffect(() => {

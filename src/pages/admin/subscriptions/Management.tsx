@@ -44,6 +44,7 @@ import {
 } from '@/APIs/SubscriptionAPI';
 import { PaginationObject, DEFAULT_PAGINATION } from '@/utils/http';
 import { getMembershipStatusColor } from '@/constants/membership-status';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionManagement: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<AdminSubscription[]>([]);
@@ -65,6 +66,7 @@ const SubscriptionManagement: React.FC = () => {
   const [bulkReason, setBulkReason] = useState('');
   
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   useEffect(() => {
     fetchSubscriptions();
@@ -72,28 +74,34 @@ const SubscriptionManagement: React.FC = () => {
   }, [filters, pagination]);
 
   const fetchSubscriptions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await api.subscriptionApi.getAllSubscriptions(pagination, filters);
+    setLoading(true);
+    setError(null);
+    
+    const result = await execute(
+      () => api.subscriptionApi.getAllSubscriptions(pagination, filters),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
       setSubscriptions(result.items || []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load subscriptions');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const fetchAnalytics = async () => {
-    try {
-      setAnalyticsLoading(true);
-      const analyticsData = await api.subscriptionApi.getSubscriptionAnalytics({ period: '30d' });
-      setAnalytics(analyticsData);
-    } catch (err: any) {
-      console.error('Failed to load analytics:', err);
-    } finally {
-      setAnalyticsLoading(false);
+    setAnalyticsLoading(true);
+    
+    const result = await execute(
+      () => api.subscriptionApi.getSubscriptionAnalytics({ period: '30d' }),
+      { showErrorToast: false } // Don't show error for analytics
+    );
+    
+    if (result) {
+      setAnalytics(result);
     }
+    
+    setAnalyticsLoading(false);
   };
 
   const handleSearch = () => {
@@ -112,17 +120,23 @@ const SubscriptionManagement: React.FC = () => {
   const handleBulkAction = async () => {
     if (selectedSubscriptions.length === 0) return;
     
-    try {
-      setLoading(true);
-      const bulkData: BulkUpdateData = {
-        action: bulkAction,
-        subscription_ids: selectedSubscriptions,
-        reason: bulkReason || undefined
-      };
-      
-      const result = await api.subscriptionApi.bulkUpdateSubscriptions(bulkData);
-      setSuccess(`Successfully updated ${result.success} subscriptions`);
-      
+    setLoading(true);
+    
+    const bulkData: BulkUpdateData = {
+      action: bulkAction,
+      subscription_ids: selectedSubscriptions,
+      reason: bulkReason || undefined
+    };
+    
+    const result = await execute(
+      () => api.subscriptionApi.bulkUpdateSubscriptions(bulkData),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Successfully updated subscriptions'
+      }
+    );
+    
+    if (result) {
       if (result.failed > 0) {
         setError(`Failed to update ${result.failed} subscriptions`);
       }
@@ -131,17 +145,19 @@ const SubscriptionManagement: React.FC = () => {
       setSelectedSubscriptions([]);
       setBulkReason('');
       await fetchSubscriptions();
-    } catch (err: any) {
-      setError(err.message || 'Failed to perform bulk action');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const handleExport = async () => {
-    try {
-      const blob = await api.subscriptionApi.exportSubscriptions(filters, 'csv');
-      const url = window.URL.createObjectURL(blob);
+    const result = await execute(
+      () => api.subscriptionApi.exportSubscriptions(filters, 'csv'),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
+      const url = window.URL.createObjectURL(result);
       const a = document.createElement('a');
       a.href = url;
       a.download = `subscriptions-${new Date().toISOString().split('T')[0]}.csv`;
@@ -149,8 +165,6 @@ const SubscriptionManagement: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err: any) {
-      setError(err.message || 'Failed to export subscriptions');
     }
   };
 

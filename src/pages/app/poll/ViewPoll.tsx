@@ -11,7 +11,6 @@ import {
   Stack,
   IconButton,
   Button,
-  alpha,
   useTheme,
   Snackbar,
   Alert
@@ -29,6 +28,8 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import CommentIcon from '@mui/icons-material/Comment';
 import { PATHS } from '@/constants/paths';
 import { formatDistanceToNow } from 'date-fns';
+import { alpha } from '@mui/material/styles';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewPollSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -96,64 +97,72 @@ const ViewPoll: React.FC = () => {
   const [showResultsMode, setShowResultsMode] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { execute } = useApiCall();
 
   useEffect(() => {
     const fetchPoll = async () => {
-      try {
-        if (id) {
-          setLoading(true);
-          const pollResult = await api?.pollApi.get(id);
-          if (pollResult) {
-            setPoll(pollResult);
-            
-            // Fetch user's vote for this poll
-            try {
-              const voteResponse = await api?.pollApi.getUserVote(id);
-              if (voteResponse.optionId) {
-                setUserVote(voteResponse.optionId);
-              }
-            } catch (error) {
-              console.error('Failed to fetch user vote:', error);
-            }
-          }
+      if (!id) return;
+      
+      setLoading(true);
+      
+      // Fetch poll data
+      const pollResult = await execute(
+        () => api?.pollApi.get(id),
+        { showErrorToast: true }
+      );
+      
+      if (pollResult) {
+        setPoll(pollResult);
+        
+        // Fetch user's vote for this poll
+        const voteResponse = await execute(
+          () => api?.pollApi.getUserVote(id),
+          { showErrorToast: false } // Don't show error if user hasn't voted
+        );
+        
+        if (voteResponse?.optionId) {
+          setUserVote(voteResponse.optionId);
         }
-      } catch (error) {
-        console.error('Failed to fetch poll:', error);
-      } finally {
-        setLoading(false);
       }
+      
+      setLoading(false);
     };
 
     fetchPoll();
-  }, [id, api?.pollApi]);
+  }, [id, execute]);
 
   const handleVote = async (pollId: string, optionId: string) => {
-    try {
-      await api?.pollApi.vote(pollId, { optionId });
+    const result = await execute(
+      () => api?.pollApi.vote(pollId, { optionId }),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Vote recorded successfully!'
+      }
+    );
+    
+    if (result) {
       setUserVote(optionId);
       // Refresh poll to get updated vote counts
-      const updatedPoll = await api?.pollApi.get(pollId);
+      const updatedPoll = await execute(
+        () => api?.pollApi.get(pollId),
+        { showErrorToast: true }
+      );
+      
       if (updatedPoll) {
         setPoll(updatedPoll);
       }
-    } catch (error: any) {
-      console.error('Failed to vote:', error);
-      setError(error.response?.data?.message || 'Failed to vote on poll');
     }
   };
 
   const handleViewResults = async (pollId: string) => {
-    try {
-      // Fetch the latest poll results
-      const updatedPoll = await api?.pollApi.get(pollId);
-      if (updatedPoll) {
-        setPoll(updatedPoll);
-      }
-      // Show results mode
+    const updatedPoll = await execute(
+      () => api?.pollApi.get(pollId),
+      { showErrorToast: true }
+    );
+    
+    if (updatedPoll) {
+      setPoll(updatedPoll);
       setShowResultsMode(true);
-    } catch (error: any) {
-      console.error('Failed to fetch results:', error);
-      setError(error.response?.data?.message || 'Failed to fetch poll results');
     }
   };
 

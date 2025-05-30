@@ -23,6 +23,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useApiContext } from '@/contexts/ApiContext';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface StudioChannelCardProps {
   channel: Channel;
@@ -35,6 +36,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const theme = useTheme();
@@ -49,12 +51,18 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
   };
 
   const handleDelete = async () => {
-    try {
-      await api?.channelApi.deleteChannel(channel.id);
+    const result = await execute(
+      () => api?.channelApi.deleteChannel(channel.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Channel deleted successfully'
+      }
+    );
+    
+    if (result) {
       onRefresh();
-    } catch (error) {
-      console.error('Failed to delete channel:', error);
     }
+    
     setDeleteDialogOpen(false);
   };
 

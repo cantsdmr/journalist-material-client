@@ -13,6 +13,7 @@ import {
 import { Edit, Save, Cancel } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { UserProfile, UpdateProfileData } from '@/APIs/AccountAPI';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ProfileTab: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -24,26 +25,30 @@ const ProfileTab: React.FC = () => {
   const [formData, setFormData] = useState<UpdateProfileData>({});
   
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
   const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const profileData = await api.accountApi.getProfile();
-      setProfile(profileData);
+    setLoading(true);
+    setError(null);
+    
+    const result = await execute(
+      () => api.accountApi.getProfile(),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
+      setProfile(result);
       setFormData({
-        displayName: profileData.displayName,
-        photoUrl: profileData.photoUrl
+        displayName: result.displayName,
+        photoUrl: result.photoUrl
       });
-    } catch (err: any) {
-      setError(err.message || 'Failed to load profile');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const handleEdit = () => {
@@ -65,20 +70,24 @@ const ProfileTab: React.FC = () => {
   };
 
   const handleSave = async () => {
-    try {
-      setSaving(true);
-      setError(null);
-      setSuccess(null);
-      
-      const updatedProfile = await api.accountApi.updateProfile(formData);
-      setProfile(updatedProfile);
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+    
+    const result = await execute(
+      () => api.accountApi.updateProfile(formData),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Profile updated successfully'
+      }
+    );
+    
+    if (result) {
+      setProfile(result);
       setEditing(false);
-      setSuccess('Profile updated successfully');
-    } catch (err: any) {
-      setError(err.message || 'Failed to update profile');
-    } finally {
-      setSaving(false);
     }
+    
+    setSaving(false);
   };
 
   const handleInputChange = (field: keyof UpdateProfileData) => (

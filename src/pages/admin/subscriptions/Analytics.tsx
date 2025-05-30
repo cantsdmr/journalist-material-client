@@ -38,6 +38,7 @@ import {
 } from 'recharts';
 import { useApiContext } from '@/contexts/ApiContext';
 import { SubscriptionAnalytics } from '@/APIs/SubscriptionAPI';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionAnalyticsPage: React.FC = () => {
   const [analytics, setAnalytics] = useState<SubscriptionAnalytics | null>(null);
@@ -46,23 +47,26 @@ const SubscriptionAnalyticsPage: React.FC = () => {
   const [period, setPeriod] = useState('30d');
   
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   useEffect(() => {
     fetchAnalytics();
   }, [period]);
 
   const fetchAnalytics = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const analyticsData = await api.subscriptionApi.getSubscriptionAnalytics({ period });
-      setAnalytics(analyticsData);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load analytics');
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    setError(null);
+    
+    const result = await execute(
+      () => api.subscriptionApi.getSubscriptionAnalytics({ period }),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
+      setAnalytics(result);
     }
+    
+    setLoading(false);
   };
 
   const formatCurrency = (amount: number) => {

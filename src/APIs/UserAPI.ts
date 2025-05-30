@@ -29,10 +29,6 @@ export type CreateUserData = {
 const API_PATH = '/api/users'
 
 export class UserAPI extends HTTPApi {
-    private readonly SUB_PATH = {
-        PROFILE: 'profile'
-    };
-
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
     }

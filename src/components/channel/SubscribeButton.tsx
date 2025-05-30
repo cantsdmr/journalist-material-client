@@ -23,6 +23,7 @@ import {
 import { useApiContext } from '@/contexts/ApiContext';
 import { ChannelTier, ChannelMembership } from '@/APIs/ChannelAPI';
 import { PaymentMethod } from '@/APIs/AccountAPI';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface SubscribeButtonProps {
   channelId: string;
@@ -53,6 +54,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
   const [error, setError] = useState<string | null>(null);
   
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   const isSubscribed = currentMembership?.status === 'active';
   const freeTier = tiers.find(tier => tier.price === 0);
@@ -68,16 +70,22 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
   const handleSubscribeClick = async () => {
     if (isSubscribed) {
       // Unsubscribe
-      try {
-        setLoading(true);
-        setError(null);
-        await api.channelApi.unsubscribeFromChannel(channelId);
+      setLoading(true);
+      setError(null);
+      
+      const result = await execute(
+        () => api.channelApi.unsubscribeFromChannel(channelId),
+        {
+          showSuccessMessage: true,
+          successMessage: 'Successfully unsubscribed'
+        }
+      );
+      
+      if (result) {
         onSubscriptionChange?.();
-      } catch (err: any) {
-        setError(err.message || 'Failed to unsubscribe');
-      } finally {
-        setLoading(false);
       }
+      
+      setLoading(false);
     } else {
       // Subscribe - check if we need to show tier selection
       if (tiers.length === 1) {
@@ -93,39 +101,46 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
   };
 
   const handleDirectSubscribe = async (tierId: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const tier = tiers.find(t => t.id === tierId);
-      const subscribeData: any = { tier_id: tierId };
-      
-      // For paid tiers, we might need a payment method
-      if (tier && tier.price > 0) {
-        // For now, let the backend handle payment method selection
-        // In a real implementation, you'd want to ensure a payment method is selected
+    setLoading(true);
+    setError(null);
+    
+    const tier = tiers.find(t => t.id === tierId);
+    const subscribeData: any = { tier_id: tierId };
+    
+    // For paid tiers, we might need a payment method
+    if (tier && tier.price > 0) {
+      // For now, let the backend handle payment method selection
+      // In a real implementation, you'd want to ensure a payment method is selected
+    }
+    
+    const result = await execute(
+      () => api.channelApi.subscribeToChannel(channelId, subscribeData),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Successfully subscribed!'
       }
-      
-      await api.channelApi.subscribeToChannel(channelId, subscribeData);
+    );
+    
+    if (result) {
       onSubscriptionChange?.();
       setDialogOpen(false);
-    } catch (err: any) {
-      setError(err.message || 'Failed to subscribe');
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
   const loadPaymentMethods = async () => {
-    try {
-      const methods = await api.accountApi.getPaymentMethods();
-      setPaymentMethods(methods.items ?? []);
-      const defaultMethod = methods.items?.find(m => m.isDefault);
+    const result = await execute(
+      () => api.accountApi.getPaymentMethods(),
+      { showErrorToast: false } // Don't show error toast for this
+    );
+    
+    if (result) {
+      setPaymentMethods(result.items ?? []);
+      const defaultMethod = result.items?.find(m => m.isDefault);
       if (defaultMethod) {
         setSelectedPaymentMethodId(defaultMethod.id);
       }
-    } catch (err: any) {
-      console.error('Failed to load payment methods:', err);
     }
   };
 

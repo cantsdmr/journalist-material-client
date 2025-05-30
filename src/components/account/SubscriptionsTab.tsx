@@ -20,6 +20,7 @@ import { Cancel, Subscriptions as SubscriptionsIcon } from '@mui/icons-material'
 import { useApiContext } from '@/contexts/ApiContext';
 import { Subscription } from '@/APIs/AccountAPI';
 import { getMembershipStatusColor, getMembershipStatusLabel, canCancelMembership } from '@/constants/membership-status';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionsTab: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -31,43 +32,49 @@ const SubscriptionsTab: React.FC = () => {
   const [canceling, setCanceling] = useState(false);
   
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   useEffect(() => {
     fetchSubscriptions();
   }, []);
 
   const fetchSubscriptions = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const subscriptionsData = await api.accountApi.getSubscriptions();
-      setSubscriptions(subscriptionsData.items ?? []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load subscriptions');
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    setError(null);
+    
+    const result = await execute(
+      () => api.accountApi.getSubscriptions(),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
+      setSubscriptions(result.items ?? []);
     }
+    
+    setLoading(false);
   };
 
   const handleCancelSubscription = async () => {
     if (!selectedSubscription) return;
     
-    try {
-      setCanceling(true);
-      setError(null);
-      await api.accountApi.cancelSubscription(selectedSubscription.id);
+    setCanceling(true);
+    setError(null);
+    
+    const result = await execute(
+      () => api.accountApi.cancelSubscription(selectedSubscription.id),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Subscription canceled successfully'
+      }
+    );
+    
+    if (result) {
       await fetchSubscriptions();
       setCancelDialogOpen(false);
       setSelectedSubscription(null);
-      setSuccess('Subscription canceled successfully');
-      
-      // Clear success message after 5 seconds
-      setTimeout(() => setSuccess(null), 5000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to cancel subscription');
-    } finally {
-      setCanceling(false);
     }
+    
+    setCanceling(false);
   };
 
   const openCancelDialog = (subscription: Subscription) => {

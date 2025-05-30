@@ -15,7 +15,7 @@ import {
 import { DateTimePicker } from '@mui/x-date-pickers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { useUserInfo } from '@/hooks/useUserInfo';
+import { useProfile } from '@/contexts/ProfileContext';
 
 interface PollOption {
   text: string;
@@ -41,7 +41,7 @@ const PollForm: React.FC<PollFormProps> = ({
   onSubmit,
   submitButtonText = 'Submit'
 }) => {
-  const { user : { channels } } = useUserInfo();
+  const { profile : { channels } } = useProfile();
   const [formData, setFormData] = useState<PollFormData>({
     title: initialData?.title || '',
     description: initialData?.description || '',

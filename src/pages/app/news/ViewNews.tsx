@@ -26,6 +26,7 @@ import JEditor from '@/components/editor/JEditor';
 import { alpha } from '@mui/material/styles';
 import { parseContent } from '@/utils/json';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewNewsSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -110,28 +111,30 @@ const ViewNewsSkeleton = () => (
 const ViewNews: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const [entry, setEntry] = useState<Nullable<News>>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getNews = async () => {
-      try {
-        if (id) {
-          setLoading(true);
-          const newsResult = await api?.newsApi.get(id);
-          if (newsResult) {
-            setEntry(newsResult);
-          }
+      if (id) {
+        setLoading(true);
+        
+        const result = await execute(
+          () => api?.newsApi.get(id),
+          { showErrorToast: true }
+        );
+        
+        if (result) {
+          setEntry(result);
         }
-      } catch (error) {
-        console.error('Failed to fetch news:', error);
-      } finally {
+        
         setLoading(false);
       }
     };
 
     getNews();
-  }, [id, api?.newsApi]);
+  }, [id, execute]);
 
   if (loading) {
     return <ViewNewsSkeleton />;

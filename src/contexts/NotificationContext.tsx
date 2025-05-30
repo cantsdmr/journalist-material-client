@@ -22,6 +22,8 @@ export interface NotificationContextValue {
 export interface ValidationError {
   property: string;
   constraints: Record<string, string>;
+  value?: any; // Optional: the value that failed validation
+  children?: ValidationError[]; // Optional: nested validation errors
 }
 
 const NotificationContext = createContext<NotificationContextValue | null>(null);
@@ -74,17 +76,28 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const showValidationErrors = useCallback((errors: ValidationError[]) => {
     if (errors.length === 0) return;
     
-    // Format validation errors into a readable message
-    const errorMessages = errors.map(error => {
+    // Helper function to format individual error
+    const formatError = (error: ValidationError, prefix = ''): string => {
       const constraintMessages = Object.values(error.constraints || {});
-      return `${error.property}: ${constraintMessages.join(', ')}`;
-    });
+      const errorText = `${prefix}${error.property}: ${constraintMessages.join(', ')}`;
+      
+      // Handle nested errors if present
+      if (error.children && error.children.length > 0) {
+        const childErrors = error.children.map(child => formatError(child, '  '));
+        return `${errorText}\n${childErrors.join('\n')}`;
+      }
+      
+      return errorText;
+    };
+    
+    // Format all validation errors
+    const errorMessages = errors.map(error => formatError(error));
     
     const message = errorMessages.length === 1 
       ? errorMessages[0]
       : `Validation errors:\n${errorMessages.map(msg => `• ${msg}`).join('\n')}`;
     
-    showNotification(message, 'error', 8000); // Longer duration for validation errors
+    showNotification(message, 'error', 10000); // Longer duration for validation errors
   }, [showNotification]);
 
   const hideNotification = useCallback(() => {

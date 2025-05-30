@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import { USER_ROLE } from '@/enums/UserEnums';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface UserProfile {
   primaryRole: string;
@@ -23,6 +24,7 @@ const PostSignUpFlow: React.FC = () => {
   });
   const navigate = useNavigate();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   const steps = ['Welcome', 'Tell us about yourself', 'Your interests', 'Get started'];
 
@@ -70,18 +72,18 @@ const PostSignUpFlow: React.FC = () => {
 
   const updateUserRole = async (roleId: number) => {
     setLoading(true);
-    try {
-      console.log('PostSignUpFlow: Updating user role to:', roleId);
-      // Update user role via account API
-      await api?.accountApi.updateProfile({ roleId });
-      console.log('PostSignUpFlow: User role updated successfully');
-    } catch (error) {
-      console.error('PostSignUpFlow: Error updating user role:', error);
-      // Don't block the UI flow even if role update fails
-      // The user can always update their role later in settings
-    } finally {
-      setLoading(false);
-    }
+    console.log('PostSignUpFlow: Updating user role to:', roleId);
+    
+    await execute(
+      () => api?.accountApi.updateProfile({ roleId }),
+      {
+        showSuccessMessage: false, // Don't show success message for this
+        showErrorToast: false // Don't block the UI flow even if role update fails
+      }
+    );
+    
+    console.log('PostSignUpFlow: User role update completed');
+    setLoading(false);
   };
 
   const handleInterestToggle = (interest: string) => {

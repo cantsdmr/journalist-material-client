@@ -9,7 +9,7 @@ import {
   Chip
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Channel } from '@/APIs/ChannelAPI';
+import { Channel, ChannelTier } from '@/APIs/ChannelAPI';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { PATHS } from '@/constants/paths';
@@ -17,6 +17,7 @@ import { PATHS } from '@/constants/paths';
 interface ChannelItemProps {
   channel: Channel;
   hasMembership: boolean;
+  membershipTier: ChannelTier | null;
   onJoin: (channelId: string, tierId?: string) => void;
   onCancel: (channelId: string) => void;
 }
@@ -24,11 +25,13 @@ interface ChannelItemProps {
 const ChannelItem: React.FC<ChannelItemProps> = ({ 
   channel, 
   hasMembership,
+  membershipTier,
   onJoin,
   onCancel
 }) => {
   const navigate = useNavigate();
   const currentMembership = hasMembership;
+  const currentTier = membershipTier;
   const defaultTier = channel.tiers?.find(tier => tier.isDefault);
 
   const handleClick = () => {
@@ -93,7 +96,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
 
           {currentMembership ? (
             <Chip
-              label={currentMembership.tier.name}
+              label={currentTier?.name}
               color="primary"
               onDelete={handleJoin}
               size="small"

@@ -9,7 +9,7 @@ import { OutputData } from '@editorjs/editorjs';
 import { NEWS_MEDIA_FORMAT, NEWS_MEDIA_TYPE, NEWS_STATUS } from '@/enums/NewsEnums';
 import JEditor from '@/components/editor/JEditor';
 import NewsSocialLinks from '@/components/news/NewsSocialLinks';
-import { useUserInfo } from '@/hooks/useUserInfo';
+import { useProfile } from '@/contexts/ProfileContext';
 import ImageUpload from '@/components/common/ImageUpload';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
@@ -27,16 +27,16 @@ const NewsForm: React.FC<NewsFormProps> = ({
   onSubmit,
   submitButtonText
 }) => {
-  const { user } = useUserInfo();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   
-  // Check if user has channels
+  // Check if profile has channels
   useEffect(() => {
-    if (user && (!user.channels || user.channels.length === 0)) {
-      // User has no channels
+    if (profile && (!profile.channels || profile.channels.length === 0)) {
+      // Profile has no channels
       return;
     }
-  }, [user]);
+  }, [profile]);
 
   const [formData, setFormData] = useState<any>(() => ({
     title: initialData?.title || '',
@@ -82,7 +82,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
     }));
   }, []);
 
-  const hasChannel = user?.channels && user.channels.length > 0;
+  const hasChannel = profile?.channels && profile.channels.length > 0;
 
   return !hasChannel ? (
     <Box sx={{ 
@@ -114,7 +114,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
         )}
 
         {/* Warning Alert when no channels */}
-        {user && (!user.channels || user.channels.length === 0) && (
+        {profile && (!profile.channels || profile.channels.length === 0) && (
           <Alert 
             severity="warning"
             action={
@@ -132,7 +132,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
         )}
 
         {/* Rest of your form components */}
-        {user?.channels && user.channels.length > 0 ? (
+        {profile?.channels && profile.channels.length > 0 ? (
           <>
             {/* Media Section */}
             <Box>
@@ -209,7 +209,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
                       }))}
                       required
                     >
-                      {user?.channels.map((channel) => (
+                      {profile?.channels.map((channel) => (
                         <MenuItem key={channel.channelId} value={channel.channelId}>
                           {channel.channelName}
                         </MenuItem>
@@ -347,7 +347,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
             <Button
               type="submit"
               variant="contained"
-              disabled={loading || !user?.channels?.length}
+              disabled={loading || !profile?.channels?.length}
               sx={{
                 py: 1.5,
                 textTransform: 'none',

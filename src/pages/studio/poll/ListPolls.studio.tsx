@@ -12,9 +12,10 @@ import { alpha } from '@mui/material/styles';
 import AddChartIcon from '@mui/icons-material/AddChart';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
-import { useUserInfo } from '@/hooks/useUserInfo';
+import { useProfile } from '@/contexts/ProfileContext';
 import { EmptyState } from '@/components/common/EmptyState';
 import StudioPollCard from '@/components/studio/poll/StudioPollCard';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ListPollsStudio: React.FC = () => {
   const [polls, setPolls] = useState<any[]>([]);
@@ -22,20 +23,24 @@ const ListPollsStudio: React.FC = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
   const { api } = useApiContext();
-  const { user } = useUserInfo();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const theme = useTheme();
+  const { execute } = useApiCall();
 
   const fetchMoreData = () => {
     getPolls(page + 1);
   };
 
   const getPolls = async (_page: number = page) => {
-    try {
-      if (!user?.id) return;
+    if (!profile?.id) return;
 
-      const result = await api?.pollApi.getUserPolls(user.id);
-      
+    const result = await execute(
+      () => api?.pollApi.getUserPolls(profile.id),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
       setPolls(prev => _page === 1 
         ? result?.items ?? [] 
         : [...prev, ...(result?.items ?? [])]
@@ -43,11 +48,9 @@ const ListPollsStudio: React.FC = () => {
       
       setPage(result?.metadata.currentPage ?? 1);
       setHasMore(result?.metadata.hasNext === true);
-    } catch (error) {
-      console.error('Failed to fetch polls:', error);
-    } finally {
-      setIsLoading(false);
     }
+    
+    setIsLoading(false);
   };
 
   useEffect(() => {

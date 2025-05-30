@@ -1,73 +1,109 @@
 import { useState, useEffect } from 'react';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Channel, ChannelTier, CreateChannelTierData, EditChannelData, EditChannelTierData } from '@/APIs/ChannelAPI';
+import { useApiCall } from '@/hooks/useApiCall';
 
 export const useChannel = (channelId?: string) => {
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const [channel, setChannel] = useState<Channel | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchChannel = async () => {
     if (!channelId) return;
-    try {
-      setIsLoading(true);
-      const data = await api?.channelApi.getChannel(channelId);
-      setChannel(data || null);
-    } catch (error) {
-      console.error('Failed to fetch channel:', error);
-    } finally {
-      setIsLoading(false);
+    
+    setIsLoading(true);
+    
+    const result = await execute(
+      () => api?.channelApi.getChannel(channelId),
+      { showErrorToast: true }
+    );
+    
+    if (result) {
+      setChannel(result);
     }
+    
+    setIsLoading(false);
   };
 
   const updateChannel = async (data: EditChannelData) => {
     if (!channelId) return;
-    try {
-      await api?.channelApi.updateChannel(channelId, data);
+    
+    const result = await execute(
+      () => api?.channelApi.updateChannel(channelId, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Channel updated successfully'
+      }
+    );
+    
+    if (result) {
       await fetchChannel();
-    } catch (error) {
-      console.error('Failed to update channel:', error);
     }
   };
 
   // Tier operations
   const createTier = async (data: CreateChannelTierData) => {
     if (!channelId) return;
-    try {
-      await api?.channelApi.createTier(channelId, data);
+    
+    const result = await execute(
+      () => api?.channelApi.createTier(channelId, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Tier created successfully'
+      }
+    );
+    
+    if (result) {
       await fetchChannel();
-    } catch (error) {
-      console.error('Failed to create tier:', error);
     }
   };
 
   const updateTier = async (tierId: string, data: EditChannelTierData) => {
     if (!channelId) return;
-    try {
-      await api?.channelApi.updateTier(channelId, tierId, data);
+    
+    const result = await execute(
+      () => api?.channelApi.updateTier(channelId, tierId, data),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Tier updated successfully'
+      }
+    );
+    
+    if (result) {
       await fetchChannel();
-    } catch (error) {
-      console.error('Failed to update tier:', error);
     }
   };
 
   const deleteTier = async (tierId: string) => {
     if (!channelId) return;
-    try {
-      await api?.channelApi.deleteTier(channelId, tierId);
+    
+    const result = await execute(
+      () => api?.channelApi.deleteTier(channelId, tierId),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Tier deleted successfully'
+      }
+    );
+    
+    if (result) {
       await fetchChannel();
-    } catch (error) {
-      console.error('Failed to delete tier:', error);
     }
   };
 
   const updateTiers = async (tiers: ChannelTier[]) => {
     if (!channelId) return;
-    try {
-      await api?.channelApi.updateTiers(channelId, tiers);
+    
+    const result = await execute(
+      () => api?.channelApi.updateTiers(channelId, tiers),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Tiers updated successfully'
+      }
+    );
+    
+    if (result) {
       await fetchChannel();
-    } catch (error) {
-      console.error('Failed to update tiers:', error);
     }
   };
 

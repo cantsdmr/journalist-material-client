@@ -9,6 +9,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { NewsTag } from '@/APIs/NewsAPI';
 import { useApiContext } from '@/contexts/ApiContext';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const SCROLL_AMOUNT = 200;
 
@@ -20,6 +21,7 @@ interface NewsTagsProps {
 const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
   const [newsTags, setNewsTags] = useState<NewsTag[]>([]);
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const theme = useTheme();
   const tagsContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -32,16 +34,16 @@ const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
   };
 
   const fetchTags = async () => {
-    try {
-      const tagsResult = await api?.newsApi.getTags();
-      if (tagsResult?.items) {
-        setNewsTags([
-          { id: 'all', tagId: 'all', title: 'All' },
-          ...tagsResult.items
-        ]);
-      }
-    } catch (error) {
-      console.error('Failed to fetch tags:', error);
+    const result = await execute(
+      () => api?.newsApi.getTags(),
+      { showErrorToast: true }
+    );
+    
+    if (result?.items) {
+      setNewsTags([
+        { id: 'all', tagId: 'all', title: 'All' },
+        ...result.items
+      ]);
     }
   };
 

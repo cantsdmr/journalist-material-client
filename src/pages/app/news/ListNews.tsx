@@ -11,6 +11,7 @@ import NewsEntry from '@/components/news/NewsEntry';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { EmptyState } from '@/components/common/EmptyState';
 import { alpha } from '@mui/material/styles';
+import { useApiCall } from '@/hooks/useApiCall';
 
 interface ListNewsProps {
   isSubscribed: boolean;
@@ -60,28 +61,32 @@ const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   const fetchNews = async (_page: number = page) => {
-    try {
-      setLoading(true);
-      const response = isSubscribed 
-        ? await api?.newsApi.getFollowed({ page: _page, limit: 12 })
-        : await api?.newsApi.getTrending({ page: _page, limit: 12 });
+    setLoading(true);
+    
+    const response = isSubscribed 
+      ? await execute(
+          () => api?.newsApi.getFollowed({ page: _page, limit: 12 }),
+          { showErrorToast: true }
+        )
+      : await execute(
+          () => api?.newsApi.getTrending({ page: _page, limit: 12 }),
+          { showErrorToast: true }
+        );
 
-      if (response) {
-        if (_page === 1) {
-          setNews(response.items);
-        } else {
-          setNews(prev => [...prev, ...response.items]);
-        }
-        setHasMore(response.metadata.hasNext);
-        setPage(response.metadata.currentPage);
+    if (response) {
+      if (_page === 1) {
+        setNews(response.items);
+      } else {
+        setNews(prev => [...prev, ...response.items]);
       }
-    } catch (error) {
-      console.error('Failed to fetch news:', error);
-    } finally {
-      setLoading(false);
+      setHasMore(response.metadata.hasNext);
+      setPage(response.metadata.currentPage);
     }
+    
+    setLoading(false);
   };
 
   useEffect(() => {

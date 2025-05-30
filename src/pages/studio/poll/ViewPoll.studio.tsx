@@ -16,6 +16,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import PollChartResults from '@/components/studio/poll/PollChartResults';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewPollSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -68,28 +69,30 @@ const ViewPollSkeleton = () => (
 const ViewPollStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { api } = useApiContext();
+  const { execute } = useApiCall();
   const [poll, setPoll] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getPoll = async () => {
-      try {
-        if (id) {
-          setLoading(true);
-          const result = await api?.pollApi.get(id);
-          if (result) {
-            setPoll(result);
-          }
+      if (id) {
+        setLoading(true);
+        
+        const result = await execute(
+          () => api?.pollApi.get(id),
+          { showErrorToast: true }
+        );
+        
+        if (result) {
+          setPoll(result);
         }
-      } catch (error) {
-        console.error('Failed to fetch poll:', error);
-      } finally {
+        
         setLoading(false);
       }
     };
 
     getPoll();
-  }, [id, api?.pollApi]);
+  }, [id, execute]);
 
   if (loading) {
     return <ViewPollSkeleton />;
