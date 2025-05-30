@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useApiContext } from './ApiContext';
 import { PATHS } from '@/constants/paths';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import { useProfile } from './ProfileContext';
 import { createCtx } from './BaseContext';
 
 export interface AppState {
