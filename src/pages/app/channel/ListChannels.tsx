@@ -137,6 +137,7 @@ const ListChannels: React.FC = () => {
             <ChannelItem 
               key={channel.id}
               channel={channel}
+              hasMembership={actions.hasMembership(channel.id)}
               onJoin={handleJoin}
               onCancel={handleCancel}
             />

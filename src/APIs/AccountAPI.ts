@@ -1,21 +1,26 @@
 import { DEFAULT_PAGINATION, HTTPApi, PaginatedCollection, PaginationObject } from "@/utils/http";
 import { AxiosJournalist } from "@/utils/axios";
-import { Channel } from "./ChannelAPI";
-import { ApiResponse, ChannelTier } from "./ChannelAPI";
+import { Channel, ChannelMembership } from "./ChannelAPI";
+import { ChannelTier } from "./ChannelAPI";
 
 export type UserProfile = {
   id: string;
+  externalId: string;
   email: string;
-  display_name: string;
-  photo_url?: string;
-  role: number;
-  status: number;
-  last_login?: string;
+  displayName: string;
+  photoUrl?: string;
+  roleId: number;
+  statusId: number;
+  createdAt: string;
+  updatedAt: string;
+  lastLogin?: string;
+  memberships?: ChannelMembership[];
+  channelUsers?: ChannelUser[];
 };
 
 export type UpdateProfileData = {
-  display_name?: string;
-  photo_url?: string;
+  displayName?: string;
+  photoUrl?: string;
   roleId?: number;
 };
 
@@ -28,12 +33,12 @@ export type PaymentMethodType = {
 
 export type PaymentMethod = {
   id: string;
-  type_id: number;
+  typeId: number;
   type: PaymentMethodType;
   currency: string;
-  is_default: boolean;
-  expires_at?: string;
-  last_used_at?: string;
+  isDefault: boolean;
+  expiresAt?: string;
+  lastUsedAt?: string;
   details: {
     email?: string; // PayPal
     cardNumber?: string; // iyzico (masked)
@@ -113,11 +118,11 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async getProfile() {
-    return this._get<ApiResponse<UserProfile>>(`${API_PATH}/profile`);
+    return this._get<UserProfile>(`${API_PATH}/profile`);
   }
 
   public async updateProfile(data: UpdateProfileData) {
-    return this._put<ApiResponse<UserProfile>>(`${API_PATH}/profile`, data);
+    return this._put<UserProfile>(`${API_PATH}/profile`, data);
   }
 
   public async getPaymentMethods() {
@@ -125,15 +130,15 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async addPaymentMethod(data: AddPaymentMethodData) {
-    return this._post<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods`, data);
+    return this._post<PaymentMethod>(`${API_PATH}/payment-methods`, data);
   }
 
   public async updatePaymentMethod(paymentMethodId: string, data: UpdatePaymentMethodData) {
-    return this._put<ApiResponse<PaymentMethod>>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
+    return this._put<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
   }
 
   public async deletePaymentMethod(paymentMethodId: string) {
-    return this._remove<ApiResponse<void>>(`${API_PATH}/payment-methods/${paymentMethodId}`);
+    return this._remove<void>(`${API_PATH}/payment-methods/${paymentMethodId}`);
   }
 
   public async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethod> {
@@ -153,7 +158,7 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async cancelSubscription(subscriptionId: string){
-    return this._remove<ApiResponse<void>>(`${API_PATH}/subscriptions/${subscriptionId}`);
+    return this._remove<void>(`${API_PATH}/subscriptions/${subscriptionId}`);
   }
 
   public async getUserChannels(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {

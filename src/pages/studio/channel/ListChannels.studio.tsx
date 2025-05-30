@@ -13,7 +13,6 @@ import AddToQueueIcon from '@mui/icons-material/AddToQueue';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import StudioChannelCard from '@/components/studio/channel/StudioChannelCard';
-import { useUserInfo } from '@/hooks/useUserInfo';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Channel } from '@/APIs/ChannelAPI';
 
@@ -23,7 +22,6 @@ const ListChannelsStudio: React.FC = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState(true);
   const { api } = useApiContext();
-  const { user } = useUserInfo();
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -33,9 +31,7 @@ const ListChannelsStudio: React.FC = () => {
 
   const getChannels = async (_page: number = page) => {
     try {
-      if (!user?.id) return;
-
-      const result = await api?.accountApi.getUserChannels(user.id);
+      const result = await api?.accountApi.getUserChannels();
       
       setUserChannels(prev => _page === 1 
         ? result?.items ?? [] 

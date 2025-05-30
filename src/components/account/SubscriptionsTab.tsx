@@ -41,7 +41,7 @@ const SubscriptionsTab: React.FC = () => {
       setLoading(true);
       setError(null);
       const subscriptionsData = await api.accountApi.getSubscriptions();
-      setSubscriptions(subscriptionsData);
+      setSubscriptions(subscriptionsData.items ?? []);
     } catch (err: any) {
       setError(err.message || 'Failed to load subscriptions');
     } finally {

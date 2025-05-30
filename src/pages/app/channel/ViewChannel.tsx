@@ -201,7 +201,7 @@ const ViewChannel: React.FC = () => {
                     />
                     <Typography variant="h4" gutterBottom>{channel.name}</Typography>
                     <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                        {channel.membershipCount.toLocaleString('en-US', {
+                        {channel.stats?.membershipCount?.toLocaleString('en-US', {
                             notation: 'compact',
                             maximumFractionDigits: 1
                         })} members • {channel.tiers?.length || 0} tiers

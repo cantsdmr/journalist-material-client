@@ -14,8 +14,6 @@ export type Channel = {
     logoUrl?: string;
     bannerUrl?: string;
     status: number;
-    membershipCount: number;
-    currentUserMembership?: ChannelMembership | null;
     memberships?: ChannelMembership[];
     news?: News[];
     polls?: Poll[];
@@ -23,7 +21,7 @@ export type Channel = {
     tiers?: ChannelTier[];
     tags?: string[];
     stats?: {
-        memberCount: number;
+        membershipCount: number;
         newsCount: number;
         pollCount: number;
     };
@@ -253,38 +251,5 @@ export class ChannelAPI extends HTTPApi {
     /** @deprecated Use unsubscribeFromChannel instead */
     public async cancelMembership(channelId: string): Promise<void> {
         return this.unsubscribeFromChannel(channelId);
-    }
-
-    // Utility methods for checking subscription status
-    public async getMembership(channelId: string): Promise<ChannelMembership | null> {
-        try {
-            const channel = await this.getChannel(channelId);
-            return channel.currentUserMembership || null;
-        } catch {
-            return null;
-        }
-    }
-
-    public async hasMembership(channelId: string): Promise<boolean> {
-        const membership = await this.getMembership(channelId);
-        return membership !== null && membership.status === 'active';
-    }
-
-    public async getMembershipTier(channelId: string): Promise<string | null> {
-        const membership = await this.getMembership(channelId);
-        return membership?.tier?.name || null;
-    }
-
-    public async isFollowing(channelId: string): Promise<boolean> {
-        return this.hasMembership(channelId);
-    }
-
-    public async isSubscribed(channelId: string): Promise<boolean> {
-        const membership = await this.getMembership(channelId);
-        return membership !== null && membership.status === 'active' && (membership.tier?.price || 0) > 0;
-    }
-
-    public async getSubscriptionTier(channelId: string): Promise<string | null> {
-        return this.getMembershipTier(channelId);
     }
 }

@@ -119,8 +119,8 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
   const loadPaymentMethods = async () => {
     try {
       const methods = await api.accountApi.getPaymentMethods();
-      setPaymentMethods(methods);
-      const defaultMethod = methods.find(m => m.is_default);
+      setPaymentMethods(methods.items ?? []);
+      const defaultMethod = methods.items?.find(m => m.isDefault);
       if (defaultMethod) {
         setSelectedPaymentMethodId(defaultMethod.id);
       }

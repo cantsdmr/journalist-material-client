@@ -36,8 +36,8 @@ const ProfileTab: React.FC = () => {
       const profileData = await api.accountApi.getProfile();
       setProfile(profileData);
       setFormData({
-        display_name: profileData.display_name,
-        photo_url: profileData.photo_url
+        displayName: profileData.displayName,
+        photoUrl: profileData.photoUrl
       });
     } catch (err: any) {
       setError(err.message || 'Failed to load profile');
@@ -56,8 +56,8 @@ const ProfileTab: React.FC = () => {
     setEditing(false);
     if (profile) {
       setFormData({
-        display_name: profile.display_name,
-        photo_url: profile.photo_url
+        displayName: profile.displayName,
+        photoUrl: profile.photoUrl
       });
     }
     setError(null);
@@ -120,20 +120,20 @@ const ProfileTab: React.FC = () => {
         {/* Avatar Section */}
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
           <Avatar
-            src={formData.photo_url || profile.photo_url}
+            src={formData.photoUrl || profile.photoUrl}
             sx={{ width: 120, height: 120, mb: 2 }}
           />
           <Typography variant="h6">{profile.email}</Typography>
           <Typography variant="body2" color="text.secondary">
-            Joined {new Date(profile.last_login || '').toLocaleDateString()}
+            Joined {new Date(profile.lastLogin || '').toLocaleDateString()}
           </Typography>
         </Box>
 
         {/* Form Fields */}
         <TextField
           label="Display Name"
-          value={formData.display_name || ''}
-          onChange={handleInputChange('display_name')}
+          value={formData.displayName || ''}
+          onChange={handleInputChange('displayName')}
           disabled={!editing}
           fullWidth
           variant="outlined"
@@ -141,8 +141,8 @@ const ProfileTab: React.FC = () => {
 
         <TextField
           label="Photo URL"
-          value={formData.photo_url || ''}
-          onChange={handleInputChange('photo_url')}
+          value={formData.photoUrl || ''}
+          onChange={handleInputChange('photoUrl')}
           disabled={!editing}
           fullWidth
           variant="outlined"

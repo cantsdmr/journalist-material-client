@@ -16,17 +16,19 @@ import { PATHS } from '@/constants/paths';
 
 interface ChannelItemProps {
   channel: Channel;
+  hasMembership: boolean;
   onJoin: (channelId: string, tierId?: string) => void;
   onCancel: (channelId: string) => void;
 }
 
 const ChannelItem: React.FC<ChannelItemProps> = ({ 
   channel, 
+  hasMembership,
   onJoin,
   onCancel
 }) => {
   const navigate = useNavigate();
-  const currentMembership = channel.currentUserMembership;
+  const currentMembership = hasMembership;
   const defaultTier = channel.tiers?.find(tier => tier.isDefault);
 
   const handleClick = () => {
@@ -142,7 +144,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             gap: 0.5
           }}>
             <PeopleIcon sx={{ fontSize: 16 }} />
-            {channel.membershipCount.toLocaleString('en-US', { 
+            {channel.stats?.membershipCount?.toLocaleString('en-US', { 
               notation: 'compact',
               maximumFractionDigits: 1 
             })}

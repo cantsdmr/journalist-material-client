@@ -29,7 +29,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!authUser?.uid) return;
     setIsLoading(true);
     try {
-      const data = await api.userApi.getUserInfoByExternalId(authUser.uid);
+      const data = await api.accountApi.getProfile();
       setUser(data);
     } finally {
       setIsLoading(false);

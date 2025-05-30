@@ -45,8 +45,8 @@ const PaymentMethodsTab: React.FC = () => {
         api.accountApi.getPaymentMethods(),
         api.accountApi.getAvailablePaymentMethods()
       ]);
-      setPaymentMethods(methods);
-      setAvailableTypes(types);
+      setPaymentMethods(methods.items ?? []);
+      setAvailableTypes(types.items ?? []);
     } catch (err: any) {
       setError(err.message || 'Failed to load payment methods');
     } finally {
@@ -115,7 +115,7 @@ const PaymentMethodsTab: React.FC = () => {
   };
 
   const getPaymentMethodDetails = (method: PaymentMethod) => {
-    switch (method.type_id) {
+    switch (method.typeId) {
       case 3: // PayPal
         return method.details.email;
       case 4: // iyzico
@@ -191,13 +191,13 @@ const PaymentMethodsTab: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Stack direction="row" spacing={2} alignItems="center">
-                      {getPaymentMethodIcon(method.type_id)}
+                      {getPaymentMethodIcon(method.typeId)}
                       <Box sx={{ flex: 1 }}>
                         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                           <Typography variant="subtitle1">
                             {method.type.name}
                           </Typography>
-                          {method.is_default && (
+                          {method.isDefault && (
                             <Chip label="Default" size="small" color="primary" />
                           )}
                         </Stack>
@@ -207,9 +207,9 @@ const PaymentMethodsTab: React.FC = () => {
                         <Typography variant="caption" color="text.secondary">
                           {method.currency.toUpperCase()}
                         </Typography>
-                        {method.last_used_at && (
+                        {method.lastUsedAt && (
                           <Typography variant="caption" color="text.secondary" display="block">
-                            Last used: {new Date(method.last_used_at).toLocaleDateString()}
+                            Last used: {new Date(method.lastUsedAt).toLocaleDateString()}
                           </Typography>
                         )}
                       </Box>
@@ -217,10 +217,10 @@ const PaymentMethodsTab: React.FC = () => {
                         <IconButton
                           size="small"
                           onClick={() => handleSetDefault(method)}
-                          disabled={method.is_default}
-                          title={method.is_default ? "Already default" : "Set as default"}
+                          disabled={method.isDefault}
+                          title={method.isDefault ? "Already default" : "Set as default"}
                         >
-                          {method.is_default ? <Star color="primary" /> : <StarBorder />}
+                          {method.isDefault ? <Star color="primary" /> : <StarBorder />}
                         </IconButton>
                         <IconButton
                           size="small"
@@ -254,7 +254,7 @@ const PaymentMethodsTab: React.FC = () => {
         <DialogContent>
           <Typography>
             Are you sure you want to delete this payment method?
-            {selectedPaymentMethod?.is_default && (
+            {selectedPaymentMethod?.isDefault && (
               <Alert severity="warning" sx={{ mt: 2 }}>
                 This is your default payment method. You'll need to set another payment method as default.
               </Alert>
