@@ -7,6 +7,8 @@ import { AuthAPI } from "./AuthAPI";
 import { AccountAPI } from "./AccountAPI";
 import { ExpenseOrderAPI } from "./ExpenseOrderAPI";
 import { SubscriptionAPI } from "./SubscriptionAPI";
+import { StudioAPI } from "./StudioAPI";
+import { TagAPI } from "./TagAPI";
 
 export class AppAPI {
     private axiosJ: AxiosJournalist
@@ -18,6 +20,8 @@ export class AppAPI {
     public accountApi: AccountAPI;
     public expenseOrderApi: ExpenseOrderAPI;
     public subscriptionApi: SubscriptionAPI;
+    public studioApi: StudioAPI;
+    public tagApi: TagAPI;
 
     constructor() {
         this.axiosJ = new AxiosJournalist()
@@ -42,6 +46,8 @@ export class AppAPI {
         this.accountApi = new AccountAPI(this.axiosJ)
         this.expenseOrderApi = new ExpenseOrderAPI(this.axiosJ)
         this.subscriptionApi = new SubscriptionAPI(this.axiosJ)
+        this.studioApi = new StudioAPI(this.axiosJ)
+        this.tagApi = new TagAPI(this.axiosJ)
 
         return this
     }

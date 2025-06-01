@@ -26,6 +26,7 @@ import JEditor from '@/components/editor/JEditor';
 import { alpha } from '@mui/material/styles';
 import { parseContent } from '@/utils/json';
 import { useApiCall } from '@/hooks/useApiCall';
+import { PATHS } from '@/constants/paths';
 
 const ViewNewsSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -207,7 +208,7 @@ const ViewNewsStudio: React.FC = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box 
                     component={RouterLink}
-                    to={`/channels/${entry.channelId}`}
+                    to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', entry.channel.id)}
                     sx={{
                       display: 'inline-flex',
                       alignItems: 'center',

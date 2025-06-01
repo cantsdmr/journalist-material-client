@@ -5,6 +5,7 @@ import { Poll } from '@/APIs/PollAPI';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useApiContext } from '@/contexts/ApiContext';
+import { useApiCall } from '@/hooks/useApiCall';
 import { Link as RouterLink } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { alpha } from '@mui/material/styles';
@@ -24,21 +25,27 @@ const ListPoll: React.FC = () => {
   const [limit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const { api } = useApiContext();
+  const { execute } = useApiCall();
 
   const fetchPolls = async (_page: number = page) => {
-    try {
-      let response;
-      switch (activeTab) {
-        case PollTab.TRENDING:
-          response = await api.pollApi.getTrending({ page: _page, limit });
-          break;
-        case PollTab.FUNDED:
-          response = await api.pollApi.getFunded({ page: _page, limit });
-          break;
-        default:
-          response = await api.pollApi.getAll({ page: _page, limit });
-      }
+    let filters = {};
+    switch (activeTab) {
+      case PollTab.TRENDING:
+        filters = { trending: true };
+        break;
+      case PollTab.FUNDED:
+        filters = { funded: true };
+        break;
+      default:
+        filters = {}; // All polls
+    }
 
+    const response = await execute(
+      () => api.pollApi.getPolls(filters, { page: _page, limit }),
+      { showErrorToast: true }
+    );
+
+    if (response) {
       if (_page === 1) {
         setPolls(response.items);
       } else {
@@ -47,8 +54,6 @@ const ListPoll: React.FC = () => {
       
       setPage(response.metadata.currentPage);
       setHasMore(response.metadata.hasNext === true);
-    } catch (error) {
-      console.error('Failed to fetch polls:', error);
     }
     setLoading(false);
   };

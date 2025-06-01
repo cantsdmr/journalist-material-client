@@ -20,20 +20,13 @@ export type Channel = {
     users?: User[];
     tiers?: ChannelTier[];
     tags?: string[];
-    stats?: {
-        membershipCount: number;
-        newsCount: number;
-        pollCount: number;
-    };
+    stats?: ChannelStats;
     creatorId: string;
-    followerCount: number;
-    subscriberCount: number;
     isFollowing?: boolean;
     isSubscribed?: boolean;
-    subscriptionTier?: string;
 };
 
-export type ChannelUser = {
+export type ChannelExecutive = {
     id: string;
     userId: string;
     channelId: string;
@@ -42,7 +35,7 @@ export type ChannelUser = {
     channel: Channel;
 };
 
-export type ChannelFollower = {
+export type ChannelMember = {
     id: string;
     userId: string;
     channelId: string;
@@ -85,6 +78,15 @@ export type ChannelTier = {
     maxSubscribers?: number;
     benefits: any[];
     currency: string;
+}
+
+export type ChannelStats = {
+    activeMemberCount: number;
+    paidMemberCount: number;
+    popularityScore: number;
+    newsCount: number;
+    pollCount: number;
+    tierCount: number;
 }
 
 export type CreateChannelData = {
@@ -136,6 +138,18 @@ export type ChannelSubscribeData = {
     payment_method_id?: string;
 };
 
+// Query parameter types for filtering
+export type ChannelFilters = {
+    trending?: boolean;
+    popular?: boolean;
+    subscribed?: boolean;
+    followed?: boolean;
+    creator?: string;
+    category?: string;
+    verified?: boolean;
+    tags?: string[];
+};
+
 // Response wrapper types
 export type ApiResponse<T> = {
     success: boolean;
@@ -145,14 +159,83 @@ export type ApiResponse<T> = {
 
 const API_PATH = '/api/channels'
 const SUB_PATH = {
-    TIER: 'tier',
-    SUBSCRIBER: 'subscriber'  // Updated to match backend
+    TIER: 'tiers',
+    SUBSCRIPTIONS: 'subscriptions'  // Updated to match backend
 }
 
 export class ChannelAPI extends HTTPApi {
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
     }
+
+    // ==================== MAIN CHANNELS ENDPOINT WITH FILTERING ====================
+
+    /**
+     * Get channels with comprehensive filtering via query parameters
+     * Supports: trending, popular, subscribed, followed, creator, category, verified, tags
+     */
+    public async getChannels(
+        filters: ChannelFilters = {},
+        pagination: PaginationObject = DEFAULT_PAGINATION
+    ): Promise<PaginatedCollection<Channel>> {
+        const params: any = { ...pagination };
+        
+        // Add filter parameters
+        if (filters.trending) params.trending = 'true';
+        if (filters.popular) params.popular = 'true';
+        if (filters.subscribed) params.subscribed = 'true';
+        if (filters.followed) params.followed = 'true';
+        if (filters.verified) params.verified = 'true';
+        if (filters.creator) params.creator = filters.creator;
+        if (filters.category) params.category = filters.category;
+        if (filters.tags && filters.tags.length > 0) params.tags = filters.tags.join(',');
+
+        return this._list<Channel>(API_PATH, params);
+    }
+
+    /**
+     * Get all channels (default)
+     */
+    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+        return this.getChannels({}, pagination);
+    }
+
+    /**
+     * Get trending channels
+     */
+    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+        return this.getChannels({ trending: true }, pagination);
+    }
+
+    /**
+     * Get popular channels
+     */
+    public async getPopular(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+        return this.getChannels({ popular: true }, pagination);
+    }
+
+    /**
+     * Get subscribed channels
+     */
+    public async getSubscribed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+        return this.getChannels({ subscribed: true }, pagination);
+    }
+
+    /**
+     * Get followed channels
+     */
+    public async getFollowed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+        return this.getChannels({ followed: true }, pagination);
+    }
+
+    /**
+     * Get verified channels
+     */
+    public async getVerified(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+        return this.getChannels({ verified: true }, pagination);
+    }
+
+    // ==================== INDIVIDUAL CHANNEL OPERATIONS ====================
 
     // Channel methods
     public async createChannel(data: CreateChannelData): Promise<Channel> {
@@ -163,12 +246,8 @@ export class ChannelAPI extends HTTPApi {
         return this._get<Channel>(`${API_PATH}/${channelId}`);
     }
 
-    public async getChannels(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
-        return this._list<Channel>(API_PATH, pagination);
-    }
-
     public async getCreatorChannels(userId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
-        return this._list<Channel>(`${API_PATH}/creator/${userId}`, pagination);
+        return this.getChannels({ creator: userId }, pagination);
     }
 
     public async updateChannel(channelId: string, data: EditChannelData): Promise<Channel> {
@@ -211,21 +290,21 @@ export class ChannelAPI extends HTTPApi {
 
     // CHANNEL VIEWPOINT: Unified subscription methods
     public async subscribeToChannel(channelId: string, data: ChannelSubscribeData = {}): Promise<ChannelMembership> {
-        const response = await this._post<ApiResponse<ChannelMembership>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, data);
+        const response = await this._post<ApiResponse<ChannelMembership>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}`, data);
         return response.data;
     }
 
     public async unsubscribeFromChannel(channelId: string): Promise<void> {
-        await this._remove<ApiResponse<void>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`);
+        await this._remove<ApiResponse<void>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}`);
     }
 
     // CREATOR/OWNER VIEWPOINT: Channel subscriber management
     public async getChannelSubscribers(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<ChannelMembership>> {
-        return this._list<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}`, pagination);
+        return this._list<ChannelMembership>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}`, pagination);
     }
 
     public async getSubscriptionDetails(channelId: string, subscriptionId: string): Promise<ChannelMembership> {
-        const response = await this._get<ApiResponse<ChannelMembership>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIBER}/${subscriptionId}`);
+        const response = await this._get<ApiResponse<ChannelMembership>>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}/${subscriptionId}`);
         return response.data;
     }
 

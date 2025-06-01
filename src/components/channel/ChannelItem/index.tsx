@@ -147,7 +147,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             gap: 0.5
           }}>
             <PeopleIcon sx={{ fontSize: 16 }} />
-            {channel.stats?.membershipCount?.toLocaleString('en-US', { 
+            {channel.stats?.activeMemberCount?.toLocaleString('en-US', { 
               notation: 'compact',
               maximumFractionDigits: 1 
             })}
@@ -158,7 +158,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             gap: 0.5
           }}>
             <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
-            {channel.tiers?.length || 0} Tiers
+            {channel.stats?.tierCount || 0} Tiers
           </Box>
         </Stack>
       </Box>

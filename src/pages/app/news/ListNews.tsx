@@ -63,18 +63,33 @@ const ListNews: React.FC<ListNewsProps> = ({ isSubscribed }) => {
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
+  const ITEMS_PER_PAGE = 12;
+
   const fetchNews = async (_page: number = page) => {
     setLoading(true);
     
-    const response = isSubscribed 
-      ? await execute(
-          () => api?.newsApi.getFollowed({ page: _page, limit: 12 }),
-          { showErrorToast: true }
-        )
-      : await execute(
-          () => api?.newsApi.getTrending({ page: _page, limit: 12 }),
-          { showErrorToast: true }
-        );
+    // ✅ REFACTORED: Using unified getNews() method with query parameter filtering
+    // 
+    // Before (separate methods):
+    // - api?.newsApi.getFollowed({ page: _page, limit: 12 })
+    // - api?.newsApi.getTrending({ page: _page, limit: 12 })
+    //
+    // After (unified method with filters):
+    // - api?.newsApi.getNews({ followed: true }, { page: _page, limit: 12 })
+    // - api?.newsApi.getNews({ trending: true }, { page: _page, limit: 12 })
+    
+    const response = await execute(
+      () => api?.newsApi.getNews(
+        isSubscribed 
+          ? { followed: true }  // ✅ New filtering approach
+          : { trending: true }, // ✅ New filtering approach
+        { 
+          page: _page,
+          limit: ITEMS_PER_PAGE
+        }
+      ),
+      { showErrorToast: true }
+    );
 
     if (response) {
       if (_page === 1) {

@@ -27,10 +27,13 @@ const ListChannels: React.FC = () => {
 
   const getChannels = async (_page: number = page) => {
     const result = await execute(
-      () => api?.channelApi.getChannels({
-        page: _page,
-        limit
-      }),
+      () => api?.channelApi.getChannels(
+        {}, // Empty filters for general channels page
+        {
+          page: _page,
+          limit
+        }
+      ),
       { showErrorToast: true }
     );
     

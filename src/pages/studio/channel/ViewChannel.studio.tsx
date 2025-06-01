@@ -114,10 +114,10 @@ const ViewChannelStudio: React.FC = () => {
                     />
                     <Typography variant="h4" gutterBottom>{channel.name}</Typography>
                     <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                        {channel.followerCount.toLocaleString('en-US', {
+                        {channel.stats?.activeMemberCount.toLocaleString('en-US', {
                             notation: 'compact',
                             maximumFractionDigits: 1
-                        })} followers • {channel.subscriberCount.toLocaleString('en-US', {
+                        })} followers • {channel.stats?.paidMemberCount.toLocaleString('en-US', {
                             notation: 'compact',
                             maximumFractionDigits: 1
                         })} subscribers

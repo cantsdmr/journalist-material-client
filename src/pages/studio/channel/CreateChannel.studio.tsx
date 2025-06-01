@@ -16,7 +16,7 @@ const CreateChannelStudio: React.FC = () => {
     if (!data) return;
     
     const result = await execute(
-      () => api?.channelApi.createChannel(data as CreateChannelData),
+      () => api?.studioApi.createChannel(data as CreateChannelData),
       {
         showSuccessMessage: true,
         successMessage: 'Channel created successfully!'

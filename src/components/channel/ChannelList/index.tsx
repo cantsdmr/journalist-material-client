@@ -143,7 +143,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             color: isUserFollowing ? 'primary.main' : 'inherit'
           }}>
             <PeopleIcon sx={{ fontSize: 16 }} />
-            {channel.followerCount.toLocaleString('en-US', { 
+            {channel.stats?.activeMemberCount?.toLocaleString('en-US', { 
               notation: 'compact',
               maximumFractionDigits: 1 
             })}

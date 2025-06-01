@@ -33,7 +33,7 @@ const ListChannelsStudio: React.FC = () => {
 
   const getChannels = async (_page: number = page) => {
     const result = await execute(
-      () => api?.accountApi.getUserChannels(),
+      () => api?.studioApi.getMyChannels(),
       { showErrorToast: true }
     );
     
