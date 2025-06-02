@@ -83,7 +83,7 @@ const PollForm: React.FC<PollFormProps> = ({
     <Box component="form" onSubmit={handleSubmit}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled>
             <InputLabel id="channel-select-label">Channel</InputLabel>
             <Select
               labelId="channel-select-label"

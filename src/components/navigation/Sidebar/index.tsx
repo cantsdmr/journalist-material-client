@@ -4,13 +4,13 @@ import {
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ExploreIcon from '@mui/icons-material/Explore';
+// import ExploreIcon from '@mui/icons-material/Explore';
 import PeopleIcon from '@mui/icons-material/People';
-import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
+// import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import PollIcon from '@mui/icons-material/Poll';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SearchIcon from '@mui/icons-material/Search';
+// import SearchIcon from '@mui/icons-material/Search';
 import { PATHS } from '@/constants/paths';
 
 interface SidebarProps {
@@ -22,11 +22,11 @@ const Sidebar: React.FC<SidebarProps> = () => {
   const location = useLocation();
 
   const menuItems = [
-    { path: `${PATHS.APP_NEWS_TRENDING}`, icon: <TrendingUpIcon />, label: 'Trending' },
-    { path: `${PATHS.APP_SEARCH}`, icon: <SearchIcon />, label: 'Search' },
-    { path: `${PATHS.APP_EXPLORE}`, icon: <ExploreIcon />, label: 'Explore' },
-    { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <PeopleIcon />, label: 'Following' },
-    { path: `${PATHS.APP_SUBSCRIPTIONS}`, icon: <SubscriptionsIcon />, label: 'Subscriptions' },
+    { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <PeopleIcon />, label: 'Feed' },
+    { path: `${PATHS.APP_NEWS_TRENDING}`, icon: <TrendingUpIcon />, label: 'Popular' },
+    // { path: `${PATHS.APP_SEARCH}`, icon: <SearchIcon />, label: 'Search' },
+    // { path: `${PATHS.APP_EXPLORE}`, icon: <ExploreIcon />, label: 'Explore' },
+    // { path: `${PATHS.APP_SUBSCRIPTIONS}`, icon: <SubscriptionsIcon />, label: 'Subscriptions' },
     { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' },
     { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' },
     { path: `${PATHS.APP_ACCOUNT}`, icon: <AccountCircleIcon />, label: 'Account' }

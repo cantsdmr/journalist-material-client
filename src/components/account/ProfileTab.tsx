@@ -134,7 +134,7 @@ const ProfileTab: React.FC = () => {
           />
           <Typography variant="h6">{profile.email}</Typography>
           <Typography variant="body2" color="text.secondary">
-            Joined {new Date(profile.lastLogin || '').toLocaleDateString()}
+            Joined {new Date(profile.createdAt || '').toLocaleDateString()}
           </Typography>
         </Box>
 

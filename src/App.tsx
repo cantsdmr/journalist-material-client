@@ -105,8 +105,8 @@ const App: React.FC = () => {
       {/* Main App Routes */}
       <Route path={`${PATHS.APP_ROOT}/*`} element={<PrivateRoute><MainLayout /></PrivateRoute>}>
         <Route path={`${NEWS.ROOT}/*`}>
-          <Route path={NEWS.SUBPATHS.TRENDING} element={<ListNews isSubscribed={false} />} />
-          <Route path={NEWS.SUBPATHS.MY_FEED} element={<ListNews isSubscribed={true} />} />
+          <Route path={NEWS.SUBPATHS.TRENDING} element={<ListNews key="trending" filters={{ trending: true }} />} />
+          <Route path={NEWS.SUBPATHS.MY_FEED} element={<ListNews key="feed" filters={{ feed: true }} />} />
           <Route path={`${NEWS.VIEW}`} element={<ViewNews />} />
         </Route>
         <Route path={`${CHANNEL.ROOT}/*`}>

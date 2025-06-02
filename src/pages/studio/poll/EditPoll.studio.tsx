@@ -23,7 +23,7 @@ const EditPollStudio: React.FC = () => {
       );
       
       if (result) {
-        setInitialData(result);
+        setInitialData(result.data);
       }
     };
 
@@ -64,7 +64,17 @@ const EditPollStudio: React.FC = () => {
       </Typography>
 
       <PollForm
-        initialData={initialData}
+        initialData={{
+          title: initialData.title,
+          description: initialData.description,
+          startDate: initialData.startDate,
+          endDate: initialData.endDate,
+          channelId: initialData.channel.id,
+          options: initialData.options.map((option: any) => ({
+            text: option.text,
+            id: option.id
+          }))
+        }}
         onSubmit={handleUpdate}
         submitButtonText="Update Poll"
       />

@@ -1,5 +1,5 @@
 import { AxiosJournalist } from "@/utils/axios";
-import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from "@/utils/http";
+import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse, ApiResponse } from "@/utils/http";
 
 export type PollStatus = {
     id: number;
@@ -209,8 +209,8 @@ export class PollAPI extends HTTPApi {
     /**
      * Get specific poll by ID
      */
-    public async get(id: string): Promise<Poll> {
-        return this._get<Poll>(`${API_PATH}/${id}`);
+    public async get(id: string): Promise<ApiResponse<Poll>> {
+        return this._get<ApiResponse<Poll>>(`${API_PATH}/${id}`);
     }
 
     /**
