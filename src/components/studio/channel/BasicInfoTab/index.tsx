@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@mui/material';
 import ChannelForm from '@/components/studio/channel/ChannelForm';
-import { EditChannelData, CreateChannelData, Channel } from '@/APIs/ChannelAPI';
+import { EditChannelData, CreateChannelData, Channel } from '@/types/index';
 
 interface BasicInfoTabProps {
     channel: Channel;

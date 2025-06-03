@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { Edit, Save, Cancel } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { UserProfile, UpdateProfileData } from '@/APIs/AccountAPI';
+import { UserProfile, UpdateProfileData } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const ProfileTab: React.FC = () => {

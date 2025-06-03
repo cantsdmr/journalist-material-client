@@ -11,7 +11,7 @@ import {
 import { Add as AddIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ExpenseOrderCard from '@/components/expense-order/ExpenseOrderCard';
-import { ExpenseOrder } from '@/APIs/ExpenseOrderAPI';
+import { ExpenseOrder } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';

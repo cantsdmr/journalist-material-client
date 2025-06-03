@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Add, Delete, Star, StarBorder, CreditCard, AccountBalanceWallet } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { PaymentMethod, PaymentMethodType } from '@/APIs/AccountAPI';
+import { PaymentMethod, PaymentMethodType } from '@/types/index';
 import { AddPaymentMethodDialog } from '@/components/account/AddPaymentMethodDialog';
 import { useApiCall } from '@/hooks/useApiCall';
 

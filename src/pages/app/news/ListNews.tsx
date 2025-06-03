@@ -5,7 +5,7 @@ import {
   Stack,
   Box,
 } from '@mui/material';
-import { News, NewsFilters } from '@/APIs/NewsAPI';
+import { News, NewsFilters } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import NewsEntry from '@/components/news/NewsEntry';
 import InfiniteScroll from 'react-infinite-scroll-component';

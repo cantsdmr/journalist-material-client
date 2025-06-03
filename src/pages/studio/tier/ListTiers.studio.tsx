@@ -3,7 +3,7 @@ import { Box, Typography, Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import TierCard from '@/components/tier/TierCard';
-import { ChannelTier } from '@/APIs/ChannelAPI';
+import { ChannelTier } from '@/types/index';
 import { EmptyState } from '@/components/common/EmptyState';
 import AddIcon from '@mui/icons-material/Add';
 import { useNavigate } from 'react-router-dom';

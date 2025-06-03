@@ -4,7 +4,7 @@ import {
   Select, MenuItem, Box,
   Typography
 } from '@mui/material';
-import { CreateChannelData, EditChannelData } from '@/APIs/ChannelAPI';
+import { CreateChannelData, EditChannelData } from '@/types/index';
 import ImageUpload from '@/components/common/ImageUpload';
 import { CHANNEL_STATUS } from '@/enums/ChannelEnums';
 

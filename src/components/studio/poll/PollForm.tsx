@@ -92,8 +92,8 @@ const PollForm: React.FC<PollFormProps> = ({
               onChange={(e) => handleChange('channelId', e.target.value)}
               required
             >
-              {profile?.channelUsers?.map((channel) => (
-                <MenuItem key={channel.channel.id} value={channel.channel.id}>
+              {profile?.staffChannels?.map((channel) => (
+                <MenuItem key={channel.id} value={channel.id}>
                   {channel.channel.name}
                 </MenuItem>
               ))}

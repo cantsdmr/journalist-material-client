@@ -5,7 +5,7 @@ import {
   Container,
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { Channel } from '../../../APIs/ChannelAPI';
+import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import ChannelItem from '@/components/channel/ChannelItem/index';
 import { alpha } from '@mui/material/styles';
@@ -140,8 +140,8 @@ const ListChannels: React.FC = () => {
             <ChannelItem 
               key={channel.id}
               channel={channel}
-              hasMembership={channelRelations.hasMembership(channel.id)}
-              membershipTier={channelRelations.getMembershipTier(channel.id)}
+              hasSubscription={channelRelations.hasSubscription(channel.id)}
+              subscriptionTier={channelRelations.getSubscriptionTier(channel.id)}
               onJoin={handleJoin}
               onCancel={handleCancel}
             />

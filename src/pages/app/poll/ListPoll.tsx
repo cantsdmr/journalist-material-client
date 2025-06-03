@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Box, Tabs, Tab, Stack } from '@mui/material';
 import PollCard from '@/components/poll/PollCard';
-import { Poll } from '@/APIs/PollAPI';
+import { Poll } from '@/types/index';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useApiContext } from '@/contexts/ApiContext';

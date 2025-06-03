@@ -1,83 +1,15 @@
-import { NEWS_STATUS } from "@/enums/NewsEnums";
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedCollection, PaginatedResponse } from "@/utils/http";
-import { Channel } from "./ChannelAPI";
-import { User } from "./UserAPI";
+import { 
+    News, 
+    CreateNewsData, 
+    EditNewsData, 
+    NewsFilters, 
+    NewsStatsResponse, 
+    NewsTagResponse 
+} from "../types";
 
-export type News = {
-    id: string; // generated
-    title: string;
-    content: string;
-    channelId: string;
-    status: keyof typeof NEWS_STATUS;
-    requiredTierId: string;
-    isPremium: boolean;
-
-    // relations
-    newsFund: any;
-    creator: User;
-    channel: Channel;
-    qualityMetrics: QualityMetrics;
-    tags: NewsTag[];
-    socialLinks: SocialLink[];
-    media: NewsMedia[];
-    publishedAt: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export type QualityMetrics = {
-    id: string;
-    correctnessScore: number;
-    objectivityScore: number;
-    ethicalValueScore: number;
-    sourcingQualityScore: number;
-    relevanceScore: number;
-    clarityScore: number;
-    timelinessScore: number;
-    overallQualityScore: number;
-}
-
-export type SocialLink = {
-    id: string;
-    newsId: string;
-    platform: number;
-    url: string;
-}
-
-export type NewsMedia = {
-    id: string;
-    newsId: string;
-    type: number;
-    format: number;
-    url: string;
-}
-
-export interface NewsTag {
-    id: string;
-    tagId: string;
-    title: string;
-}
-
-// Query parameter types for filtering
-export type NewsFilters = {
-    feed?: boolean;
-    trending?: boolean;
-    subscribed?: boolean;
-    channel?: string;
-    creator?: string;
-    status?: string;
-    premium?: boolean;
-    tags?: string[];
-};
-
-export type CreateNewsData = Omit<News, "id" | "fund_id" | "created_by">
-export type EditNewsData = Omit<News, "id" | "fund_id" | "created_by">
-
-const API_PATH = '/api/news'
-// const SUB_PATH = {
-//     STATS: 'stats'
-// }
+const API_PATH = '/api/news';
 
 export class NewsAPI extends HTTPApi {
     constructor(axiosJ: AxiosJournalist) {
@@ -119,7 +51,7 @@ export class NewsAPI extends HTTPApi {
     }
     
     /**
-     * Get news stats
+     * Get news feed
      */
     public async getFeed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<News>> {
         return this.getNews({ feed: true }, pagination);
@@ -135,42 +67,42 @@ export class NewsAPI extends HTTPApi {
     /**
      * Get news from subscribed channels
      */
-    public async getSubscribed(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
+    public async getSubscribed(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getNews({ subscribed: true }, pagination);
     }
 
     /**
      * Get premium news
      */
-    public async getPremium(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
+    public async getPremium(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getNews({ premium: true }, pagination);
     }
 
     /**
      * Get news by channel
      */
-    public async getNewsByChannel(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
+    public async getNewsByChannel(channelId: string, pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getNews({ channel: channelId }, pagination);
     }
 
     /**
      * Get news by creator
      */
-    public async getCreatorNews(creatorId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
+    public async getCreatorNews(creatorId: string, pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getNews({ creator: creatorId }, pagination);
     }
 
     /**
      * Get news by tags
      */
-    public async getNewsByTags(tags: string[], pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
+    public async getNewsByTags(tags: string[], pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getNews({ tags }, pagination);
     }
 
     /**
      * Get news by status
      */
-    public async getNewsByStatus(status: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<News>> {
+    public async getNewsByStatus(status: string, pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getNews({ status }, pagination);
     }
 
@@ -193,15 +125,29 @@ export class NewsAPI extends HTTPApi {
     /**
      * Update news article
      */
-    public async update(id: string, data: EditNewsData): Promise<News> {
-        return this._patch<News>(`${API_PATH}/${id}`, data);
+    public async update(id: string, data: EditNewsData): Promise<void> {
+        await this._put<void>(`${API_PATH}/${id}`, data);
     }
 
     /**
-     * Delete news article
+     * Delete news article  
      */
     public async delete(id: string): Promise<void> {
-        return this._remove<void>(`${API_PATH}/${id}`);
+        await this._remove<void>(`${API_PATH}/${id}`);
+    }
+
+    /**
+     * Get news statistics/analytics
+     */
+    public async getNewsStats(id: string, startDate: string, endDate: string): Promise<NewsStatsResponse> {
+        return this._get<NewsStatsResponse>(`${API_PATH}/${id}/stats?startDate=${startDate}&endDate=${endDate}`);
+    }
+
+    /**
+     * Get all available news tags
+     */
+    public async getNewsTags(pagination: PaginationObject = DEFAULT_PAGINATION) {
+        return this._list<NewsTagResponse>(`${API_PATH}/tags`, pagination);
     }
 
     // ==================== BACKWARD COMPATIBILITY (DEPRECATED) ====================

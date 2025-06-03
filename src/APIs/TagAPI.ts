@@ -1,75 +1,12 @@
 import { AxiosJournalist } from "@/utils/axios";
-import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedCollection } from "@/utils/http";
-import { News } from "./NewsAPI";
-import { Poll } from "./PollAPI";
-
-export type Tag = {
-    id: string;
-    name: string;
-    slug: string;
-    typeId: number;
-    statusId: number;
-    isVerified: boolean;
-    isTrending: boolean;
-    createdBy?: string;
-    approvedBy?: string;
-    approvedAt?: string;
-    createdAt: string;
-    updatedAt: string;
-    analytics?: TagAnalytics;
-};
-
-export type TagAnalytics = {
-    id: string;
-    tagId: string;
-    viewCount: number;
-    searchCount: number;
-    usageCount: number;
-    lastTrendingAt?: string;
-};
-
-export type CreateTagData = {
-    name: string;
-    typeId?: number;
-};
-
-export type UpdateTagData = {
-    name?: string;
-    typeId?: number;
-    statusId?: number;
-    isVerified?: boolean;
-    isTrending?: boolean;
-};
-
-export type TagFilters = {
-    trending?: boolean;
-    popular?: boolean;
-    category?: 'news' | 'polls';
-    verified?: boolean;
-};
-
-export type TagContentResponse = {
-    items: News[] | Poll[];
-    metadata: {
-        totalItems: number;
-        totalPages: number;
-        currentPage: number;
-        hasNext: boolean;
-        hasPrevious: boolean;
-    };
-};
-
-export type TagManagementResponse = {
-    success: boolean;
-    message: string;
-};
-
-// Response wrapper types
-export type ApiResponse<T> = {
-    success: boolean;
-    data: T;
-    message?: string;
-};
+import { HTTPApi, PaginationObject, DEFAULT_PAGINATION } from "@/utils/http";
+import { 
+    Tag, 
+    CreateTagData, 
+    UpdateTagData, 
+    TagFilters,
+    TagContentResponse
+} from "../types";
 
 const API_PATH = '/api/tags';
 
@@ -82,12 +19,11 @@ export class TagAPI extends HTTPApi {
 
     /**
      * Get tags with comprehensive filtering via query parameters
-     * Supports: trending, popular, category, verified
      */
     public async getTags(
         filters: TagFilters = {},
         pagination: PaginationObject = DEFAULT_PAGINATION
-    ): Promise<PaginatedCollection<Tag>> {
+    ) {
         const params: any = { ...pagination };
         
         // Add filter parameters
@@ -102,81 +38,77 @@ export class TagAPI extends HTTPApi {
     /**
      * Get all tags (default)
      */
-    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Tag>> {
+    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getTags({}, pagination);
     }
 
     /**
      * Get trending tags
      */
-    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Tag>> {
+    public async getTrending(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getTags({ trending: true }, pagination);
     }
 
     /**
      * Get popular tags
      */
-    public async getPopular(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Tag>> {
+    public async getPopular(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getTags({ popular: true }, pagination);
     }
 
     /**
      * Get verified tags
      */
-    public async getVerified(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Tag>> {
+    public async getVerified(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getTags({ verified: true }, pagination);
     }
 
     /**
      * Get news tags
      */
-    public async getNewsTags(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Tag>> {
+    public async getNewsTags(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getTags({ category: 'news' }, pagination);
     }
 
     /**
      * Get poll tags
      */
-    public async getPollTags(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Tag>> {
+    public async getPollTags(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this.getTags({ category: 'polls' }, pagination);
     }
 
     /**
      * Get specific tag by ID
      */
-    public async getTagById(id: string): Promise<Tag> {
-        const response = await this._get<ApiResponse<Tag>>(`${API_PATH}/${id}`);
-        return response.data;
+    public async getTagById(id: string) {
+        return this._get<Tag>(`${API_PATH}/${id}`);
     }
 
     /**
      * Get tag by slug
      */
-    public async getTagBySlug(slug: string): Promise<Tag> {
-        const response = await this._get<ApiResponse<Tag>>(`${API_PATH}/slug/${slug}`);
-        return response.data;
+    public async getTagBySlug(slug: string) {
+        return this._get<Tag>(`${API_PATH}/slug/${slug}`);
     }
 
     /**
      * Create new tag
      */
-    public async createTag(data: CreateTagData): Promise<Tag> {
-        const response = await this._post<ApiResponse<Tag>>(API_PATH, data);
-        return response.data;
+    public async createTag(data: CreateTagData) {
+        return this._post<Tag>(API_PATH, data);
     }
 
     /**
      * Update existing tag
      */
-    public async updateTag(id: string, data: UpdateTagData): Promise<Tag> {
-        const response = await this._put<ApiResponse<Tag>>(`${API_PATH}/${id}`, data);
-        return response.data;
+    public async updateTag(id: string, data: UpdateTagData) {
+        return this._put<Tag>(`${API_PATH}/${id}`, data);
     }
 
     /**
      * Delete tag
      */
-    public async deleteTag(id: string): Promise<void> {
+    public async deleteTag(id: string) {
         await this._remove<void>(`${API_PATH}/${id}`);
     }
 
@@ -188,12 +120,11 @@ export class TagAPI extends HTTPApi {
     public async getTagNews(
         tagId: string, 
         pagination: PaginationObject = DEFAULT_PAGINATION
-    ): Promise<TagContentResponse> {
-        const response = await this._get<ApiResponse<TagContentResponse>>(
+    ) {
+        return this._get<TagContentResponse>(
             `${API_PATH}/${tagId}/news`,
             { params: pagination }
         );
-        return response.data;
     }
 
     /**
@@ -202,12 +133,11 @@ export class TagAPI extends HTTPApi {
     public async getTagPolls(
         tagId: string, 
         pagination: PaginationObject = DEFAULT_PAGINATION
-    ): Promise<TagContentResponse> {
-        const response = await this._get<ApiResponse<TagContentResponse>>(
+    ) {
+        return this._get<TagContentResponse>(
             `${API_PATH}/${tagId}/polls`,
             { params: pagination }
         );
-        return response.data;
     }
 
     // ==================== TAG CONTENT MANAGEMENT ====================
@@ -215,43 +145,39 @@ export class TagAPI extends HTTPApi {
     /**
      * Add tag to news article
      */
-    public async addTagToNews(tagId: string, newsId: string): Promise<TagManagementResponse> {
-        const response = await this._post<ApiResponse<TagManagementResponse>>(
+    public async addTagToNews(tagId: string, newsId: string) {
+        return this._post<void>(
             `${API_PATH}/${tagId}/news/${newsId}`,
             {}
         );
-        return response.data;
     }
 
     /**
      * Remove tag from news article
      */
-    public async removeTagFromNews(tagId: string, newsId: string): Promise<TagManagementResponse> {
-        const response = await this._remove<ApiResponse<TagManagementResponse>>(
+    public async removeTagFromNews(tagId: string, newsId: string) {
+        return this._remove<void>(
             `${API_PATH}/${tagId}/news/${newsId}`
         );
-        return response.data;
     }
 
     /**
      * Add tag to poll
      */
-    public async addTagToPoll(tagId: string, pollId: string): Promise<TagManagementResponse> {
-        const response = await this._post<ApiResponse<TagManagementResponse>>(
+    public async addTagToPoll(tagId: string, pollId: string) {
+        return this._post<void>(
             `${API_PATH}/${tagId}/polls/${pollId}`,
             {}
         );
-        return response.data;
     }
 
     /**
      * Remove tag from poll
      */
-    public async removeTagFromPoll(tagId: string, pollId: string): Promise<TagManagementResponse> {
-        const response = await this._remove<ApiResponse<TagManagementResponse>>(
+    public async removeTagFromPoll(tagId: string, pollId: string) {
+        return this._remove<void>(
             `${API_PATH}/${tagId}/polls/${pollId}`
         );
-        return response.data;
     }
 
     // ==================== ADMIN OPERATIONS ====================
@@ -260,11 +186,10 @@ export class TagAPI extends HTTPApi {
      * Moderate tag (approve/reject)
      */
     public async moderateTag(tagId: string, statusId: number): Promise<Tag> {
-        const response = await this._patch<ApiResponse<Tag>>(
+        return this._patch<Tag>(
             `${API_PATH}/${tagId}/moderate`,
             { statusId }
         );
-        return response.data;
     }
 
     /**
@@ -289,7 +214,7 @@ export class TagAPI extends HTTPApi {
     public async searchTags(
         query: string,
         pagination: PaginationObject = DEFAULT_PAGINATION
-    ): Promise<PaginatedCollection<Tag>> {
+    ) {
         const params = { ...pagination, search: query };
         return this._list<Tag>(API_PATH, params);
     }
@@ -299,36 +224,27 @@ export class TagAPI extends HTTPApi {
      */
     public async getTagSuggestions(prefix: string, limit: number = 10): Promise<Tag[]> {
         const params = { prefix, limit };
-        const response = await this._get<ApiResponse<Tag[]>>(`${API_PATH}/suggestions`, { params });
-        return response.data;
+        return this._get<Tag[]>(`${API_PATH}/suggestions`, { params });
     }
 
     // ==================== BACKWARD COMPATIBILITY ====================
 
-    /**
-     * @deprecated Use getTagById instead
-     */
+    /** @deprecated Use getTagById instead */
     public async get(id: string): Promise<Tag> {
         return this.getTagById(id);
     }
 
-    /**
-     * @deprecated Use createTag instead
-     */
+    /** @deprecated Use createTag instead */
     public async create(data: CreateTagData): Promise<Tag> {
         return this.createTag(data);
     }
 
-    /**
-     * @deprecated Use updateTag instead
-     */
+    /** @deprecated Use updateTag instead */
     public async update(id: string, data: UpdateTagData): Promise<Tag> {
         return this.updateTag(id, data);
     }
 
-    /**
-     * @deprecated Use deleteTag instead
-     */
+    /** @deprecated Use deleteTag instead */
     public async delete(id: string): Promise<void> {
         return this.deleteTag(id);
     }

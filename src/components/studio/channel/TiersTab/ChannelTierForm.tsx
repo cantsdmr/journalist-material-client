@@ -9,7 +9,7 @@ import {
   Stack,
   InputAdornment
 } from '@mui/material';
-import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/APIs/ChannelAPI';
+import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/types/index';
 
 type TierFormFields = keyof (CreateChannelTierData & EditChannelTierData);
 type TierFormData = CreateChannelTierData & EditChannelTierData;

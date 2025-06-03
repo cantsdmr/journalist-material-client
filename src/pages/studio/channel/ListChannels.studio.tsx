@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { 
+import {
   Box,
   Typography,
   Grid,
@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import StudioChannelCard from '@/components/studio/channel/StudioChannelCard';
 import { EmptyState } from '@/components/common/EmptyState';
-import { Channel } from '@/APIs/ChannelAPI';
+import { Channel } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const ListChannelsStudio: React.FC = () => {
@@ -36,17 +36,17 @@ const ListChannelsStudio: React.FC = () => {
       () => api?.studioApi.getMyChannels(),
       { showErrorToast: true }
     );
-    
+
     if (result) {
-      setUserChannels(prev => _page === 1 
-        ? result?.items ?? [] 
+      setUserChannels(prev => _page === 1
+        ? result?.items ?? []
         : [...prev, ...(result?.items ?? [])]
       );
-      
+
       setPage(result?.metadata.currentPage ?? 1);
       setHasMore(result?.metadata.hasNext === true);
     }
-    
+
     setIsLoading(false);
   };
 
@@ -55,13 +55,13 @@ const ListChannelsStudio: React.FC = () => {
   }, []);
 
   const ChannelSkeleton = () => (
-    <Box 
+    <Box
       sx={{
         p: 2,
         borderRadius: 1,
         bgcolor: theme => alpha(
-          theme.palette.mode === 'dark' 
-            ? theme.palette.common.white 
+          theme.palette.mode === 'dark'
+            ? theme.palette.common.white
             : theme.palette.common.black,
           theme.palette.mode === 'dark' ? 0.05 : 0.03
         ),
@@ -76,12 +76,12 @@ const ListChannelsStudio: React.FC = () => {
           <Skeleton width="40%" height={16} />
         </Box>
       </Box>
-      <Skeleton 
-        variant="rectangular" 
-        sx={{ 
+      <Skeleton
+        variant="rectangular"
+        sx={{
           borderRadius: 1,
           height: { xs: 70, sm: 80 }
-        }} 
+        }}
       />
       <Box sx={{ mt: 1.5 }}>
         <Skeleton width="30%" height={20} />
@@ -90,7 +90,7 @@ const ListChannelsStudio: React.FC = () => {
   );
 
   return (
-    <Box sx={{ 
+    <Box sx={{
       px: { xs: 2, sm: 3, md: 4 },
       py: { xs: 2, sm: 3 },
       maxWidth: 'lg',
@@ -98,9 +98,9 @@ const ListChannelsStudio: React.FC = () => {
       width: '100%'
     }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography 
-          variant="h5" 
-          sx={{ 
+        <Typography
+          variant="h5"
+          sx={{
             fontWeight: 600,
             fontSize: { xs: '1.25rem', sm: '1.5rem' }
           }}
@@ -145,7 +145,7 @@ const ListChannelsStudio: React.FC = () => {
           <Grid container spacing={2}>
             {userChannels.map((userChannel) => (
               <Grid item xs={12} sm={6} key={userChannel.id}>
-                <StudioChannelCard 
+                <StudioChannelCard
                   channel={userChannel}
                   onRefresh={() => getChannels(1)}
                 />

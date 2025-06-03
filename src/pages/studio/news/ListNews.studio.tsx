@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Container, 
-  Typography, 
-  Stack,
   Box,
+  Typography,
+  Grid,
   Skeleton,
-  Card,
+  useTheme
 } from '@mui/material';
-import { News } from '@/APIs/NewsAPI';
+import { News } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
-import NewsEntry from '@/components/news/NewsEntry';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { EmptyState } from '@/components/common/EmptyState';
 import PostAddIcon from '@mui/icons-material/PostAdd';
@@ -17,161 +15,154 @@ import { useNavigate } from 'react-router-dom';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
+import StudioNewsCard from '@/components/studio/news/StudioNewsCard';
+import { alpha } from '@mui/material/styles';
 
-interface ListNewsProps {
-  isSubscribed: boolean;
-  isCreator?: boolean;
-}
-
-const ListNewsSkeleton = () => (
-  <Box sx={{ mb: 4 }}>
-    {[1, 2, 3].map((index) => (
-      <Box key={index} sx={{ mb: 10 }}>
-        {/* Channel info skeleton */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, px: 0.5 }}>
-          <Skeleton 
-            variant="rounded" 
-            width={28} 
-            height={28} 
-            sx={{ borderRadius: 1.5, mr: 1.5 }} 
-          />
-          <Skeleton width={120} height={20} />
-        </Box>
-
-        {/* News card skeleton */}
-        <Card sx={{ 
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-          borderRadius: 2,
-          overflow: 'hidden'
-        }}>
-          <Skeleton 
-            variant="rectangular" 
-            sx={{ 
-              width: { xs: '100%', sm: '360px' },
-              minWidth: { sm: '360px' },
-              height: { xs: '220px', sm: '200px' }
-            }} 
-          />
-          <Box sx={{ p: 3, flex: 1 }}>
-            <Skeleton width="90%" height={24} sx={{ mb: 2 }} />
-            <Skeleton width="80%" height={24} sx={{ mb: 2 }} />
-            <Skeleton width="95%" height={20} sx={{ mb: 1 }} />
-            <Skeleton width="90%" height={20} sx={{ mb: 3 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Skeleton width={100} height={20} />
-              <Box sx={{ display: 'flex', gap: 1.5 }}>
-                <Skeleton variant="circular" width={32} height={32} />
-                <Skeleton variant="circular" width={32} height={32} />
-              </Box>
-            </Box>
-          </Box>
-        </Card>
-      </Box>
-    ))}
-  </Box>
-);
-
-const ListNewsStudio: React.FC<ListNewsProps> = () => {
+const ListNewsStudio: React.FC = () => {
   const [news, setNews] = useState<News[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   const { api } = useApiContext();
   const { profile } = useProfile();
   const navigate = useNavigate();
   const { execute } = useApiCall();
+  const theme = useTheme();
 
-  const fetchNews = async (pageNum: number = page) => {
+  const fetchMoreData = () => {
+    getNews(page + 1);
+  };
+
+  const getNews = async (_page: number = page) => {
     if (!profile) return;
     
-    setLoading(true);
-    
-    const response = await execute(
-      () => api?.newsApi.getCreatorNews(profile.id, { page: pageNum, limit: 12 }),
+    const result = await execute(
+      () => api?.newsApi.getCreatorNews(profile.id, { page: _page, limit: 12 }),
       { showErrorToast: true }
     );
-
-    if (response) {
-      if (pageNum === 1) {
-        setNews(response.items);
-      } else {
-        setNews(prev => [...prev, ...response.items]);
-      }
-      setHasMore(response.metadata.hasNext);
-      setPage(response.metadata.currentPage);
+    
+    if (result) {
+      setNews(prev => _page === 1 
+        ? result?.items ?? [] 
+        : [...prev, ...(result?.items ?? [])]
+      );
+      
+      setPage(result?.metadata.currentPage ?? 1);
+      setHasMore(result?.metadata.hasNext === true);
     }
     
-    setLoading(false);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchNews(page);
-  }, []);
-
-  const fetchMoreData = () => {
-    if (!loading && hasMore) {
-      fetchNews(page + 1);
+    if (profile) {
+      getNews(1);
     }
-  };
+  }, [profile]);
 
-  if (loading && news.length === 0) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          <Skeleton width={200} />
+  const NewsSkeleton = () => (
+    <Box 
+      sx={{
+        p: 2,
+        borderRadius: 1,
+        bgcolor: theme => alpha(
+          theme.palette.mode === 'dark' 
+            ? theme.palette.common.white 
+            : theme.palette.common.black,
+          theme.palette.mode === 'dark' ? 0.05 : 0.03
+        ),
+        height: { xs: 280, sm: 320 },
+        transition: theme.transitions.create(['background-color', 'height'])
+      }}
+    >
+      <Skeleton 
+        variant="rectangular" 
+        sx={{ 
+          borderRadius: 1,
+          height: { xs: 120, sm: 140 },
+          mb: 2
+        }} 
+      />
+      <Box sx={{ p: 1 }}>
+        <Skeleton width="90%" height={24} sx={{ mb: 1 }} />
+        <Skeleton width="60%" height={16} sx={{ mb: 1 }} />
+        <Skeleton width="95%" height={20} sx={{ mb: 1 }} />
+        <Skeleton width="80%" height={20} sx={{ mb: 2 }} />
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Skeleton width="25%" height={24} />
+          <Skeleton width="30%" height={24} />
+          <Skeleton width="20%" height={24} />
+        </Box>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ 
+      px: { xs: 2, sm: 3, md: 4 },
+      py: { xs: 2, sm: 3 },
+      maxWidth: 'lg',
+      mx: 'auto',
+      width: '100%'
+    }}>
+      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 600,
+            fontSize: { xs: '1.25rem', sm: '1.5rem' }
+          }}
+        >
+          {isLoading ? <Skeleton width={150} /> : 'My News'}
         </Typography>
-        <Stack spacing={3}>
-          {[1, 2, 3].map((index) => (
-            <ListNewsSkeleton key={index} />
-          ))}
-        </Stack>
-      </Container>
-    );
-  }
+      </Box>
 
-  if (!loading && news.length === 0) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      {isLoading ? (
+        <Grid container spacing={2}>
+          {[1, 2, 3, 4].map((index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <NewsSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      ) : news.length === 0 ? (
         <EmptyState
           title="No News Yet"
           description="Start creating your first news article to share with your subscribers."
-          icon={<PostAddIcon sx={{ fontSize: 48 }} />}
+          icon={<PostAddIcon sx={{ fontSize: { xs: 40, sm: 48 } }} />}
           action={{
             label: "Create News",
             onClick: () => navigate(PATHS.STUDIO_NEWS_CREATE)
           }}
         />
-      </Container>
-    );
-  }
-
-  return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>      
-      <InfiniteScroll
-        dataLength={news.length}
-        next={fetchMoreData}
-        hasMore={hasMore}
-        loader={<ListNewsSkeleton />}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            px: 1,
-            mt: 6
-          }}
+      ) : (
+        <InfiniteScroll
+          dataLength={news.length}
+          next={fetchMoreData}
+          hasMore={hasMore}
+          loader={
+            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+              {[1, 2, 3].map((index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <NewsSkeleton />
+                </Grid>
+              ))}
+            </Grid>
+          }
         >
-          {news.map((item) => (
-            <NewsEntry 
-              key={item.id} 
-              news={item}
-            />
-          ))}
-        </Box>
-      </InfiniteScroll>
-    </Container>
+          <Grid container spacing={2}>
+            {news.map((newsItem) => (
+              <Grid item xs={12} sm={6} md={4} key={newsItem.id}>
+                <StudioNewsCard 
+                  news={newsItem}
+                  onRefresh={() => getNews(1)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </InfiniteScroll>
+      )}
+    </Box>
   );
 };
 

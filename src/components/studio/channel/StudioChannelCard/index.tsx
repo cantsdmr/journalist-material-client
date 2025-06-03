@@ -14,7 +14,7 @@ import {
   alpha,
   useTheme
 } from '@mui/material';
-import { Channel } from '@/APIs/ChannelAPI';
+import { Channel } from '@/types/index';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -163,7 +163,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
             >
               <Chip 
                 size="small"
-                label={`${channel.subscriberCount} subscribers`}
+                label={`${channel?.stats?.activeMemberCount} members`}
                 sx={{ 
                   height: 24,
                   fontSize: '0.75rem',

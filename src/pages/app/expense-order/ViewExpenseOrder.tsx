@@ -20,7 +20,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { formatDistanceToNow, format } from 'date-fns';
 import ExpenseOrderStatusChip from '@/components/expense-order/ExpenseOrderStatusChip';
-import { ExpenseOrder } from '@/APIs/ExpenseOrderAPI';
+import { ExpenseOrder } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';

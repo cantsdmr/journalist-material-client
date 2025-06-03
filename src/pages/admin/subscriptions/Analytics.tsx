@@ -37,7 +37,7 @@ import {
   Cell
 } from 'recharts';
 import { useApiContext } from '@/contexts/ApiContext';
-import { SubscriptionAnalytics } from '@/APIs/SubscriptionAPI';
+import { SubscriptionAnalytics } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionAnalyticsPage: React.FC = () => {

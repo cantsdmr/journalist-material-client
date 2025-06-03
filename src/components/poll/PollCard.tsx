@@ -15,7 +15,7 @@ import {
   alpha,
   useTheme
 } from '@mui/material';
-import { Poll } from '@/APIs/PollAPI';
+import { Poll } from '@/types/index';
 import { formatDistanceToNow } from 'date-fns';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ShareIcon from '@mui/icons-material/Share';

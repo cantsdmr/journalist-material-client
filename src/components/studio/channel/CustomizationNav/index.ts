@@ -1,6 +1,6 @@
 import { MobileNavigation } from './MobileNavigation';
 import { DesktopNavigation } from './DesktopNavigation';
-import { Channel, EditChannelData } from '@/APIs/ChannelAPI'
+import { Channel, EditChannelData } from '@/types/index'
 
 export interface TabConfig {
   readonly id: string;

@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/APIs/ChannelAPI';
+import { ChannelTier, CreateChannelTierData, EditChannelTierData } from '@/types/index';
 
 interface TierFormProps {
   initialData?: ChannelTier;

@@ -1,21 +1,6 @@
-import { DEFAULT_PAGINATION, HTTPApi, PaginationObject, PaginatedCollection } from "@/utils/http";
-import { ChannelUser, ChannelMembership } from "./ChannelAPI";
 import { AxiosJournalist } from "@/utils/axios";
-
-export type User = {
-    id: string;
-    externalId: string;
-    email: string;
-    displayName: string;
-    photoUrl?: string;
-    roleId: number;
-    statusId: number;
-    createdAt: string;
-    updatedAt: string;
-    lastLogin?: string;
-    memberships?: ChannelMembership[];
-    channelUsers?: ChannelUser[];
-};
+import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
+import { User } from "../types";
 
 export type CreateUserData = {
     email: string;
@@ -26,14 +11,14 @@ export type CreateUserData = {
     statusId: number;
 };
 
-const API_PATH = '/api/users'
+const API_PATH = '/api/users';
 
 export class UserAPI extends HTTPApi {
     constructor(axiosJ: AxiosJournalist) {
         super(axiosJ, API_PATH);
     }
 
-    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<User>> {
+    public async getAll(pagination: PaginationObject = DEFAULT_PAGINATION) {
         return this._list<User>(API_PATH, pagination);
     }
 
@@ -45,8 +30,8 @@ export class UserAPI extends HTTPApi {
         return this._post<User>(API_PATH, data);
     }
 
-    public async update(id: string, data: Partial<CreateUserData>): Promise<User> {
-        return this._put<User>(`${API_PATH}/${id}`, data);
+    public async update(id: string, data: Partial<CreateUserData>): Promise<void> {
+        await this._put<void>(`${API_PATH}/${id}`, data);
     }
 
     public async delete(id: string): Promise<void> {

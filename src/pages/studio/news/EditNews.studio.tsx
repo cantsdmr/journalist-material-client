@@ -4,19 +4,21 @@ import { Container, Typography } from '@mui/material';
 import NewsForm from '@/components/news/NewsForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
+import { News, EditNewsData } from '@/types/index';
 
 const EditNewsStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { api } = useApiContext();
-  const [initialData, setInitialData] = useState<any>(null);
-  const { execute } = useApiCall();
+  const [initialData, setInitialData] = useState<News | null>(null);
+  const { execute: executeGet } = useApiCall<News>();
+  const { execute: executeUpdate } = useApiCall<void>();
 
   useEffect(() => {
     const fetchNews = async () => {
       if (!id) return;
       
-      const result = await execute(
+      const result = await executeGet(
         () => api?.newsApi.get(id),
         { showErrorToast: true }
       );
@@ -27,12 +29,12 @@ const EditNewsStudio: React.FC = () => {
     };
 
     fetchNews();
-  }, [id, api?.newsApi, execute]);
+  }, [id, api?.newsApi, executeGet]);
 
-  const handleUpdate = async (data: any) => {
+  const handleUpdate = async (data: EditNewsData) => {
     if (!id) return;
     
-    const result = await execute(
+    await executeUpdate(
       () => api?.newsApi.update(id, data),
       {
         showSuccessMessage: true,
@@ -40,9 +42,7 @@ const EditNewsStudio: React.FC = () => {
       }
     );
     
-    if (result) {
-      navigate(`/news/${id}`);
-    }
+    navigate(`/news/${id}`);
   };
 
   if (!initialData) return null; // or loading spinner

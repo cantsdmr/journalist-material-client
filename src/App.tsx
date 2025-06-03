@@ -131,7 +131,7 @@ const App: React.FC = () => {
       <Route path={`${PATHS.STUDIO_ROOT}/*`} element={<PrivateRoute><StudioLayout /></PrivateRoute>}>
         {/* <Route index element={<Studio />} /> */}
         <Route path={`${NEWS.ROOT}/*`}>
-          <Route index element={<ListNewsStudio isSubscribed={false} />} />
+          <Route index element={<ListNewsStudio />} />
           <Route path={`${NEWS.CREATE}`} element={<CreateNewsStudio />} />
           <Route path={`${NEWS.EDIT}/:id`} element={<EditNewsStudio />} />
           <Route path={`${NEWS.VIEW}`} element={<ViewNewsStudio />} />

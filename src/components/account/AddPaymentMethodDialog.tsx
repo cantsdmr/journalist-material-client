@@ -19,7 +19,7 @@ import {
   Grid
 } from '@mui/material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { PaymentMethodType, AddPaymentMethodData } from '@/APIs/AccountAPI';
+import { PaymentMethodType, AddPaymentMethodData } from '@/types/index';
 
 interface AddPaymentMethodDialogProps {
   open: boolean;

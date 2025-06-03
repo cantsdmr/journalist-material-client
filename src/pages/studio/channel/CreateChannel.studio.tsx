@@ -3,7 +3,7 @@ import { Container, Typography } from '@mui/material';
 import ChannelForm from '@/components/studio/channel/ChannelForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useNavigate } from 'react-router-dom';
-import { CreateChannelData, EditChannelData } from '@/APIs/ChannelAPI';
+import { CreateChannelData, EditChannelData } from '@/types/index';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 

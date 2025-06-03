@@ -9,29 +9,29 @@ import {
   Chip
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Channel, ChannelTier } from '@/APIs/ChannelAPI';
+import { Channel, SubscriptionTier } from '@/types/index';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { PATHS } from '@/constants/paths';
 
 interface ChannelItemProps {
   channel: Channel;
-  hasMembership: boolean;
-  membershipTier: ChannelTier | null;
+  hasSubscription: boolean;
+  subscriptionTier: SubscriptionTier | null;
   onJoin: (channelId: string, tierId?: string) => void;
   onCancel: (channelId: string) => void;
 }
 
 const ChannelItem: React.FC<ChannelItemProps> = ({ 
   channel, 
-  hasMembership,
-  membershipTier,
+  hasSubscription,
+  subscriptionTier,
   onJoin,
   onCancel
 }) => {
   const navigate = useNavigate();
-  const currentMembership = hasMembership;
-  const currentTier = membershipTier;
+  const currentSubscription = hasSubscription;
+  const currentTier = subscriptionTier;
   const defaultTier = channel.tiers?.find(tier => tier.isDefault);
 
   const handleClick = () => {
@@ -40,7 +40,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
 
   const handleJoin = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (currentMembership) {
+    if (currentSubscription) {
       onCancel(channel.id);
     } else {
       onJoin(channel.id, defaultTier?.id);
@@ -94,7 +94,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
             {channel.name}
           </Typography>
 
-          {currentMembership ? (
+          {currentSubscription ? (
             <Chip
               label={currentTier?.name}
               color="primary"

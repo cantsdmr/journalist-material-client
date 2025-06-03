@@ -21,15 +21,14 @@ import {
   WorkspacePremium as PremiumIcon
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { ChannelTier, ChannelMembership } from '@/APIs/ChannelAPI';
-import { PaymentMethod } from '@/APIs/AccountAPI';
+import { ChannelTier, ChannelSubscription, PaymentMethod } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
 
 interface SubscribeButtonProps {
   channelId: string;
   channelName: string;
   tiers: ChannelTier[];
-  currentMembership?: ChannelMembership | null;
+  currentMembership?: ChannelSubscription | null;
   onSubscriptionChange?: () => void;
   variant?: 'contained' | 'outlined' | 'text';
   size?: 'small' | 'medium' | 'large';
@@ -56,7 +55,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
-  const isSubscribed = currentMembership?.status === 'active';
+  const isSubscribed = currentMembership?.status === 1;
   const freeTier = tiers.find(tier => tier.price === 0);
   const defaultTier = tiers.find(tier => tier.isDefault) || freeTier || tiers[0];
 

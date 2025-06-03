@@ -8,7 +8,7 @@ import {
   alpha
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Channel } from '@/APIs/ChannelAPI';
+import { Channel } from '@/types/index';
 import PeopleIcon from '@mui/icons-material/People';
 // import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import CheckIcon from '@mui/icons-material/Check';
@@ -30,11 +30,11 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
   const navigate = useNavigate();
   const { 
     channelRelations: {
-      hasMembership,
+      hasSubscription,
     }
   } = useProfile();
+  const isUserFollowing = hasSubscription(channel.id);
 
-  const isUserFollowing = hasMembership(channel.id);
 
   const handleClick = () => {
     navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', channel.id));

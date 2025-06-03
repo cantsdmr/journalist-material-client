@@ -1,8 +1,13 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedCollection } from "@/utils/http";
-import { News, CreateNewsData } from "./NewsAPI";
-import { Channel, CreateChannelData } from "./ChannelAPI";
-import { Poll } from "./PollAPI";
+import { 
+    News, 
+    Channel, 
+    Poll, 
+    CreateNewsData, 
+    CreateChannelData, 
+    StudioCreatePollData 
+} from "../types";
 
 // Creator statistics
 export type CreatorStats = {
@@ -27,17 +32,6 @@ export type CreatorContent = {
   polls?: Poll[];
 };
 
-// Create poll data specific to studio (might have different structure)
-export type StudioCreatePollData = {
-  title: string;
-  description?: string;
-  channelId: string;
-  options: string[];
-  startDate?: string;
-  endDate?: string;
-  allowMultipleVotes?: boolean;
-};
-
 const API_PATH = '/api/studio';
 
 export class StudioAPI extends HTTPApi {
@@ -49,7 +43,6 @@ export class StudioAPI extends HTTPApi {
   
   /**
    * Create news article in studio
-   * POST /api/studio/news
    */
   public async createNews(data: CreateNewsData): Promise<News> {
     return this._post<News>(`${API_PATH}/news`, data);
@@ -57,7 +50,6 @@ export class StudioAPI extends HTTPApi {
 
   /**
    * Create channel in studio
-   * POST /api/studio/channels
    */
   public async createChannel(data: CreateChannelData): Promise<Channel> {
     return this._post<Channel>(`${API_PATH}/channels`, data);
@@ -65,7 +57,6 @@ export class StudioAPI extends HTTPApi {
 
   /**
    * Create poll in studio
-   * POST /api/studio/polls
    */
   public async createPoll(data: StudioCreatePollData): Promise<Poll> {
     return this._post<Poll>(`${API_PATH}/polls`, data);
@@ -75,7 +66,6 @@ export class StudioAPI extends HTTPApi {
 
   /**
    * Get current user's channels for dropdown/selection in forms
-   * GET /api/studio/me/channels
    */
   public async getMyChannels() {
     return this._list<Channel>(`${API_PATH}/me/channels`);
@@ -83,9 +73,6 @@ export class StudioAPI extends HTTPApi {
 
   /**
    * Get current user's content with unified interface
-   * GET /api/studio/me/content
-   * @param type - Type of content to retrieve ('all', 'news', 'channels', 'polls')
-   * @param pagination - Pagination options
    */
   public async getMyContent(
     type: ContentType = 'all',
@@ -104,8 +91,6 @@ export class StudioAPI extends HTTPApi {
 
   /**
    * Get creator analytics/statistics
-   * GET /api/studio/analytics
-   * @param period - Time period for stats ('7d', '30d', '90d', '1y')
    */
   public async getAnalytics(period: string = '30d'): Promise<CreatorStats> {
     const params = { period };
@@ -137,16 +122,12 @@ export class StudioAPI extends HTTPApi {
 
   // ==================== BACKWARD COMPATIBILITY ALIASES ====================
   
-  /**
-   * @deprecated Use getMyChannels() instead
-   */
+  /** @deprecated Use getMyChannels() instead */
   public async getCreatorChannels() {
     return this.getMyChannels();
   }
 
-  /**
-   * @deprecated Use getMyContent() instead
-   */
+  /** @deprecated Use getMyContent() instead */
   public async getCreatorContent(
     type: ContentType = 'all',
     pagination: PaginationObject = DEFAULT_PAGINATION
@@ -154,9 +135,7 @@ export class StudioAPI extends HTTPApi {
     return this.getMyContent(type, pagination);
   }
 
-  /**
-   * @deprecated Use getAnalytics() instead
-   */
+  /** @deprecated Use getAnalytics() instead */
   public async getCreatorStats(period: string = '30d'): Promise<CreatorStats> {
     return this.getAnalytics(period);
   }

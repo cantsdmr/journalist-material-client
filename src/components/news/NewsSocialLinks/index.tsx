@@ -7,7 +7,7 @@ import {
   Divider,
   Link
 } from '@mui/material';
-import { SocialLink } from '../../../APIs/NewsAPI';
+import { SocialLink } from '@/types/index';
 import { getSocialIcon, getPlatformColor, getPlatformName } from '../../../uiUtils/social';
 import PublicIcon from '@mui/icons-material/Public';
 import LaunchIcon from '@mui/icons-material/Launch';

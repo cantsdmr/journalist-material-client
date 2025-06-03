@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Cancel, Subscriptions as SubscriptionsIcon } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { Subscription } from '@/APIs/AccountAPI';
+import { Subscription } from '@/types/index';
 import { getMembershipStatusColor, getMembershipStatusLabel, canCancelMembership } from '@/constants/membership-status';
 import { useApiCall } from '@/hooks/useApiCall';
 

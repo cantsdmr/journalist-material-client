@@ -1,117 +1,11 @@
 import { AxiosJournalist } from "@/utils/axios";
-import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse, ApiResponse } from "@/utils/http";
-
-export type PollStatus = {
-    id: number;
-    name: string;
-}
-
-export type PollOption = {
-    id: string;
-    text: string;
-    voteCount: number;
-}
-
-export type PollTag = {
-    id: string;
-    name: string;
-}
-
-export type PollGoal = {
-    id: string;
-    targetAmount: number;
-}
-
-export type PollFund = {
-    id: string;
-    amount: number;
-}
-
-export type PollStatistics = {
-    totalVotes: number;
-    totalGoals: number;
-    totalTags: number;
-    totalFunds: number;
-    hasEnded: boolean;
-    viewCount: number;
-}
-
-export type PollFunding = {
-    id: string;
-    currentAmount: number;
-    goalAmount: number;
-    status: {
-        id: number;
-        name: string;
-    };
-    contributions: Array<{
-        id: string;
-        amount: number;
-        userId: string;
-        isAnonymous: boolean;
-        comment?: string;
-        createdAt: Date;
-    }>;
-}
-
-export type Poll = {
-    id: string;
-    title: string;
-    description?: string;
-    channelId: string;
-    creatorId: string;
-    createdAt: string;
-    updatedAt: string;
-    endDate?: string;
-    options: {
-        id: string;
-        text: string;
-        voteCount: number;
-    }[];
-    channel: {
-        id: string;
-        name: string;
-    };
-    creator: {
-        id: string;
-        displayName: string;
-    };
-    stats: PollStatistics;
-    voteCount: number;
-    tags: PollTag[];
-    isTrending: boolean;
-}
-
-export type CreatePollData = {
-    title: string;
-    description?: string;
-    channelId: string;
-    options: string[];
-    endDate?: string;
-}
-
-export type EditPollData = {
-    title?: string;
-    description?: string;
-    endDate?: string;
-}
-
-export type VoteData = {
-    optionId: string;
-}
-
-// Query parameter types for filtering
-export type PollFilters = {
-    trending?: boolean;
-    funded?: boolean;
-    claimed?: boolean;
-    channel?: string;
-    creator?: string;
-    subscribed?: boolean;
-    status?: string;
-    converted?: boolean;
-    tags?: string[];
-};
+import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from "@/utils/http";
+import { 
+    Poll, 
+    CreatePollData, 
+    EditPollData, 
+    PollFilters 
+} from "../types";
 
 const API_PATH = '/api/polls';
    
@@ -209,8 +103,8 @@ export class PollAPI extends HTTPApi {
     /**
      * Get specific poll by ID
      */
-    public async get(id: string): Promise<ApiResponse<Poll>> {
-        return this._get<ApiResponse<Poll>>(`${API_PATH}/${id}`);
+    public async get(id: string): Promise<Poll> {
+        return this._get<Poll>(`${API_PATH}/${id}`);
     }
 
     /**
@@ -223,8 +117,8 @@ export class PollAPI extends HTTPApi {
     /**
      * Update poll
      */
-    public async update(id: string, data: EditPollData): Promise<Poll> {
-        return this._put<Poll>(`${API_PATH}/${id}`, data);
+    public async update(id: string, data: EditPollData): Promise<void> {
+        await this._put<void>(`${API_PATH}/${id}`, data);
     }
 
     /**
@@ -238,7 +132,6 @@ export class PollAPI extends HTTPApi {
 
     /**
      * Get poll results/votes
-     * GET /polls/:id/votes
      */
     public async getResults(id: string): Promise<any> {
         return this._get<any>(`${API_PATH}/${id}/votes`);
@@ -246,15 +139,13 @@ export class PollAPI extends HTTPApi {
 
     /**
      * Vote on poll
-     * POST /polls/:id/votes
      */
-    public async vote(id: string, data: VoteData): Promise<void> {
+    public async vote(id: string, data: any) {
         return this._post<void>(`${API_PATH}/${id}/votes`, data);
     }
 
     /**
      * Get user's vote for poll
-     * GET /polls/:id/votes/me
      */
     public async getUserVote(id: string): Promise<{ optionId: string | null }> {
         return this._get<{ optionId: string | null }>(`${API_PATH}/${id}/votes/me`);
@@ -262,7 +153,6 @@ export class PollAPI extends HTTPApi {
 
     /**
      * Get poll funding information
-     * GET /polls/:id/funding
      */
     public async getFunding(id: string): Promise<any> {
         return this._get<any>(`${API_PATH}/${id}/funding`);
@@ -272,7 +162,6 @@ export class PollAPI extends HTTPApi {
 
     /**
      * Claim poll (create claim)
-     * POST /polls/:id/claims
      */
     public async claim(id: string): Promise<Poll> {
         return this._post<Poll>(`${API_PATH}/${id}/claims`, {});
@@ -280,7 +169,6 @@ export class PollAPI extends HTTPApi {
 
     /**
      * Convert poll to news (create conversion)
-     * POST /polls/:id/conversions
      */
     public async convertToNews(id: string, newsData: any): Promise<any> {
         return this._post<any>(`${API_PATH}/${id}/conversions`, newsData);
@@ -293,13 +181,6 @@ export class PollAPI extends HTTPApi {
      */
     public async getVoteResults(id: string): Promise<any> {
         return this.getResults(id);
-    }
-
-    /**
-     * @deprecated Use vote(id, data) instead  
-     */
-    public async voteOnPoll(id: string, data: VoteData): Promise<void> {
-        return this.vote(id, data);
     }
 
     /**

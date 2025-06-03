@@ -1,114 +1,16 @@
-import { DEFAULT_PAGINATION, HTTPApi, PaginatedCollection, PaginationObject } from "@/utils/http";
 import { AxiosJournalist } from "@/utils/axios";
-import { Channel, ChannelMembership } from "./ChannelAPI";
-import { ChannelTier } from "./ChannelAPI";
-
-export type UserProfile = {
-  id: string;
-  externalId: string;
-  email: string;
-  displayName: string;
-  photoUrl?: string;
-  roleId: number;
-  statusId: number;
-  createdAt: string;
-  updatedAt: string;
-  lastLogin?: string;
-  memberships?: ChannelMembership[];
-  channelUsers?: ChannelUser[];
-};
-
-export type UpdateProfileData = {
-  displayName?: string;
-  photoUrl?: string;
-  roleId?: number;
-};
-
-export type PaymentMethodType = {
-  id: number;
-  name: string;
-  description?: string;
-  is_active: boolean;
-};
-
-export type PaymentMethod = {
-  id: string;
-  typeId: number;
-  type: PaymentMethodType;
-  currency: string;
-  isDefault: boolean;
-  expiresAt?: string;
-  lastUsedAt?: string;
-  details: {
-    email?: string; // PayPal
-    cardNumber?: string; // iyzico (masked)
-    expiryMonth?: number; // iyzico
-    expiryYear?: number; // iyzico
-    cardHolderName?: string; // iyzico
-    [key: string]: any;
-  };
-};
-
-export type AddPaymentMethodData = {
-  type_id: number;
-  currency: string;
-  is_default?: boolean;
-  details: {
-    email?: string; // PayPal
-    cardNumber?: string; // iyzico
-    expiryMonth?: number; // iyzico
-    expiryYear?: number; // iyzico
-    cvv?: string; // iyzico
-    cardHolderName?: string; // iyzico
-    [key: string]: any;
-  };
-};
-
-export type UpdatePaymentMethodData = {
-  currency?: string;
-  is_default?: boolean;
-  details?: {
-    email?: string; // PayPal
-    cardNumber?: string; // iyzico
-    expiryMonth?: number; // iyzico
-    expiryYear?: number; // iyzico
-    cvv?: string; // iyzico
-    cardHolderName?: string; // iyzico
-    [key: string]: any;
-  };
-};
-
-export type Subscription = {
-  id: string;
-  channel_id: string;
-  channel_name: string;
-  tier_id: string;
-  tier_name: string;
-  tier_price: number;
-  currency: string;
-  status: 'active' | 'canceled' | 'expired' | 'suspended';
-  started_at: string;
-  expires_at?: string;
-  canceled_at?: string;
-};
-
-export type SubscribeData = {
-  tier_id: string;
-  payment_method_id?: string;
-};
-
-export type ChannelUser = {
-  id: string;
-  name: string;
-  description: string;
-  userRole: {
-    id: number;
-    name: string;
-    joinedAt: string;
-    lastActiveAt: string;
-  };
-  tiers: ChannelTier[];
-};
+import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
+import { 
+    UserProfile, 
+    PaymentMethod, 
+    PaymentMethodType, 
+    Subscription, 
+    UpdateProfileData, 
+    AddPaymentMethodData, 
+    UpdatePaymentMethodData, 
+    SubscribeData,
+    Channel 
+} from "../types";
 
 const API_PATH = '/api/account';
 
@@ -126,7 +28,7 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async getPaymentMethods() {
-    return this._get<PaginatedCollection<PaymentMethod>>(`${API_PATH}/payment-methods`);
+    return this._list<PaymentMethod>(`${API_PATH}/payment-methods`);
   }
 
   public async addPaymentMethod(data: AddPaymentMethodData) {
@@ -141,19 +43,19 @@ export class AccountAPI extends HTTPApi {
     return this._remove<void>(`${API_PATH}/payment-methods/${paymentMethodId}`);
   }
 
-  public async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethod> {
+  public async setDefaultPaymentMethod(paymentMethodId: string) {
     return this._patch<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
   }
 
-  public async getAvailablePaymentMethods(): Promise<PaginatedCollection<PaymentMethodType>> {
+  public async getAvailablePaymentMethods() {
     return this._list<PaymentMethodType>(`${API_PATH}/payment-methods/available`);
   }
 
-  public async getSubscriptions(): Promise<PaginatedCollection<Subscription>> {
+  public async getSubscriptions() {
     return this._list<Subscription>(`${API_PATH}/subscriptions`);
   }
 
-  public async subscribe(channelId: string, data: SubscribeData): Promise<Subscription> {
+  public async subscribe(channelId: string, data: SubscribeData) {
     return this._post<Subscription>(`${API_PATH}/subscriptions/${channelId}`, data);
   }
 
@@ -161,7 +63,7 @@ export class AccountAPI extends HTTPApi {
     return this._remove<void>(`${API_PATH}/subscriptions/${subscriptionId}`);
   }
 
-  public async getUserChannels(pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedCollection<Channel>> {
+  public async getUserChannels(pagination: PaginationObject = DEFAULT_PAGINATION) {
     return this._list<Channel>(`${API_PATH}/channels`, pagination);
   }
 } 

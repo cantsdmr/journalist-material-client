@@ -41,7 +41,7 @@ import {
   SubscriptionFilters, 
   SubscriptionAnalytics,
   BulkUpdateData 
-} from '@/APIs/SubscriptionAPI';
+} from '@/types/index';
 import { PaginationObject, DEFAULT_PAGINATION } from '@/utils/http';
 import { getMembershipStatusColor } from '@/constants/membership-status';
 import { useApiCall } from '@/hooks/useApiCall';

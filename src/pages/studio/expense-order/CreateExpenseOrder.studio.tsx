@@ -7,8 +7,8 @@ import {
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ExpenseOrderForm from '@/components/expense-order/ExpenseOrderForm';
-import { CreateExpenseOrderData, ExpenseType } from '@/APIs/ExpenseOrderAPI';
-import { Channel } from '@/APIs/ChannelAPI';
+import { CreateExpenseOrderData, ExpenseType } from '@/types/index';
+import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';

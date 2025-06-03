@@ -18,8 +18,7 @@ import {
   AttachFile as AttachFileIcon
 } from '@mui/icons-material';
 import JCard from '@/components/common/Card';
-import { ExpenseOrder, CreateExpenseOrderData, UpdateExpenseOrderData, ExpenseType } from '@/APIs/ExpenseOrderAPI';
-import { Channel } from '@/APIs/ChannelAPI';
+import { ExpenseOrder, CreateExpenseOrderData, UpdateExpenseOrderData, ExpenseType, Channel } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 
 interface ExpenseOrderFormProps {

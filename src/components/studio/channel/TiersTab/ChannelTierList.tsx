@@ -16,7 +16,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import AddIcon from '@mui/icons-material/Add';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { ChannelTier } from '@/APIs/ChannelAPI';
+import { ChannelTier } from '../../../../types';
 import { EmptyState } from '@/components/common/EmptyState';
 
 interface ChannelTierListProps {

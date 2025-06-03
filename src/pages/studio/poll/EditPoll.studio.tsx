@@ -5,35 +5,37 @@ import PollForm from '@/components/studio/poll/PollForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
+import { Poll } from '@/types/index';
 
 const EditPollStudio: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { api } = useApiContext();
   const [initialData, setInitialData] = useState<any>(null);
-  const { execute } = useApiCall();
+  const { execute: executeGet } = useApiCall<Poll>();
+  const { execute: executeUpdate } = useApiCall<void>();
 
   useEffect(() => {
     const fetchPoll = async () => {
       if (!id) return;
       
-      const result = await execute(
+      const result = await executeGet(
         () => api?.pollApi.get(id),
         { showErrorToast: true }
       );
       
       if (result) {
-        setInitialData(result.data);
+        setInitialData(result);
       }
     };
 
     fetchPoll();
-  }, [id, api?.pollApi, execute]);
+  }, [id, api?.pollApi, executeGet]);
 
   const handleUpdate = async (data: any) => {
     if (!id) return;
     
-    const result = await execute(
+    await executeUpdate(
       () => api?.pollApi.update(id, data),
       {
         showSuccessMessage: true,
@@ -41,9 +43,7 @@ const EditPollStudio: React.FC = () => {
       }
     );
     
-    if (result) {
-      navigate(PATHS.STUDIO_POLL_VIEW.replace(':id', id));
-    }
+    navigate(PATHS.STUDIO_POLL_VIEW.replace(':id', id));
   };
 
   if (!initialData) {

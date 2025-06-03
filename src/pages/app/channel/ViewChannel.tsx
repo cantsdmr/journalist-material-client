@@ -14,7 +14,7 @@ import {
     CircularProgress
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { Channel } from '@/APIs/ChannelAPI';
+import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import JCard from '@/components/common/Card';
 import { useProfile } from '@/contexts/ProfileContext';
@@ -28,8 +28,8 @@ const ViewChannel: React.FC = () => {
     const { api } = useApiContext();
     const {
         channelRelations: {
-            hasMembership,
-            getMembershipTier
+            hasSubscription,
+            getSubscriptionTier
         },
         actions: {
             refreshProfile
@@ -38,8 +38,8 @@ const ViewChannel: React.FC = () => {
     const { execute } = useApiCall();
 
     // Use them in your component
-    const isMember = hasMembership(id ?? '');
-    const currentTierId = getMembershipTier(id ?? '')?.id;
+    const isMember = hasSubscription(id ?? '');
+    const currentTierId = getSubscriptionTier(id ?? '')?.id;
 
     useEffect(() => {
         const fetchChannel = async () => {

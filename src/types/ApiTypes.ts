@@ -41,16 +41,6 @@ export interface ListResponse<T> {
 }
 
 /**
- * Standard API response wrapper (use sparingly)
- * Note: success field is deprecated in favor of HTTP status codes
- */
-export interface ApiResponse<T = any> {
-  data: T;
-  success?: boolean; // Deprecated: HTTP status codes should indicate success
-  message?: string;
-}
-
-/**
  * Error response structure
  */
 export interface ApiErrorResponse {

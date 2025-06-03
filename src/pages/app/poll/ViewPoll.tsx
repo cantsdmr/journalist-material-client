@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
-import { Poll } from '@/APIs/PollAPI';
+import { Poll } from '@/types/index';
 import PollCard from '@/components/poll/PollCard';
 import { Link as RouterLink } from 'react-router-dom';
 import CampaignIcon from '@mui/icons-material/Campaign';

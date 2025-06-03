@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { NewsTag } from '@/APIs/NewsAPI';
+import { NewsTag } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 
@@ -35,7 +35,7 @@ const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
 
   const fetchTags = async () => {
     const result = await execute(
-      () => api?.newsApi.getTags(),
+      () => api?.tagApi.getNewsTags(),
       { showErrorToast: true }
     );
     

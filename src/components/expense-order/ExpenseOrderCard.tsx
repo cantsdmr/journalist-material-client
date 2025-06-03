@@ -18,7 +18,7 @@ import {
 } from '@mui/icons-material';
 import JCard from '@/components/common/Card';
 import ExpenseOrderStatusChip from './ExpenseOrderStatusChip';
-import { ExpenseOrder } from '@/APIs/ExpenseOrderAPI';
+import { ExpenseOrder } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { formatDistanceToNow } from 'date-fns';
 

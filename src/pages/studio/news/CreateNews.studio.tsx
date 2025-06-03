@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import NewsForm from '@/components/news/NewsForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useNavigate } from 'react-router-dom';
-import { CreateNewsData } from '@/APIs/NewsAPI';
+import { CreateNewsData } from '@/types/index';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 

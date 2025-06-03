@@ -3,7 +3,7 @@ import { Box, Typography } from '@mui/material';
 import TierForm from '@/components/tier/TierForm';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { EditChannelTierData } from '@/APIs/ChannelAPI';
+import { EditChannelTierData } from '@/types/index';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 

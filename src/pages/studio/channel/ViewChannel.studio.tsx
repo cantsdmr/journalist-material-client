@@ -11,7 +11,7 @@ import {
     Divider,
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
-import { Channel } from '@/APIs/ChannelAPI';
+import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import JCard from '@/components/common/Card';
 

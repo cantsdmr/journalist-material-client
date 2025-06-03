@@ -6,7 +6,7 @@ import {
   Box,
   Stack,
 } from '@mui/material';
-import { ChannelTier } from '@/APIs/ChannelAPI';
+import { ChannelTier } from '@/types/index';
 
 interface TierCardProps {
   tier: ChannelTier;

@@ -1,6 +1,6 @@
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { AxiosJournalist } from './axios';
-import { PaginatedResponse, ListResponse } from '../types/ApiTypes';
+import { PaginatedResponse } from '../types/ApiTypes';
 
 // Re-export commonly used types for convenience
 export type { 
@@ -10,7 +10,6 @@ export type {
   PaginatedCollection, 
   Collection, 
   PaginationObject, 
-  ApiResponse 
 } from '../types/ApiTypes';
 
 export { DEFAULT_PAGINATION } from '../types/ApiTypes';
@@ -40,11 +39,11 @@ export class HTTPApi {
     }
   };
 
-  protected _listAll = async <T>(url: string, query?: Record<string, any>, config?: AxiosRequestConfig): Promise<ListResponse<T>> => {
+  protected _listAll = async <T>(url: string, query?: Record<string, any>, config?: AxiosRequestConfig): Promise<PaginatedResponse<T>> => {
     try {
       const params = new URLSearchParams(query);
       const paramString = params.size === 0 ? '' : `?${params.toString()}`
-      const response: AxiosResponse<ListResponse<T>> = await this.axiosJ.axiosInstance.get(`${url}${paramString}`, config);
+      const response: AxiosResponse<PaginatedResponse<T>> = await this.axiosJ.axiosInstance.get(`${url}${paramString}`, config);
       return response.data;
     } catch (error) {
       throw this.axiosJ.handleAxiosError(error as AxiosError);

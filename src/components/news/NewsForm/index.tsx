@@ -4,7 +4,7 @@ import {
   Select, MenuItem, FormControlLabel, Switch, Button,
   alpha, Typography
 } from '@mui/material';
-import { CreateNewsData, NewsMedia, SocialLink } from '../../../APIs/NewsAPI';
+import { CreateNewsData, NewsMedia, SocialLink, News } from '../../../types';
 import { OutputData } from '@editorjs/editorjs';
 import { NEWS_MEDIA_FORMAT, NEWS_MEDIA_TYPE, NEWS_STATUS } from '@/enums/NewsEnums';
 import JEditor from '@/components/editor/JEditor';
@@ -17,7 +17,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import AddToQueueIcon from '@mui/icons-material/AddToQueue';
 
 interface NewsFormProps {
-  initialData?: CreateNewsData;
+  initialData?: News;
   onSubmit: (data: CreateNewsData) => Promise<void>;
   submitButtonText: string;
 }
@@ -32,7 +32,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
   
   // Check if profile has channels
   useEffect(() => {
-    if (profile && (!profile.channelUsers || profile.channelUsers.length === 0)) {
+    if (profile && (!profile.staffChannels || profile.staffChannels.length === 0)) {
       // Profile has no channels
       return;
     }
@@ -198,7 +198,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
                     Select the channel where this news will be published.
                     Choose the most relevant channel for your content.
                   </Typography>
-                  <FormControl fullWidth>
+                  <FormControl fullWidth disabled>
                     <Select
                       value={formData.channelId}
                       onChange={(e) => setFormData(prev => ({
@@ -207,9 +207,9 @@ const NewsForm: React.FC<NewsFormProps> = ({
                       }))}
                       required
                     >
-                      {profile?.channelUsers.map((channel) => (
-                        <MenuItem key={channel.channelId} value={channel.channelId}>
-                          {channel.channelName}
+                      {profile?.staffChannels.map((channel) => (
+                        <MenuItem key={channel.id} value={channel.id}>
+                          {channel.channel.name}
                         </MenuItem>
                       ))}
                     </Select>

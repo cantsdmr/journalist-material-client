@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
-import { News } from '@/APIs/NewsAPI';
+import { News } from '@/types/index';
 import NewsSocialLinks from '@/components/news/NewsSocialLinks';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CoverPlaceholder from '@/assets/BG_journo.png';

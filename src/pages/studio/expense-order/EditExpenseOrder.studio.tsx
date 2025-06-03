@@ -8,8 +8,8 @@ import {
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import ExpenseOrderForm from '@/components/expense-order/ExpenseOrderForm';
-import { ExpenseOrder, UpdateExpenseOrderData, ExpenseType } from '@/APIs/ExpenseOrderAPI';
-import { Channel } from '@/APIs/ChannelAPI';
+import { ExpenseOrder, UpdateExpenseOrderData, ExpenseType } from '@/types/index';
+import { Channel } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';

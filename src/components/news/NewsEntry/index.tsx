@@ -10,7 +10,7 @@ import {
   Avatar
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { News } from '@/APIs/NewsAPI';
+import { News } from '@/types/index';
 import { NEWS_MEDIA_TYPE } from '@/enums/NewsEnums';
 import DefaultNewsAvatar from '@/assets/BG_journo.png';
 import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
