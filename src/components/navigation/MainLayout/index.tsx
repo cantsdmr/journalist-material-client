@@ -26,6 +26,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import { PATHS } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 import SearchBar from '@/components/search/SearchBar';
+import { VERSION } from '@/constants/values';
 
 const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -134,38 +135,51 @@ const MainLayout: React.FC = () => {
               <MenuRoundedIcon />
             </IconButton>
             
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 700,
-                display: 'block',
-                letterSpacing: '.1rem',
-                fontFamily: "'Inter', -apple-system, sans-serif"
-              }}
-            >
-              <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                <span style={{ 
-                  color: '#2196F3',
-                  textTransform: 'uppercase',
-                  fontWeight: 800
-                }}>Meta</span>
-                <span style={{ 
-                  color: '#1976D2',
-                  fontWeight: 600
-                }}>Journo</span>
-              </Box>
-              <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                <span style={{ 
-                  color: '#2196F3',
-                  textTransform: 'uppercase',
-                  fontWeight: 800
-                }}>M</span>
-                <span style={{ 
-                  color: '#1976D2',
-                  fontWeight: 600
-                }}>Journo</span>
-              </Box>
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontWeight: 700,
+                  display: 'block',
+                  letterSpacing: '.1rem',
+                  fontFamily: "'Inter', -apple-system, sans-serif"
+                }}
+              >
+                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  <span style={{ 
+                    color: '#2196F3',
+                    textTransform: 'uppercase',
+                    fontWeight: 800
+                  }}>Meta</span>
+                  <span style={{ 
+                    color: '#1976D2',
+                    fontWeight: 600
+                  }}>Journo</span>
+                </Box>
+                <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                  <span style={{ 
+                    color: '#2196F3',
+                    textTransform: 'uppercase',
+                    fontWeight: 800
+                  }}>M</span>
+                  <span style={{ 
+                    color: '#1976D2',
+                    fontWeight: 600
+                  }}>Journo</span>
+                </Box>
+              </Typography>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  opacity: 0.7,
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  display: { xs: 'none', sm: 'block' }
+                }}
+              >
+                v{VERSION}
+              </Typography>
+            </Box>
           </Box>
 
           <Box sx={{ 
