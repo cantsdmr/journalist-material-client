@@ -28,7 +28,7 @@ interface SubscribeButtonProps {
   channelId: string;
   channelName: string;
   tiers: ChannelTier[];
-  currentMembership?: ChannelSubscription | null;
+  currentSubscription?: ChannelSubscription | null;
   onSubscriptionChange?: () => void;
   variant?: 'contained' | 'outlined' | 'text';
   size?: 'small' | 'medium' | 'large';
@@ -39,7 +39,7 @@ const SubscribeButton: React.FC<SubscribeButtonProps> = ({
   channelId,
   channelName,
   tiers,
-  currentMembership,
+  currentSubscription: currentMembership,
   onSubscriptionChange,
   variant = 'contained',
   size = 'medium',

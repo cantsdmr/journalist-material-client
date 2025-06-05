@@ -16,6 +16,13 @@ export type Poll = {
         id: string;
         displayName: string;
     };
+    requiredTier?: {
+        id: string;
+        name: string;
+        description?: string;
+        price: number;
+        order: number;
+    };
     stats: PollStatistics;
     voteCount: number;
     tags: PollTag[];

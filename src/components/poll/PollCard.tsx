@@ -28,15 +28,18 @@ interface PollCardProps {
   onViewResults?: (pollId: string) => void;
   userVote?: string;
   showResults?: boolean;
+  disabled?: boolean;
 }
 
-const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVote, showResults = false }) => {
+const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVote, showResults = false, disabled = false }) => {
   const theme = useTheme();
   const [hoveredOption, setHoveredOption] = useState<string | null>(null);
   const totalVotes = poll.stats?.totalVotes || 0;
 
   const handleOptionHover = (optionId: string | null) => {
-    setHoveredOption(optionId);
+    if (!disabled) {
+      setHoveredOption(optionId);
+    }
   };
 
   return (
@@ -106,10 +109,11 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                 sx={{
                   mb: 2,
                   position: 'relative',
-                  cursor: showResults ? 'default' : 'pointer',
+                  cursor: (showResults || disabled) ? 'default' : 'pointer',
                   transition: 'all 0.2s ease',
                   transform: isHovered ? 'translateX(4px)' : 'none',
-                  '&:hover': !showResults && {
+                  opacity: disabled ? 0.6 : 1,
+                  '&:hover': (!showResults && !disabled) && {
                     bgcolor: alpha(theme.palette.primary.main, 0.05),
                     borderRadius: 1
                   }
@@ -117,7 +121,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  if (!showResults) {
+                  if (!showResults && !disabled) {
                     onVote?.(poll.id.toString(), option.id);
                   }
                 }}
@@ -141,7 +145,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     ? alpha(theme.palette.primary.main, 0.05)
                     : 'transparent',
                   transition: 'all 0.2s ease',
-                  '&:hover': !showResults && {
+                  '&:hover': (!showResults && !disabled) && {
                     borderColor: 'primary.main',
                     boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.15)}`
                   }

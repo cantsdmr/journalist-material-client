@@ -75,7 +75,7 @@ const TierForm: React.FC<TierFormProps> = ({
                 Tier Name
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Choose a name for this membership tier.
+                Choose a name for this subscription tier.
               </Typography>
               <TextField
                 value={formData.name}

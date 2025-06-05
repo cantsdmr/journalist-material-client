@@ -19,7 +19,7 @@ import {
 import { Cancel, Subscriptions as SubscriptionsIcon } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Subscription } from '@/types/index';
-import { getMembershipStatusColor, getMembershipStatusLabel, canCancelMembership } from '@/constants/membership-status';
+import { getSubscriptionStatusColor, getSubscriptionStatusLabel, canCancelSubscription as canCancelSubscriptionHelper } from '@/enums/SubscriptionEnums';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionsTab: React.FC = () => {
@@ -88,11 +88,11 @@ const SubscriptionsTab: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    return getMembershipStatusColor(status);
+    return getSubscriptionStatusColor(status);
   };
 
   const getStatusLabel = (status: string) => {
-    return getMembershipStatusLabel(status);
+    return getSubscriptionStatusLabel(status);
   };
 
   const formatDate = (dateString: string) => {
@@ -111,7 +111,7 @@ const SubscriptionsTab: React.FC = () => {
   };
 
   const canCancelSubscription = (subscription: Subscription) => {
-    return canCancelMembership(subscription.status);
+    return canCancelSubscriptionHelper(subscription.status);
   };
 
   if (loading) {

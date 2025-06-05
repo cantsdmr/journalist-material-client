@@ -13,11 +13,12 @@ import {
   Button,
   useTheme,
   Snackbar,
-  Alert
+  Alert,
+  Chip
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
-import { Poll } from '@/types/index';
+import { Poll, VotingEligibilityResponse } from '@/types/index';
 import PollCard from '@/components/poll/PollCard';
 import { Link as RouterLink } from 'react-router-dom';
 import CampaignIcon from '@mui/icons-material/Campaign';
@@ -26,6 +27,8 @@ import ShareIcon from '@mui/icons-material/Share';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import CommentIcon from '@mui/icons-material/Comment';
+import StarIcon from '@mui/icons-material/Star';
+import LockIcon from '@mui/icons-material/Lock';
 import { PATHS } from '@/constants/paths';
 import { formatDistanceToNow } from 'date-fns';
 import { alpha } from '@mui/material/styles';
@@ -97,6 +100,7 @@ const ViewPoll: React.FC = () => {
   const [showResultsMode, setShowResultsMode] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [votingEligibility, setVotingEligibility] = useState<VotingEligibilityResponse | null>(null);
   const { execute } = useApiCall();
 
   useEffect(() => {
@@ -123,6 +127,16 @@ const ViewPoll: React.FC = () => {
         if (voteResponse?.optionId) {
           setUserVote(voteResponse.optionId);
         }
+
+        // Check voting eligibility
+        const eligibilityResponse = await execute(
+          () => api?.pollApi.checkVotingEligibility(id),
+          { showErrorToast: false }
+        );
+
+        if (eligibilityResponse) {
+          setVotingEligibility(eligibilityResponse);
+        }
       }
       
       setLoading(false);
@@ -132,6 +146,12 @@ const ViewPoll: React.FC = () => {
   }, [id, execute]);
 
   const handleVote = async (pollId: string, optionId: string) => {
+    // Check eligibility before voting
+    if (!votingEligibility?.canVote) {
+      setError(votingEligibility?.reason || 'You cannot vote on this poll');
+      return;
+    }
+
     const result = await execute(
       () => api?.pollApi.vote(pollId, { optionId }),
       {
@@ -208,7 +228,7 @@ const ViewPoll: React.FC = () => {
               flexWrap: 'wrap',
               gap: 2
             }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Box 
                   component={RouterLink}
                   to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', poll.channel.id)}
@@ -250,6 +270,17 @@ const ViewPoll: React.FC = () => {
                     {poll.creator.displayName}
                   </Typography>
                 </Box>
+                
+                {/* Required Tier Badge */}
+                {poll.requiredTier && (
+                  <Chip
+                    icon={<StarIcon />}
+                    label={`${poll.requiredTier.name} Required`}
+                    color="warning"
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
               </Box>
               <Stack direction="row" spacing={1}>
                 <IconButton 
@@ -279,12 +310,26 @@ const ViewPoll: React.FC = () => {
           </Box>
         </Grid>
         <Grid item xs={12} md={8}>
+          {/* Voting Eligibility Warning */}
+          {votingEligibility && !votingEligibility.canVote && (
+            <Alert 
+              severity="warning" 
+              icon={<LockIcon />}
+              sx={{ mb: 2 }}
+            >
+              <Typography variant="body2">
+                {votingEligibility.reason}
+              </Typography>
+            </Alert>
+          )}
+          
           <PollCard
             poll={poll}
             onVote={handleVote}
             onViewResults={handleViewResults}
             userVote={userVote}
             showResults={!!userVote || showResultsMode}
+            disabled={!votingEligibility?.canVote}
           />
         </Grid>
         <Grid item xs={12} md={4}>
@@ -297,6 +342,31 @@ const ViewPoll: React.FC = () => {
                 <Typography variant="body2" color="text.secondary">
                   {poll.description}
                 </Typography>
+              </Paper>
+            )}
+
+            {/* Required Tier Information */}
+            {poll.requiredTier && (
+              <Paper sx={{ p: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  Access Requirements
+                </Typography>
+                <Stack spacing={1}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <StarIcon color="warning" fontSize="small" />
+                    <Typography variant="subtitle2">
+                      {poll.requiredTier.name}
+                    </Typography>
+                  </Box>
+                  {poll.requiredTier.description && (
+                    <Typography variant="body2" color="text.secondary">
+                      {poll.requiredTier.description}
+                    </Typography>
+                  )}
+                  <Typography variant="caption" color="text.secondary">
+                    This poll requires a {poll.requiredTier.name} subscription or higher to vote.
+                  </Typography>
+                </Stack>
               </Paper>
             )}
             

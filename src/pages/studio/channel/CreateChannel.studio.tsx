@@ -6,11 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import { CreateChannelData, EditChannelData } from '@/types/index';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
+import { useProfile } from '@/contexts/ProfileContext';
 
 const CreateChannelStudio: React.FC = () => {
   const { api } = useApiContext();
   const navigate = useNavigate();
   const { execute } = useApiCall();
+  const { actions: { refreshProfile } } = useProfile();
 
   const handleCreate = async (data: EditChannelData | CreateChannelData | null | undefined) => {
     if (!data) return;
@@ -24,6 +26,7 @@ const CreateChannelStudio: React.FC = () => {
     );
     
     if (result) {
+      await refreshProfile();
       navigate(`${PATHS.STUDIO_CHANNELS}`);
     }
   };

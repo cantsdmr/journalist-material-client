@@ -43,7 +43,7 @@ import {
   BulkUpdateData 
 } from '@/types/index';
 import { PaginationObject, DEFAULT_PAGINATION } from '@/utils/http';
-import { getMembershipStatusColor } from '@/constants/membership-status';
+import { getSubscriptionStatusColor} from '@/enums/SubscriptionEnums';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionManagement: React.FC = () => {
@@ -169,7 +169,7 @@ const SubscriptionManagement: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    return getMembershipStatusColor(status);
+    return getSubscriptionStatusColor(status);
   };
 
   const formatDate = (dateString: string) => {

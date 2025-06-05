@@ -36,7 +36,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     const result = await execute(
       () => api.accountApi.getProfile(),
-      { showErrorToast: true }
+      { showErrorToast: false }
     );
     
     if (result) {
@@ -59,7 +59,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
       getSubscription: (channelId: string) => profile?.subscriptions?.find(m => m.channelId === channelId) ?? null,
       getSubscriptions: () => profile?.subscriptions ?? [],
       hasSubscription: (channelId: string) => profile?.subscriptions?.some(m => m.channelId === channelId) ?? false,
-      hasChannel: () => profile?.subscriptions?.length && profile.subscriptions.length > 0,
+      hasChannel: () => profile?.staffChannels?.length && profile.staffChannels.length > 0,
       getSubscriptionTier: (channelId: string) => profile?.subscriptions?.find(m => m.channelId === channelId)?.tier ?? null
     },
     actions: {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   TextField,
@@ -15,7 +15,11 @@ import {
 import { DateTimePicker } from '@mui/x-date-pickers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import AddToQueueIcon from '@mui/icons-material/AddToQueue';
 import { useProfile } from '@/contexts/ProfileContext';
+import { useNavigate } from 'react-router-dom';
+import { PATHS } from '@/constants/paths';
+import { EmptyState } from '@/components/common/EmptyState';
 
 interface PollOption {
   text: string;
@@ -34,14 +38,18 @@ interface PollFormProps {
   initialData?: Partial<PollFormData>;
   onSubmit: (data: PollFormData) => void;
   submitButtonText?: string;
+  isEdit?: boolean;
+  isCreate?: boolean;
 }
 
 const PollForm: React.FC<PollFormProps> = ({
   initialData,
   onSubmit,
-  submitButtonText = 'Submit'
+  submitButtonText = 'Submit',
+  isEdit
 }) => {
-  const { profile  } = useProfile();
+  const { profile, channelRelations: { hasChannel } } = useProfile();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<PollFormData>({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -50,6 +58,14 @@ const PollForm: React.FC<PollFormProps> = ({
     channelId: initialData?.channelId || '',
     options: initialData?.options || [{ text: '' }, { text: '' }]
   });
+
+  // Check if profile has channels
+  useEffect(() => {
+    if (profile && (!profile.staffChannels || profile.staffChannels.length === 0)) {
+      // Profile has no channels
+      return;
+    }
+  }, [profile]);
 
   const handleChange = (field: keyof PollFormData, value: any) => {
     setFormData(prev => ({
@@ -79,11 +95,30 @@ const PollForm: React.FC<PollFormProps> = ({
     onSubmit(formData);
   };
 
-  return (
+  return !hasChannel() ? (
+    <Box sx={{ 
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      p: 3 
+    }}>
+      <EmptyState
+        title="Channel Required"
+        description="You need to create a channel before you can start creating polls."
+        icon={<AddToQueueIcon sx={{ fontSize: 48 }} />}
+        action={{
+          label: "Create Channel",
+          onClick: () => navigate(PATHS.STUDIO_CHANNEL_CREATE)
+        }}
+      />
+    </Box>
+  ) : (
     <Box component="form" onSubmit={handleSubmit}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <FormControl fullWidth disabled>
+          <FormControl fullWidth disabled={isEdit}>
             <InputLabel id="channel-select-label">Channel</InputLabel>
             <Select
               labelId="channel-select-label"

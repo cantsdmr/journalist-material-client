@@ -64,6 +64,7 @@ const EditNewsStudio: React.FC = () => {
         initialData={initialData}
         onSubmit={handleUpdate}
         submitButtonText="Update News"
+        isEdit
       />
     </Container>
   );

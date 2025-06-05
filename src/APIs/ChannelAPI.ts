@@ -159,29 +159,4 @@ export class ChannelAPI extends HTTPApi {
     public async getSubscriptionDetails(channelId: string, subscriptionId: string) {
         return this._get<ChannelSubscription>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}/${subscriptionId}`);
     }
-
-    // ==================== LEGACY METHODS (DEPRECATED) ====================
-
-    /** @deprecated Use subscribeToChannel instead */
-    public async joinChannel(channelId: string, options: { 
-        tierId?: string;
-        notificationLevel?: number;
-    } = {}) {
-        return this.subscribeToChannel(channelId, { tier_id: options.tierId });
-    }
-
-    /** @deprecated Use subscribeToChannel instead */
-    public async subscribe(channelId: string, tierId: string) {
-        return this.subscribeToChannel(channelId, { tier_id: tierId });
-    }
-
-    /** @deprecated Use unsubscribeFromChannel instead */
-    public async unsubscribe(channelId: string) {
-        return this.unsubscribeFromChannel(channelId);
-    }
-
-    /** @deprecated Use unsubscribeFromChannel instead */
-    public async cancelMembership(channelId: string) {
-        return this.unsubscribeFromChannel(channelId);
-    }
 }

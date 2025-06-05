@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Snackbar, Alert, AlertColor } from '@mui/material';
-import { setGlobalNotificationHandler } from '@/utils/axios';
 
 export interface NotificationState {
   open: boolean;
@@ -103,14 +102,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const hideNotification = useCallback(() => {
     setNotification(prev => ({ ...prev, open: false }));
   }, []);
-
-  // Register notification handlers with axios utility
-  useEffect(() => {
-    setGlobalNotificationHandler({
-      showValidationErrors,
-      showError
-    });
-  }, [showValidationErrors, showError]);
 
   const contextValue: NotificationContextValue = {
     showNotification,

@@ -91,8 +91,8 @@ export const ChannelTierList: React.FC<ChannelTierListProps> = ({
   if (tiers.length === 0) {
     return (
       <EmptyState
-        title="Set Up Channel Memberships"
-        description="Create subscription tiers to offer exclusive perks and content to your members"
+        title="Set Up Channel Subscriptions"
+        description="Create subscription tiers to offer exclusive perks and content to your subscribers"
         action={{
           label: "Create Your First Tier",
           onClick: onCreateTier
@@ -111,7 +111,7 @@ export const ChannelTierList: React.FC<ChannelTierListProps> = ({
         justifyContent="space-between"
       >
         <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          Membership Tiers
+          Subscription Tiers
         </Typography>
         <Button
           variant="contained"

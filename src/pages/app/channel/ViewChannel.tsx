@@ -27,6 +27,7 @@ const ViewChannel: React.FC = () => {
     const { id } = useParams();
     const { api } = useApiContext();
     const {
+        profile,
         channelRelations: {
             hasSubscription,
             getSubscriptionTier
@@ -40,6 +41,15 @@ const ViewChannel: React.FC = () => {
     // Use them in your component
     const isMember = hasSubscription(id ?? '');
     const currentTierId = getSubscriptionTier(id ?? '')?.id;
+
+    // Debug logging
+    console.log('ViewChannel Debug:', {
+        channelId: id,
+        isMember,
+        currentTierId,
+        subscriptions: profile?.subscriptions,
+        profileLoaded: !!profile
+    });
 
     useEffect(() => {
         const fetchChannel = async () => {
@@ -64,7 +74,9 @@ const ViewChannel: React.FC = () => {
         if (!channel) return;
         
         const result = await execute(
-            () => api?.channelApi.joinChannel(channel.id, { tierId }),
+            () => api?.channelApi.subscribeToChannel(channel.id, {
+                tier_id: tierId
+            }),
             {
                 showSuccessMessage: true,
                 successMessage: 'Successfully joined channel!'
@@ -72,6 +84,7 @@ const ViewChannel: React.FC = () => {
         );
         
         if (result) {
+            console.log('Subscription successful, refreshing profile...');
             await refreshProfile();
         }
     };
@@ -89,6 +102,7 @@ const ViewChannel: React.FC = () => {
         );
         
         if (result) {
+            console.log('Membership update successful, refreshing profile...');
             await refreshProfile();
         }
         
@@ -99,7 +113,7 @@ const ViewChannel: React.FC = () => {
         if (!channel) return;
         
         const result = await execute(
-            () => api?.channelApi.cancelMembership(channel.id),
+            () => api?.channelApi.unsubscribeFromChannel(channel.id),
             {
                 showSuccessMessage: true,
                 successMessage: 'Membership cancelled successfully!'
@@ -107,6 +121,7 @@ const ViewChannel: React.FC = () => {
         );
         
         if (result) {
+            console.log('Cancellation successful, refreshing profile...');
             await refreshProfile();
         }
     };
@@ -190,10 +205,10 @@ const ViewChannel: React.FC = () => {
                     />
                     <Typography variant="h4" gutterBottom>{channel.name}</Typography>
                     <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                        {channel.stats?.activeMemberCount?.toLocaleString('en-US', {
+                        {channel.stats?.activeSubscriptionCount?.toLocaleString('en-US', {
                             notation: 'compact',
                             maximumFractionDigits: 1
-                        })} members • {channel.tiers?.length || 0} tiers
+                        })} subscribers • {channel.tiers?.length || 0} tiers
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 3 }}>
                         {channel.description}
@@ -213,6 +228,17 @@ const ViewChannel: React.FC = () => {
                             {loadingTierId ? 'Processing...' : (isMember ? 'Cancel Membership' : 'Join Channel')}
                         </Button>
                     </Stack>
+                    
+                    {/* Debug info - remove in production */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <Box sx={{ mt: 2, p: 2, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 1 }}>
+                            <Typography variant="caption" display="block">
+                                Debug: isMember={isMember.toString()}, currentTierId={currentTierId || 'none'}, 
+                                subscriptions={profile?.subscriptions?.length || 0}
+                            </Typography>
+                        </Box>
+                    )}
+                    
                     <Divider sx={{ mb: 4 }} />
                 </Box>
             </Box>

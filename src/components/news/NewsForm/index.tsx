@@ -20,12 +20,15 @@ interface NewsFormProps {
   initialData?: News;
   onSubmit: (data: CreateNewsData) => Promise<void>;
   submitButtonText: string;
+  isEdit?: boolean;
+  isCreate?: boolean;
 }
 
 const NewsForm: React.FC<NewsFormProps> = ({
   initialData,
   onSubmit,
-  submitButtonText
+  submitButtonText,
+  isEdit
 }) => {
   const { profile, channelRelations: { hasChannel } } = useProfile();
   const navigate = useNavigate();
@@ -198,7 +201,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
                     Select the channel where this news will be published.
                     Choose the most relevant channel for your content.
                   </Typography>
-                  <FormControl fullWidth disabled>
+                  <FormControl fullWidth disabled={isEdit}>
                     <Select
                       value={formData.channelId}
                       onChange={(e) => setFormData(prev => ({

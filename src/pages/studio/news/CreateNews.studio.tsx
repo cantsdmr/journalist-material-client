@@ -42,6 +42,7 @@ const CreateNewsStudio: React.FC = () => {
       <NewsForm
         onSubmit={handleCreate}
         submitButtonText="Create News"
+        isCreate={true}
       />
     </Box>
   );

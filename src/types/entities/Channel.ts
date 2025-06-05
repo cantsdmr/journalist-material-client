@@ -32,8 +32,8 @@ export type ChannelTier = {
 };
 
 export type ChannelStats = {
-    activeMemberCount: number;
-    paidMemberCount: number;
+    activeSubscriptionCount: number;
+    paidSubscriptionCount: number;
     popularityScore: number;
     newsCount: number;
     pollCount: number;

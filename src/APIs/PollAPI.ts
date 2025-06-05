@@ -3,8 +3,9 @@ import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from
 import { 
     Poll, 
     CreatePollData, 
-    EditPollData, 
-    PollFilters 
+    UpdatePollData, 
+    PollFilters,
+    VotingEligibilityResponse
 } from "../types";
 
 const API_PATH = '/api/polls';
@@ -117,7 +118,7 @@ export class PollAPI extends HTTPApi {
     /**
      * Update poll
      */
-    public async update(id: string, data: EditPollData): Promise<void> {
+    public async update(id: string, data: UpdatePollData): Promise<void> {
         await this._put<void>(`${API_PATH}/${id}`, data);
     }
 
@@ -149,6 +150,13 @@ export class PollAPI extends HTTPApi {
      */
     public async getUserVote(id: string): Promise<{ optionId: string | null }> {
         return this._get<{ optionId: string | null }>(`${API_PATH}/${id}/votes/me`);
+    }
+
+    /**
+     * Check if user can vote on poll
+     */
+    public async checkVotingEligibility(id: string): Promise<VotingEligibilityResponse> {
+        return this._get<VotingEligibilityResponse>(`${API_PATH}/${id}/votes/eligibility`);
     }
 
     /**
