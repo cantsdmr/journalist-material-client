@@ -163,7 +163,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
             >
               <Chip 
                 size="small"
-                label={`${channel?.stats?.activeSubscribtionCount} subscribers`}
+                label={`${channel?.stats?.activeSubscriptionCount} subscribers`}
                 sx={{ 
                   height: 24,
                   fontSize: '0.75rem',

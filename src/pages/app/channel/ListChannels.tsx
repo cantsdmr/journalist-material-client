@@ -56,7 +56,7 @@ const ListChannels: React.FC = () => {
 
   const handleJoin = async (channelId: string, tierId?: string) => {
     const result = await execute(
-      () => api?.channelApi.joinChannel(channelId, { tierId }),
+      () => api?.channelApi.subscribeToChannel(channelId, { tier_id: tierId }),
       {
         showSuccessMessage: true,
         successMessage: 'Successfully joined channel!'
@@ -70,7 +70,7 @@ const ListChannels: React.FC = () => {
 
   const handleCancel = async (channelId: string) => {
     const result = await execute(
-      () => api?.channelApi.cancelMembership(channelId),
+      () => api?.channelApi.unsubscribeFromChannel(channelId),
       {
         showSuccessMessage: true,
         successMessage: 'Membership cancelled successfully!'
