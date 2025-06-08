@@ -92,9 +92,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
         const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(searchQuery)}`);
         const data = await response.json();
         
-        if (data.success) {
+        // Backend returns { query, suggestions } directly
+        if (data.suggestions) {
           // Transform API response to suggestions format
-          const transformedSuggestions: SearchSuggestion[] = data.data.suggestions.map((suggestion: string, index: number) => ({
+          const transformedSuggestions: SearchSuggestion[] = data.suggestions.map((suggestion: string, index: number) => ({
             id: `suggestion-${index}`,
             text: suggestion,
             type: 'tag' as const, // Default type, could be enhanced

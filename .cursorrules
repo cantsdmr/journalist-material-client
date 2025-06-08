@@ -12,3 +12,4 @@ Design system:
 - Create common components under /components
 - Design the pages using mobile first approach
 - Use numbered enums
+- Use apiContext

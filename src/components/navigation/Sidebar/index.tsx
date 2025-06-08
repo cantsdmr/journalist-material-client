@@ -10,7 +10,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import PollIcon from '@mui/icons-material/Poll';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-// import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/Search';
 import { PATHS } from '@/constants/paths';
 import { VERSION } from '@/constants/values';
 
@@ -25,7 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const menuItems = [
     { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <PeopleIcon />, label: 'Feed' },
     { path: `${PATHS.APP_NEWS_TRENDING}`, icon: <TrendingUpIcon />, label: 'Popular' },
-    // { path: `${PATHS.APP_SEARCH}`, icon: <SearchIcon />, label: 'Search' },
+    { path: `${PATHS.APP_SEARCH}`, icon: <SearchIcon />, label: 'Search' },
     // { path: `${PATHS.APP_EXPLORE}`, icon: <ExploreIcon />, label: 'Explore' },
     // { path: `${PATHS.APP_SUBSCRIPTIONS}`, icon: <SubscriptionsIcon />, label: 'Subscriptions' },
     { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' },

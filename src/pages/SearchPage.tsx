@@ -26,15 +26,19 @@ import {
   Article as ArticleIcon,
   Tv as ChannelIcon,
   Person as PersonIcon,
+  Poll as PollIcon,
+  Tag as TagIcon,
   Tune as TuneIcon,
   Share as ShareIcon,
   Bookmark as BookmarkIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { PATHS } from '@/constants/paths';
 import SearchBar from '../components/search/SearchBar';
 import { useSearch } from '../hooks/useSearch';
-import type { SearchFilters, SearchResult } from '../hooks/useSearch';
+import type { SearchFilters } from '../hooks/useSearch';
+import type { SearchResult } from '../APIs/SearchAPI';
 
 // Styled components
 const FilterPanel = styled(Paper)(({ theme }) => ({
@@ -65,6 +69,7 @@ const SearchPage: React.FC = () => {
   const { searchResults, loading, error, performSearch } = useSearch();
   
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentQuery, setCurrentQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({
     type: 'all',
     sortBy: 'relevance'
@@ -79,6 +84,7 @@ const SearchPage: React.FC = () => {
     const type = params.get('type') as SearchFilters['type'];
     
     if (query) {
+      setCurrentQuery(query);
       const initialFilters = { ...filters };
       if (type && type !== 'all') {
         initialFilters.type = type;
@@ -91,6 +97,7 @@ const SearchPage: React.FC = () => {
   // Handle search from search bar
   const handleSearch = (query: string, searchFilters?: SearchFilters) => {
     const updatedFilters = searchFilters || filters;
+    setCurrentQuery(query);
     setCurrentPage(1);
     
     // Update URL with search params
@@ -99,7 +106,7 @@ const SearchPage: React.FC = () => {
     if (updatedFilters.type && updatedFilters.type !== 'all') {
       params.set('type', updatedFilters.type);
     }
-    navigate(`/search?${params.toString()}`);
+    navigate(`${PATHS.APP_SEARCH}?${params.toString()}`);
     
     performSearch(query, updatedFilters, 1);
   };
@@ -110,16 +117,18 @@ const SearchPage: React.FC = () => {
     setFilters(updatedFilters);
     setCurrentPage(1);
     
-    // Re-search with new filters if we have results
-    if (searchResults) {
-      performSearch(searchResults.query, updatedFilters, 1);
+    // Re-search with new filters if we have a current query
+    if (currentQuery) {
+      performSearch(currentQuery, updatedFilters, 1);
     }
   };
 
   // Handle pagination
   const handlePageChange = (_: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
-    handleSearch(searchResults?.query || '', filters);
+    if (currentQuery) {
+      performSearch(currentQuery, filters, page);
+    }
   };
 
   // Render search result card
@@ -129,6 +138,9 @@ const SearchPage: React.FC = () => {
         case 'news': return <ArticleIcon color="primary" />;
         case 'channel': return <ChannelIcon color="secondary" />;
         case 'user': return <PersonIcon color="action" />;
+        case 'poll': return <PollIcon color="info" />;
+        case 'tag': return <TagIcon color="success" />;
+        default: return <ArticleIcon color="primary" />;
       }
     };
 
@@ -137,12 +149,38 @@ const SearchPage: React.FC = () => {
         case 'news': return 'primary';
         case 'channel': return 'secondary';
         case 'user': return 'default';
+        case 'poll': return 'info';
+        case 'tag': return 'success';
         default: return 'default';
       }
     };
 
+    const handleResultClick = () => {
+      switch (result.type) {
+        case 'news':
+          navigate(PATHS.APP_NEWS_VIEW.replace(':id', result.id));
+          break;
+        case 'channel':
+          navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', result.id));
+          break;
+        case 'poll':
+          navigate(PATHS.APP_POLL_VIEW.replace(':id', result.id));
+          break;
+        case 'tag':
+          // For tags, perform a search for that tag
+          handleSearch(result.title, { ...filters, type: 'all' });
+          break;
+        case 'user':
+          // Users don't have individual view pages in the current routes
+          // Could be handled differently based on requirements
+          break;
+        default:
+          break;
+      }
+    };
+
     return (
-      <ResultCard key={result.id}>
+      <ResultCard key={result.id} onClick={handleResultClick}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
             <Box sx={{ mt: 0.5 }}>
@@ -172,7 +210,7 @@ const SearchPage: React.FC = () => {
                 {result.channel && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Avatar sx={{ width: 20, height: 20 }}>
-                      {result.channel.name.charAt(0)}
+                      {result?.channel?.name?.charAt(0)}
                     </Avatar>
                     <Typography variant="caption" color="text.secondary">
                       in <strong>{result.channel.name}</strong> (@{result.channel.handle})
@@ -190,6 +228,36 @@ const SearchPage: React.FC = () => {
                   <Typography variant="caption" color="text.secondary">
                     {new Date(result.publishedAt).toLocaleDateString()}
                   </Typography>
+                )}
+
+                {result.startDate && (
+                  <Typography variant="caption" color="text.secondary">
+                    Start: {new Date(result.startDate).toLocaleDateString()}
+                  </Typography>
+                )}
+
+                {result.endDate && (
+                  <Typography variant="caption" color="text.secondary">
+                    End: {new Date(result.endDate).toLocaleDateString()}
+                  </Typography>
+                )}
+
+                {result.voteCount !== undefined && (
+                  <StatsChip 
+                    label={`${result.voteCount} votes`}
+                    size="small"
+                    variant="outlined"
+                    color="info"
+                  />
+                )}
+
+                {result.usageCount !== undefined && (
+                  <StatsChip 
+                    label={`${result.usageCount} uses`}
+                    size="small"
+                    variant="outlined"
+                    color="success"
+                  />
                 )}
 
                 <StatsChip 
@@ -210,7 +278,7 @@ const SearchPage: React.FC = () => {
                       variant="outlined"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSearch(`${searchResults?.query} ${tag}`);
+                        handleSearch(`${currentQuery} ${tag}`);
                       }}
                       sx={{ fontSize: '0.7rem' }}
                     />
@@ -255,7 +323,7 @@ const SearchPage: React.FC = () => {
     </>
   );
 
-  const totalPages = searchResults ? Math.ceil(searchResults.total / resultsPerPage) : 0;
+  const totalPages = searchResults ? Math.ceil((searchResults.metadata?.total || 0) / resultsPerPage) : 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
@@ -291,6 +359,8 @@ const SearchPage: React.FC = () => {
                 <MenuItem value="news">Articles</MenuItem>
                 <MenuItem value="channels">Channels</MenuItem>
                 <MenuItem value="users">Journalists</MenuItem>
+                <MenuItem value="polls">Polls</MenuItem>
+                <MenuItem value="tags">Tags</MenuItem>
               </Select>
             </FormControl>
 
@@ -344,14 +414,13 @@ const SearchPage: React.FC = () => {
         {/* Results */}
         <Grid item xs={12} md={9}>
           {/* Results Header */}
-          {searchResults && (
+          {searchResults && currentQuery && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h5" sx={{ mb: 1 }}>
                 Search Results
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Found {searchResults.total.toLocaleString()} results for "{searchResults.query}"
-                {searchResults.took && ` (${searchResults.took}ms)`}
+                Found {(searchResults.metadata?.total || 0).toLocaleString()} results for "{currentQuery}"
               </Typography>
               
               {/* Active Filters */}
@@ -392,7 +461,7 @@ const SearchPage: React.FC = () => {
           {/* Results */}
           {!loading && searchResults && (
             <>
-              {searchResults.results.length === 0 ? (
+              {(searchResults.items?.length || 0) === 0 ? (
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
                   <Typography variant="h6" color="text.secondary">
                     No results found
@@ -403,7 +472,7 @@ const SearchPage: React.FC = () => {
                 </Paper>
               ) : (
                 <>
-                  {searchResults.results.map(renderResultCard)}
+                  {searchResults.items?.map(renderResultCard)}
                   
                   {/* Pagination */}
                   {totalPages > 1 && (
@@ -431,7 +500,7 @@ const SearchPage: React.FC = () => {
                 Start your search
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Search for articles, channels, or journalists to get started
+                Search for articles, channels, journalists, polls, or tags to get started
               </Typography>
             </Paper>
           )}

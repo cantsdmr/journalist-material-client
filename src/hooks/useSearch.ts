@@ -1,41 +1,22 @@
 import { useState, useCallback } from 'react';
+import { StringToSearchType, StringToSearchSort, SearchTypeString, SearchSortString } from '@/enums/SearchEnums';
+import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse } from '@/APIs/SearchAPI';
+import { PaginatedResponse } from '@/utils/http';
+import { useApiCall } from './useApiCall';
+import { useApiContext } from '@/contexts/ApiContext';
 
 export interface SearchFilters {
-  type?: 'news' | 'channels' | 'users' | 'all';
+  type?: SearchTypeString;
   tags?: string[];
   dateFrom?: Date;
   dateTo?: Date;
-  sortBy?: 'relevance' | 'date' | 'popularity';
+  sortBy?: SearchSortString;
   onlyPremium?: boolean;
   channelId?: string;
 }
 
-export interface SearchResult {
-  type: 'news' | 'channel' | 'user';
-  id: string;
-  title: string;
-  description?: string;
-  handle?: string;
-  relevanceScore: number;
-  publishedAt?: Date;
-  tags?: string[];
-  channel?: {
-    id: string;
-    name: string;
-    handle: string;
-  };
-}
-
-export interface SearchResponse {
-  results: SearchResult[];
-  total: number;
-  query: string;
-  filters: SearchFilters;
-  took: number;
-}
-
 export interface UseSearchReturn {
-  searchResults: SearchResponse | null;
+  searchResults: PaginatedResponse<SearchResult> | null;
   loading: boolean;
   error: string | null;
   performSearch: (query: string, filters?: SearchFilters, page?: number, limit?: number) => Promise<void>;
@@ -43,9 +24,11 @@ export interface UseSearchReturn {
   clearResults: () => void;
 }
 
-export const useSearch = (apiBaseUrl: string = '/api'): UseSearchReturn => {
-  const [searchResults, setSearchResults] = useState<SearchResponse | null>(null);
+export const useSearch = (): UseSearchReturn => {
+  const [searchResults, setSearchResults] = useState<PaginatedResponse<SearchResult> | null>(null);
   const [loading, setLoading] = useState(false);
+  const { api } = useApiContext();
+  const { execute } = useApiCall();
   const [error, setError] = useState<string | null>(null);
 
   const performSearch = useCallback(async (
@@ -63,52 +46,49 @@ export const useSearch = (apiBaseUrl: string = '/api'): UseSearchReturn => {
     setError(null);
 
     try {
-      const params = new URLSearchParams({
-        q: query,
-        limit: limit.toString(),
-        offset: ((page - 1) * limit).toString()
-      });
-
-      // Add filters to params
+      // Convert frontend string filters to backend number filters
+      const apiFilters: APISearchFilters = {};
+      
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          if (Array.isArray(value)) {
-            value.forEach((item) => params.append(key, item.toString()));
-          } else if (value instanceof Date) {
-            params.append(key, value.toISOString());
+          if (key === 'type' && typeof value === 'string') {
+            // Convert string type to number for API
+            const numericType = StringToSearchType[value];
+            if (numericType !== undefined) {
+              apiFilters.type = numericType;
+            }
+          } else if (key === 'sortBy' && typeof value === 'string') {
+            // Convert string sortBy to number for API
+            const numericSort = StringToSearchSort[value];
+            if (numericSort !== undefined) {
+              apiFilters.sortBy = numericSort;
+            }
           } else {
-            params.append(key, value.toString());
+            (apiFilters as any)[key] = value;
           }
         }
       });
 
-      const response = await fetch(`${apiBaseUrl}/search?${params}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add auth headers if needed
-          // 'Authorization': `Bearer ${token}`
+      const pagination = {
+        limit,
+        offset: (page - 1) * limit
+      };
+
+      const data = await execute(
+        () => api?.searchApi.search(query, apiFilters, pagination),
+        {
+          showSuccessMessage: false,
+          successMessage: 'Search results fetched successfully!'
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setSearchResults(data.data);
-      } else {
-        setError(data.error || 'Search failed');
-      }
-    } catch (err) {
+      );
+      setSearchResults(data);
+    } catch (err: any) {
       console.error('Search error:', err);
-      setError(err instanceof Error ? err.message : 'Network error occurred');
+      setError(err.message || 'Search failed');
     } finally {
       setLoading(false);
     }
-  }, [apiBaseUrl]);
+  }, [execute]);
 
   const getSuggestions = useCallback(async (query: string, type?: string): Promise<string[]> => {
     if (!query.trim() || query.length < 2) {
@@ -116,35 +96,19 @@ export const useSearch = (apiBaseUrl: string = '/api'): UseSearchReturn => {
     }
 
     try {
-      const params = new URLSearchParams({ q: query });
-      if (type) {
-        params.append('type', type);
-      }
-
-      const response = await fetch(`${apiBaseUrl}/search/suggestions?${params}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
+      const data: SearchSuggestionsResponse = await execute(
+        () => api?.searchApi.getSuggestions(query, type),
+        {
+          showSuccessMessage: true,
+          successMessage: 'Search suggestions fetched successfully!'
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Suggestions failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        return data.data.suggestions || [];
-      } else {
-        console.warn('Suggestions request failed:', data.error);
-        return [];
-      }
+      );
+      return data.suggestions || [];
     } catch (err) {
       console.error('Suggestions error:', err);
       return [];
     }
-  }, [apiBaseUrl]);
+  }, [execute]);
 
   const clearResults = useCallback(() => {
     setSearchResults(null);
