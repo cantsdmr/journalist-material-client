@@ -9,19 +9,6 @@ import {
     StudioCreatePollData 
 } from "../types";
 
-// Creator statistics
-export type CreatorStats = {
-  period: string;
-  stats: {
-    totalNews: number;
-    totalChannels: number;
-    totalPolls: number;
-    totalViews: number;
-    totalSubscribers: number;
-    revenue: number;
-  };
-};
-
 // Content type filter for unified content endpoint
 export type ContentType = 'all' | 'news' | 'channels' | 'polls';
 
@@ -87,16 +74,6 @@ export class StudioAPI extends HTTPApi {
     }
   }
 
-  // ==================== DASHBOARD RESOURCES ====================
-
-  /**
-   * Get creator analytics/statistics
-   */
-  public async getAnalytics(period: string = '30d'): Promise<CreatorStats> {
-    const params = { period };
-    return this._get<CreatorStats>(`${API_PATH}/analytics`, { params });
-  }
-
   // ==================== CONVENIENCE METHODS ====================
 
   /**
@@ -133,11 +110,6 @@ export class StudioAPI extends HTTPApi {
     pagination: PaginationObject = DEFAULT_PAGINATION
   ) {
     return this.getMyContent(type, pagination);
-  }
-
-  /** @deprecated Use getAnalytics() instead */
-  public async getCreatorStats(period: string = '30d'): Promise<CreatorStats> {
-    return this.getAnalytics(period);
   }
 }
 

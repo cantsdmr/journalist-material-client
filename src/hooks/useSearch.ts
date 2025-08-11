@@ -32,9 +32,9 @@ export const useSearch = (): UseSearchReturn => {
   const [error, setError] = useState<string | null>(null);
 
   const performSearch = useCallback(async (
-    query: string, 
-    filters: SearchFilters = {}, 
-    page: number = 1, 
+    query: string,
+    filters: SearchFilters = {},
+    page: number = 1,
     limit: number = 20
   ) => {
     if (!query.trim()) {
@@ -48,7 +48,7 @@ export const useSearch = (): UseSearchReturn => {
     try {
       // Convert frontend string filters to backend number filters
       const apiFilters: APISearchFilters = {};
-      
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           if (key === 'type' && typeof value === 'string') {
@@ -70,15 +70,14 @@ export const useSearch = (): UseSearchReturn => {
       });
 
       const pagination = {
-        limit,
-        offset: (page - 1) * limit
+        page,
+        limit
       };
 
       const data = await execute(
         () => api?.searchApi.search(query, apiFilters, pagination),
         {
           showSuccessMessage: false,
-          successMessage: 'Search results fetched successfully!'
         }
       );
       setSearchResults(data);
@@ -99,8 +98,7 @@ export const useSearch = (): UseSearchReturn => {
       const data: SearchSuggestionsResponse = await execute(
         () => api?.searchApi.getSuggestions(query, type),
         {
-          showSuccessMessage: true,
-          successMessage: 'Search suggestions fetched successfully!'
+          showSuccessMessage: false
         }
       );
       return data.suggestions || [];

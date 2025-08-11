@@ -3,6 +3,7 @@ import {
   Stack,
   Box,
   Container,
+  Typography,
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Channel } from '@/types/index';
@@ -11,24 +12,42 @@ import ChannelItem from '@/components/channel/ChannelItem/index';
 import { alpha } from '@mui/material/styles';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useApiCall } from '@/hooks/useApiCall';
+import TagFilter from '@/components/filters/TagFilter';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ListChannels: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { api } = useApiContext();
   const { actions, channelRelations } = useProfile();
   const { execute } = useApiCall();
+
+  // Extract tags from URL parameters on component mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tagsParam = searchParams.get('tags');
+    
+    if (tagsParam) {
+      const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
+      setSelectedTags(urlTags);
+    }
+  }, [location.search]);
 
   const fetchMoreData = () => {
     getChannels(page + 1);
   };
 
   const getChannels = async (_page: number = page) => {
+    const filters = selectedTags.length > 0 ? { tags: selectedTags } : {};
+    
     const result = await execute(
       () => api?.channelApi.getChannels(
-        {}, // Empty filters for general channels page
+        filters, // Apply tag filters
         {
           page: _page,
           limit
@@ -51,8 +70,9 @@ const ListChannels: React.FC = () => {
   };
 
   useEffect(() => {
-    getChannels(page); 
-  }, []);
+    setPage(1);
+    getChannels(1);
+  }, [selectedTags]); // Refetch when tags change
 
   const handleJoin = async (channelId: string, tierId?: string) => {
     const result = await execute(
@@ -82,8 +102,43 @@ const ListChannels: React.FC = () => {
     }
   };
 
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+    
+    // Update URL with selected tags
+    const searchParams = new URLSearchParams(location.search);
+    if (tags.length > 0) {
+      searchParams.set('tags', tags.map(tag => encodeURIComponent(tag)).join(','));
+    } else {
+      searchParams.delete('tags');
+    }
+    
+    const newPath = `${location.pathname}?${searchParams.toString()}`;
+    navigate(newPath, { replace: true });
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Discover Channels
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Find and subscribe to channels from your favorite journalists
+        </Typography>
+      </Box>
+
+      {/* Tag Filter Component */}
+      <Box sx={{ mb: 4 }}>
+        <TagFilter
+          selectedTags={selectedTags}
+          onTagsChange={handleTagsChange}
+          contentType="channels"
+          maxTags={3}
+          showCounts={true}
+        />
+      </Box>
+
       <InfiniteScroll
         dataLength={channels.length}
         next={fetchMoreData}

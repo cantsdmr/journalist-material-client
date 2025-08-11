@@ -49,4 +49,29 @@ export const StringToSearchSort: Record<string, number> = {
 export type SearchType = typeof SEARCH_TYPE[keyof typeof SEARCH_TYPE];
 export type SearchSort = typeof SEARCH_SORT[keyof typeof SEARCH_SORT];
 export type SearchTypeString = 'all' | 'news' | 'channels' | 'users' | 'polls' | 'tags';
-export type SearchSortString = 'relevance' | 'date' | 'popularity'; 
+export type SearchSortString = 'relevance' | 'date' | 'popularity';
+
+// Search suggestion types (for SearchBar component)
+export type SearchSuggestionType = 'news' | 'channel' | 'user' | 'tag' | 'poll';
+
+// Search filter types (for SearchBar component)
+export type SearchFilterType = 'news' | 'channels' | 'users' | 'all';
+export type SearchDateRange = 'day' | 'week' | 'month' | 'year';
+
+// Interface definitions for search functionality
+export interface SearchSuggestion {
+  id: string;
+  text: string;
+  type: SearchSuggestionType;
+  metadata?: {
+    channelName?: string;
+    handle?: string;
+    articleCount?: number;
+  };
+}
+
+export interface SearchFilters {
+  type?: SearchFilterType;
+  tags?: string[];
+  dateRange?: SearchDateRange;
+} 

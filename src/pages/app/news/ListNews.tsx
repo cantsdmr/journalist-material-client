@@ -12,6 +12,8 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { EmptyState } from '@/components/common/EmptyState';
 import { alpha } from '@mui/material/styles';
 import { useApiCall } from '@/hooks/useApiCall';
+import TagFilter from '@/components/filters/TagFilter';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface ListNewsProps {
   filters?: NewsFilters;
@@ -140,12 +142,28 @@ const ListNews: React.FC<ListNewsProps> = ({
   emptyTitle: customEmptyTitle,
   emptyDescription: customEmptyDescription
 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { api } = useApiContext();
   const { execute } = useApiCall();
+
+  // Extract tags from URL parameters on component mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tagsParam = searchParams.get('tags');
+    
+    if (tagsParam) {
+      const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
+      setSelectedTags(urlTags);
+    } else if (filters.tags) {
+      setSelectedTags(filters.tags);
+    }
+  }, [location.search, filters.tags]);
 
   const ITEMS_PER_PAGE = 12;
   
@@ -156,12 +174,18 @@ const ListNews: React.FC<ListNewsProps> = ({
   const displayEmptyTitle = customEmptyTitle || defaultContent.emptyTitle;
   const displayEmptyDescription = customEmptyDescription || defaultContent.emptyDescription;
 
+  // Combine filters with selected tags
+  const effectiveFilters = {
+    ...filters,
+    tags: selectedTags.length > 0 ? selectedTags : filters.tags
+  };
+
   const fetchNews = async (_page: number = page) => {
     setLoading(true);
     
     const response = await execute(
       () => api?.newsApi.getNews(
-        filters,
+        effectiveFilters,
         { 
           page: _page,
           limit: ITEMS_PER_PAGE
@@ -186,12 +210,27 @@ const ListNews: React.FC<ListNewsProps> = ({
   useEffect(() => {
     setPage(1);
     fetchNews(1);
-  }, [JSON.stringify(filters)]); // Watch for filter changes
+  }, [JSON.stringify(effectiveFilters)]); // Watch for filter changes including tags
 
   const fetchMoreData = () => {
     if (!loading && hasMore) {
       fetchNews(page + 1);
     }
+  };
+
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+    
+    // Update URL with selected tags
+    const searchParams = new URLSearchParams(location.search);
+    if (tags.length > 0) {
+      searchParams.set('tags', tags.map(tag => encodeURIComponent(tag)).join(','));
+    } else {
+      searchParams.delete('tags');
+    }
+    
+    const newPath = `${location.pathname}?${searchParams.toString()}`;
+    navigate(newPath, { replace: true });
   };
 
   return (
@@ -203,6 +242,17 @@ const ListNews: React.FC<ListNewsProps> = ({
         <Typography variant="body1" color="text.secondary">
           {displayDescription}
         </Typography>
+      </Box>
+
+      {/* Tag Filter Component */}
+      <Box sx={{ mb: 4 }}>
+        <TagFilter
+          selectedTags={selectedTags}
+          onTagsChange={handleTagsChange}
+          contentType="news"
+          maxTags={5}
+          showCounts={true}
+        />
       </Box>
 
       {news.length === 0 && !loading ? (

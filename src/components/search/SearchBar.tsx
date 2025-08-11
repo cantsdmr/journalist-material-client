@@ -4,11 +4,9 @@ import {
   TextField,
   Box,
   Typography,
-  Chip,
   InputAdornment,
   Paper,
-  IconButton,
-  Divider
+  IconButton
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -20,14 +18,37 @@ import {
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { debounce } from 'lodash';
+import { useSearch } from '@/hooks/useSearch';
+import { SearchSuggestion, SearchFilters } from '@/enums/SearchEnums';
 
-// Styled components
-const SearchContainer = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1),
+// Styled components for AppBar usage
+const SearchContainer = styled(Box)(({ theme }) => ({
+  flexGrow: 1,
+  maxWidth: 600,
+  margin: '0 auto',
+  position: 'relative',
+  [theme.breakpoints.down('md')]: {
+    maxWidth: 400,
+  },
+  [theme.breakpoints.down('sm')]: {
+    maxWidth: 280,
+  },
+}));
+
+const SearchInput = styled(Paper)(({ theme }) => ({
   borderRadius: theme.spacing(3),
-  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-  border: `1px solid ${theme.palette.divider}`,
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? 'rgba(255, 255, 255, 0.15)' 
+    : 'rgba(0, 0, 0, 0.04)',
+  border: 'none',
+  transition: 'all 0.2s ease-in-out',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark' 
+      ? 'rgba(255, 255, 255, 0.2)' 
+      : 'rgba(0, 0, 0, 0.08)',
+  },
   '&:focus-within': {
+    backgroundColor: theme.palette.background.paper,
     boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
     border: `1px solid ${theme.palette.primary.main}`,
   }
@@ -43,43 +64,28 @@ const SuggestionItem = styled(Box)(({ theme }) => ({
   }
 }));
 
-interface SearchSuggestion {
-  id: string;
-  text: string;
-  type: 'news' | 'channel' | 'user' | 'tag';
-  metadata?: {
-    channelName?: string;
-    handle?: string;
-    articleCount?: number;
-  };
-}
-
 interface SearchBarProps {
   onSearch: (query: string, filters?: SearchFilters) => void;
   onSuggestionSelect: (suggestion: SearchSuggestion) => void;
   placeholder?: string;
-  popularSearches?: string[];
   className?: string;
-}
-
-interface SearchFilters {
-  type?: 'news' | 'channels' | 'users' | 'all';
-  tags?: string[];
-  dateRange?: 'day' | 'week' | 'month' | 'year';
+  fullWidth?: boolean;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   onSuggestionSelect,
   placeholder = "Search articles, channels, or journalists...",
-  popularSearches = [],
-  className
+  className,
+  fullWidth = false
 }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const { getSuggestions } = useSearch();
 
-  // Debounced API call for suggestions
+  // Debounced API call for suggestions using useSearch hook
   const fetchSuggestions = useCallback(
     debounce(async (searchQuery: string) => {
       if (searchQuery.length < 2) {
@@ -88,28 +94,28 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
 
       setIsLoading(true);
+      
       try {
-        const response = await fetch(`/api/search/suggestions?q=${encodeURIComponent(searchQuery)}`);
-        const data = await response.json();
+        const suggestionStrings = await getSuggestions(searchQuery);
         
-        // Backend returns { query, suggestions } directly
-        if (data.suggestions) {
-          // Transform API response to suggestions format
-          const transformedSuggestions: SearchSuggestion[] = data.suggestions.map((suggestion: string, index: number) => ({
+        // Transform API response to suggestions format
+        const transformedSuggestions: SearchSuggestion[] = suggestionStrings
+          .filter((suggestion: string) => suggestion && suggestion.trim()) // Filter out empty suggestions
+          .map((suggestion: string, index: number) => ({
             id: `suggestion-${index}`,
-            text: suggestion,
+            text: suggestion.trim(),
             type: 'tag' as const, // Default type, could be enhanced
           }));
-          setSuggestions(transformedSuggestions);
-        }
+    
+        setSuggestions(transformedSuggestions);
       } catch (error) {
-        console.error('Failed to fetch suggestions:', error);
+        console.error('Error fetching suggestions:', error);
         setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
     }, 300),
-    []
+    [getSuggestions]
   );
 
   useEffect(() => {
@@ -118,6 +124,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const handleSearch = () => {
     if (query.trim()) {
+      setIsOpen(false);
       onSearch(query);
     }
   };
@@ -161,37 +168,71 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 
   return (
-    <Box className={className}>
-      <SearchContainer>
+    <SearchContainer 
+      className={className}
+      sx={{ 
+        width: fullWidth ? '100%' : undefined
+      }}
+    >
+      <SearchInput elevation={0}>
         <Autocomplete
           freeSolo
           options={suggestions}
           loading={isLoading}
           inputValue={query}
-          onInputChange={(_, newValue) => setQuery(newValue)}
-          getOptionLabel={(option) => typeof option === 'string' ? option : option.text}
-          renderOption={renderSuggestionOption}
+          onInputChange={(_, newValue) => {
+            setQuery(newValue);
+            // Open dropdown when user types 2+ characters, close when empty
+            setIsOpen(newValue.length >= 2);
+          }}
+          getOptionLabel={(option) => {
+            return typeof option === 'string' ? option : option.text;
+          }}
+          filterOptions={(options) => {
+            return options;
+          }}
+          isOptionEqualToValue={(option, value) => {
+            const optionText = typeof option === 'string' ? option : option.text;
+            const valueText = typeof value === 'string' ? value : value.text;
+            return optionText === valueText;
+          }}
+          renderOption={(props, option) => {
+            return renderSuggestionOption(props, option);
+          }}
+          noOptionsText={isLoading ? "Loading..." : "No suggestions found"}
+          open={isOpen}
+          onOpen={() => setIsOpen(true)}
+          onClose={() => setIsOpen(false)}
+          ListboxProps={{
+            style: { maxHeight: 400 } // Ensure enough height for all options
+          }}
           renderInput={(params) => (
             <TextField
               {...params}
               variant="outlined"
               placeholder={placeholder}
               onKeyPress={handleKeyPress}
+              size="medium"
               InputProps={{
                 ...params.InputProps,
                 startAdornment: (
                   <InputAdornment position="start">
-                    <IconButton onClick={handleSearch} size="small">
+                    <IconButton onClick={handleSearch} size="small" sx={{ color: 'inherit' }}>
                       <SearchIcon />
                     </IconButton>
                   </InputAdornment>
                 ),
-                endAdornment: query && (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setQuery('')} size="small">
-                      <ClearIcon />
-                    </IconButton>
-                  </InputAdornment>
+                endAdornment: (
+                  <>
+                    {isLoading && <Typography variant="caption" sx={{ mr: 1 }}>Loading...</Typography>}
+                    {query && (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setQuery('')} size="small" sx={{ color: 'inherit' }}>
+                          <ClearIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    )}
+                  </>
                 ),
                 sx: {
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -203,52 +244,43 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                     border: 'none',
                   },
+                  '& .MuiInputBase-input': {
+                    padding: '12px 8px',
+                    fontSize: '1rem',
+                  },
+                  '& .MuiInputBase-input::placeholder': {
+                    color: 'inherit',
+                    opacity: 0.7,
+                  }
                 }
               }}
             />
           )}
           PaperComponent={({ children, ...props }) => (
-            <Paper {...props} sx={{ mt: 1, boxShadow: 3 }}>
+            <Paper 
+              {...props} 
+              sx={{ 
+                mt: 0.5, 
+                boxShadow: 3,
+                maxHeight: 400,
+                overflow: 'auto',
+                position: 'absolute',
+                width: '100%',
+                zIndex: 1300,
+                borderRadius: 3,
+              }}
+            >
               {children}
-              {popularSearches.length > 0 && query.length === 0 && (
-                <>
-                  <Divider />
-                  <Box sx={{ p: 2 }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                      Popular searches
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {popularSearches.map((search, index) => (
-                        <Chip
-                          key={index}
-                          label={search}
-                          size="small"
-                          variant="outlined"
-                          onClick={() => {
-                            setQuery(search);
-                            onSearch(search);
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                </>
-              )}
             </Paper>
           )}
-          onOpen={() => {
-            if (query.length === 0 && popularSearches.length > 0) {
-              // Show popular searches when opening with empty query
-            }
-          }}
           onChange={(_, value) => {
             if (value && typeof value === 'object') {
               onSuggestionSelect(value);
             }
           }}
         />
-      </SearchContainer>
-    </Box>
+      </SearchInput>
+    </SearchContainer>
   );
 };
 

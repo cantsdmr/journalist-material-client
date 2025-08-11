@@ -6,10 +6,11 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { alpha } from '@mui/material/styles';
 import { PATHS } from '@/constants/paths';
+import TagFilter from '@/components/filters/TagFilter';
 
 enum PollTab {
   ALL = 'all',
@@ -18,26 +19,47 @@ enum PollTab {
 }
 
 const ListPoll: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<PollTab>(PollTab.ALL);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(10);
   const [hasMore, setHasMore] = useState<boolean>(true);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
+  // Extract tags from URL parameters on component mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tagsParam = searchParams.get('tags');
+    
+    if (tagsParam) {
+      const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
+      setSelectedTags(urlTags);
+    }
+  }, [location.search]);
+
   const fetchPolls = async (_page: number = page) => {
-    let filters = {};
+    const filters: any = {};
+    
+    // Apply tab-based filters
     switch (activeTab) {
       case PollTab.TRENDING:
-        filters = { trending: true };
+        filters.trending = true;
         break;
       case PollTab.FUNDED:
-        filters = { funded: true };
+        filters.funded = true;
         break;
       default:
-        filters = {}; // All polls
+        break; // All polls
+    }
+    
+    // Apply tag filters
+    if (selectedTags.length > 0) {
+      filters.tags = selectedTags;
     }
 
     const response = await execute(
@@ -62,10 +84,25 @@ const ListPoll: React.FC = () => {
     setLoading(true);
     setPage(1);
     fetchPolls(1);
-  }, [activeTab]);
+  }, [activeTab, selectedTags]); // Refetch when tab or tags change
 
   const fetchMoreData = () => {
     fetchPolls(page + 1);
+  };
+
+  const handleTagsChange = (tags: string[]) => {
+    setSelectedTags(tags);
+    
+    // Update URL with selected tags
+    const searchParams = new URLSearchParams(location.search);
+    if (tags.length > 0) {
+      searchParams.set('tags', tags.map(tag => encodeURIComponent(tag)).join(','));
+    } else {
+      searchParams.delete('tags');
+    }
+    
+    const newPath = `${location.pathname}?${searchParams.toString()}`;
+    navigate(newPath, { replace: true });
   };
 
   if (loading) {
@@ -93,6 +130,17 @@ const ListPoll: React.FC = () => {
           <Tab label="Trending" value={PollTab.TRENDING} />
           <Tab label="Funded" value={PollTab.FUNDED} />
         </Tabs>
+      </Box>
+
+      {/* Tag Filter Component */}
+      <Box sx={{ mb: 4 }}>
+        <TagFilter
+          selectedTags={selectedTags}
+          onTagsChange={handleTagsChange}
+          contentType="polls"
+          maxTags={4}
+          showCounts={true}
+        />
       </Box>
 
       {polls.length === 0 ? (
