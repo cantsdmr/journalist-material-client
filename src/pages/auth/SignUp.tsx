@@ -189,7 +189,7 @@ const SignUp: React.FC = () => {
           >
             Sign up with Google
           </SocialButton>
-          <SocialButton
+{/*           <SocialButton
             variant="contained"
             startIcon={<XIcon />}
             bgcolor="#1DA1F2"
@@ -212,7 +212,7 @@ const SignUp: React.FC = () => {
             onClick={handleProviderLogin.bind(this, appleProvider)}
           >
             Sign up with Apple
-          </SocialButton>
+          </SocialButton> */}
       </Box>
     </Container>
   );
