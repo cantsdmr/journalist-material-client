@@ -191,7 +191,6 @@ const MainLayout: React.FC = () => {
               onSearch={handleSearch}
               onSuggestionSelect={handleSuggestionSelect}
               placeholder="Search articles, channels, journalists..."
-              popularSearches={['cryptocurrency', 'climate change', 'technology', 'politics']}
               className="app-search-bar"
             />
           </Box>

@@ -67,8 +67,6 @@ const AppBarSearchDemo: React.FC<AppBarSearchDemoProps> = ({
           onSearch={handleSearch}
           onSuggestionSelect={handleSuggestionSelect}
           placeholder="Search news, channels, journalists..."
-          popularSearches={['Breaking News', 'Politics', 'Technology', 'Climate Change']}
-          variant="appbar"
         />
 
         {/* Right side actions */}

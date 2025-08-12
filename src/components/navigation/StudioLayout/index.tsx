@@ -112,7 +112,6 @@ const StudioLayout: React.FC = () => {
               onSearch={handleSearch}
               onSuggestionSelect={handleSuggestionSelect}
               placeholder="Search your content and analytics..."
-              popularSearches={['performance', 'engagement', 'subscribers', 'trending']}
               className="studio-search-bar"
             />
           </Box>
