@@ -125,7 +125,7 @@ const JEditor: React.FC<JEditorProps> = ({
           const data = await api.saver.save();
           onChange?.(data);
         },
-        autofocus: true
+        autofocus: false
       });
 
       editorRef.current = editor;
@@ -168,6 +168,42 @@ const JEditor: React.FC<JEditorProps> = ({
             theme.palette.mode === 'dark'
               ? alpha(theme.palette.common.white, 0.1)
               : alpha(theme.palette.common.black, 0.1)
+        },
+        '& ::selection': {
+          backgroundColor: theme =>
+            theme.palette.mode === 'dark'
+              ? alpha(theme.palette.primary.main, 0.3)
+              : alpha(theme.palette.primary.main, 0.3),
+          color: theme =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.common.white
+              : theme.palette.common.black
+        },
+        '& ::-moz-selection': {
+          backgroundColor: theme =>
+            theme.palette.mode === 'dark'
+              ? alpha(theme.palette.primary.main, 0.3)
+              : alpha(theme.palette.primary.main, 0.3),
+          color: theme =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.common.white
+              : theme.palette.common.black
+        },
+        '& .ce-block--selected': {
+          backgroundColor: theme =>
+            theme.palette.mode === 'dark'
+              ? alpha(theme.palette.primary.main, 0.1)
+              : alpha(theme.palette.primary.main, 0.05),
+          color: theme =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.common.white
+              : theme.palette.text.primary
+        },
+        '& .ce-block--selected .ce-block__content': {
+          color: theme =>
+            theme.palette.mode === 'dark'
+              ? theme.palette.common.white
+              : theme.palette.text.primary
         }
       }}
     />
