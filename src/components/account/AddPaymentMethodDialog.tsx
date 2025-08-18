@@ -19,13 +19,13 @@ import {
   Grid
 } from '@mui/material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { PaymentMethodType, AddPaymentMethodData } from '@/types/index';
+import { PaymentMethodTypeEnum, AddPaymentMethodData } from '@/types/index';
 
 interface AddPaymentMethodDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  availableTypes: PaymentMethodType[];
+  availableTypes: Array<{ id: number; name: string; description?: string }>;
 }
 
 const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
@@ -35,9 +35,9 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
   availableTypes
 }) => {
   const [formData, setFormData] = useState<AddPaymentMethodData>({
-    type_id: 0,
+    typeId: 0,
     currency: 'USD',
-    is_default: false,
+    isDefault: false,
     details: {}
   });
   const [loading, setLoading] = useState(false);
@@ -47,9 +47,9 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
 
   const handleClose = () => {
     setFormData({
-      type_id: 0,
+      typeId: 0,
       currency: 'USD',
-      is_default: false,
+      isDefault: false,
       details: {}
     });
     setError(null);
@@ -62,19 +62,19 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
       setError(null);
 
       // Validate required fields
-      if (!formData.type_id) {
+      if (!formData.typeId) {
         setError('Please select a payment method type');
         return;
       }
 
       // Validate PayPal fields
-      if (formData.type_id === 3 && !formData.details.email) {
+      if (formData.typeId === PaymentMethodTypeEnum.PAYPAL && !formData.details.email) {
         setError('PayPal email is required');
         return;
       }
 
       // Validate iyzico fields
-      if (formData.type_id === 4) {
+      if (formData.typeId === PaymentMethodTypeEnum.IYZICO) {
         const { cardNumber, expiryMonth, expiryYear, cvv, cardHolderName } = formData.details;
         if (!cardNumber || !expiryMonth || !expiryYear || !cvv || !cardHolderName) {
           setError('All card details are required for iyzico');
@@ -119,11 +119,11 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
     }));
   };
 
-  const selectedType = availableTypes.find(type => type.id === formData.type_id);
+  const selectedType = availableTypes.find(type => type.id === formData.typeId);
 
   const renderPaymentFields = () => {
-    switch (formData.type_id) {
-      case 3: // PayPal
+    switch (formData.typeId) {
+      case PaymentMethodTypeEnum.PAYPAL:
         return (
           <TextField
             label="PayPal Email"
@@ -136,7 +136,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
           />
         );
       
-      case 4: // iyzico
+      case PaymentMethodTypeEnum.IYZICO:
         return (
           <Stack spacing={2}>
             <TextField
@@ -211,8 +211,8 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
           <FormControl fullWidth required>
             <InputLabel>Payment Method Type</InputLabel>
             <Select
-              value={formData.type_id}
-              onChange={handleSelectChange('type_id')}
+              value={formData.typeId}
+              onChange={handleSelectChange('typeId')}
               label="Payment Method Type"
             >
               <MenuItem value={0}>Select a payment method</MenuItem>
@@ -249,8 +249,8 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
           <FormControlLabel
             control={
               <Checkbox
-                checked={formData.is_default}
-                onChange={handleInputChange('is_default')}
+                checked={formData.isDefault}
+                onChange={handleInputChange('isDefault')}
               />
             }
             label="Set as default payment method"
@@ -264,7 +264,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={loading || !formData.type_id}
+          disabled={loading || !formData.typeId}
         >
           {loading ? 'Adding...' : 'Add Payment Method'}
         </Button>

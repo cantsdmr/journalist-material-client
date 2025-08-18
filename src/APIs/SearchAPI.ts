@@ -39,6 +39,26 @@ export interface SearchSuggestionsResponse {
   suggestions: string[];
 }
 
+export interface StructuredSearchSuggestion {
+  id: string;
+  text: string;
+  type: 'news' | 'channel' | 'user' | 'poll' | 'tag';
+  relevanceScore?: number;
+  metadata?: {
+    channelName?: string;
+    handle?: string;
+    articleCount?: number;
+    publishedAt?: string;
+    voteCount?: number;
+    usageCount?: number;
+  };
+}
+
+export interface StructuredSearchSuggestionsResponse {
+  query: string;
+  suggestions: StructuredSearchSuggestion[];
+}
+
 const API_PATH = '/api/search';
 
 export class SearchAPI extends HTTPApi {
@@ -138,5 +158,17 @@ export class SearchAPI extends HTTPApi {
         }
 
         return this._get<SearchSuggestionsResponse>(`${API_PATH}/suggestions`, { params });
+    }
+
+    /**
+     * Get structured search suggestions with metadata for proper navigation
+     */
+    public async getStructuredSuggestions(query: string, type?: string): Promise<StructuredSearchSuggestionsResponse> {
+        const params: any = { q: query };
+        if (type) {
+            params.type = type;
+        }
+
+        return this._get<StructuredSearchSuggestionsResponse>(`${API_PATH}/suggestions/structured`, { params });
     }
 } 

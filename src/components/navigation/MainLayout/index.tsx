@@ -64,9 +64,6 @@ const MainLayout: React.FC = () => {
     navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(query)}`);
   };
 
-  const handleSuggestionSelect = (suggestion: any) => {
-    navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(suggestion.text)}`);
-  };
 
   const profileMenuItems = [
     {
@@ -189,7 +186,6 @@ const MainLayout: React.FC = () => {
           }}>
             <SearchBar
               onSearch={handleSearch}
-              onSuggestionSelect={handleSuggestionSelect}
               placeholder="Search articles, channels, journalists..."
               className="app-search-bar"
             />

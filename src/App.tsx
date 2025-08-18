@@ -75,12 +75,22 @@ import ViewExpenseOrderStudio from '@/pages/studio/expense-order/ViewExpenseOrde
 import AdminDashboard from '@/pages/admin/Dashboard';
 import UserManagement from '@/pages/admin/users';
 import ChannelManagement from '@/pages/admin/channels';
-import SubscriptionIndex from '@/pages/admin/subscriptions';
+// import SubscriptionIndex from '@/pages/admin/subscriptions';
 import SubscriptionManagement from '@/pages/admin/subscriptions/Management';
 import SubscriptionAnalytics from '@/pages/admin/subscriptions/Analytics';
 import RevenueTracking from '@/pages/admin/subscriptions/Revenue';
 import PlatformAnalytics from '@/pages/admin/analytics';
 import AdminSettings from '@/pages/admin/settings';
+
+// New Admin pages
+import NewsAdmin from '@/pages/admin/NewsAdmin';
+import PollAdmin from '@/pages/admin/PollAdmin';
+import ChannelAdmin from '@/pages/admin/ChannelAdmin';
+import ExpenseOrderAdmin from '@/pages/admin/ExpenseOrderAdmin';
+import PayoutAdmin from '@/pages/admin/PayoutAdmin';
+import SubscriptionAdmin from '@/pages/admin/SubscriptionAdmin';
+import UserAdmin from '@/pages/admin/UserAdmin';
+import TagAdmin from '@/pages/admin/TagAdmin';
 
 const App: React.FC = () => {
   const { isLoading, error } = useApp();
@@ -161,16 +171,25 @@ const App: React.FC = () => {
       <Route path={`${PATHS.ADMIN_ROOT}/*`} element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path={ADMIN.DASHBOARD} element={<AdminDashboard />} />
-        <Route path={ADMIN.USERS} element={<UserManagement />} />
-        <Route path={ADMIN.CHANNELS} element={<ChannelManagement />} />
+        <Route path={ADMIN.NEWS} element={<NewsAdmin />} />
+        <Route path={ADMIN.POLLS} element={<PollAdmin />} />
+        <Route path={ADMIN.CHANNELS} element={<ChannelAdmin />} />
+        <Route path={ADMIN.EXPENSE_ORDERS} element={<ExpenseOrderAdmin />} />
+        <Route path={ADMIN.PAYOUTS} element={<PayoutAdmin />} />
+        <Route path={ADMIN.TAGS} element={<TagAdmin />} />
+        <Route path={ADMIN.USERS} element={<UserAdmin />} />
         <Route path={`${ADMIN.SUBSCRIPTIONS}/*`}>
-          <Route index element={<SubscriptionIndex />} />
+          <Route index element={<SubscriptionAdmin />} />
           <Route path={SUBSCRIPTION.MANAGEMENT} element={<SubscriptionManagement />} />
           <Route path={SUBSCRIPTION.ANALYTICS} element={<SubscriptionAnalytics />} />
           <Route path={SUBSCRIPTION.REVENUE} element={<RevenueTracking />} />
         </Route>
         <Route path={ADMIN.ANALYTICS} element={<PlatformAnalytics />} />
         <Route path={ADMIN.SETTINGS} element={<AdminSettings />} />
+        
+        {/* Legacy routes for backwards compatibility */}
+        <Route path="users" element={<UserManagement />} />
+        <Route path="channels" element={<ChannelManagement />} />
       </Route>
 
       {/* Catch-all route */}

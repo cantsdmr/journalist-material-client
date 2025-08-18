@@ -20,9 +20,11 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ArticleIcon from '@mui/icons-material/Article';
 import { useApiContext } from '@/contexts/ApiContext';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { useApiCall } from '@/hooks/useApiCall';
+import PollConversionModal from './PollConversionModal';
 
 interface StudioPollCardProps {
   poll: any; // TODO: Replace with proper Poll type
@@ -35,6 +37,7 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [conversionModalOpen, setConversionModalOpen] = useState(false);
   const navigate = useNavigate();
   const { api } = useApiContext();
   const { execute } = useApiCall();
@@ -63,6 +66,11 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
     handleMenuClose();
   };
 
+  const handleConvertClick = () => {
+    setConversionModalOpen(true);
+    handleMenuClose();
+  };
+
   const handleDelete = async () => {
     const result = await execute(
       () => api?.pollApi.delete(poll.id),
@@ -77,6 +85,20 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
     }
     
     setDeleteDialogOpen(false);
+  };
+
+  const handleConvert = async (newsData: any) => {
+    const result = await execute(
+      () => api?.pollApi.convertToNews(poll.id, newsData),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Poll converted to news successfully!'
+      }
+    );
+    
+    if (result) {
+      onRefresh();
+    }
   };
 
   const getPollStatus = () => {
@@ -94,6 +116,9 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
   };
 
   const status = getPollStatus();
+  
+  // Check if poll can be converted (in studio, creators can convert their own polls)
+  const canConvert = !poll.isConverted && !poll.stats?.hasEnded;
 
   return (
     <Card
@@ -185,6 +210,14 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
           </ListItemIcon>
           <ListItemText>Edit Poll</ListItemText>
         </MenuItem>
+        {canConvert && (
+          <MenuItem onClick={handleConvertClick}>
+            <ListItemIcon>
+              <ArticleIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Convert to News</ListItemText>
+          </MenuItem>
+        )}
         <MenuItem onClick={handleDeleteClick}>
           <ListItemIcon>
             <DeleteIcon fontSize="small" />
@@ -199,6 +232,13 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
         content="Are you sure you want to delete this poll? This action cannot be undone."
         onConfirm={handleDelete}
         onClose={() => setDeleteDialogOpen(false)}
+      />
+
+      <PollConversionModal
+        open={conversionModalOpen}
+        poll={poll}
+        onClose={() => setConversionModalOpen(false)}
+        onConvert={handleConvert}
       />
     </Card>
   );

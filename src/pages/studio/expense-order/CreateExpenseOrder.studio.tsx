@@ -7,49 +7,24 @@ import {
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ExpenseOrderForm from '@/components/expense-order/ExpenseOrderForm';
-import { CreateExpenseOrderData, ExpenseType } from '@/types/index';
-import { Channel } from '@/types/index';
+import { CreateExpenseOrderData } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
+import { getExpenseTypeOptions } from '@/enums/ExpenseTypeEnums';
 
 const CreateExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
   const { api } = useApiContext();
   const { profile } = useProfile();
-  
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
   const { execute, loading } = useApiCall();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!profile) return;
-      
-      // Fetch user's channels
-      const channelsResult = await execute(
-        () => api.accountApi.getUserChannels(),
-        { showErrorToast: true }
-      );
-      
-      if (channelsResult) {
-        setChannels(channelsResult.items.map(cu => cu.channel));
-      }
-      
-      // Fetch expense types
-      const typesResult = await execute(
-        () => api.expenseOrderApi.getExpenseTypes(),
-        { showErrorToast: true }
-      );
-      
-      if (typesResult) {
-        setExpenseTypes(typesResult);
-      }
-    };
-
-    fetchData();
-  }, [profile, execute]);
+  // Get channels from profile context
+  const channels = profile?.staffChannels?.map(staffChannel => staffChannel.channel) || [];
+  
+  // Get expense types from static enum
+  const expenseTypes = getExpenseTypeOptions();
 
   const handleSave = async (data: CreateExpenseOrderData) => {
     const result = await execute(

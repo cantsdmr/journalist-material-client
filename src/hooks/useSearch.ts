@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { StringToSearchType, StringToSearchSort, SearchTypeString, SearchSortString } from '@/enums/SearchEnums';
-import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse } from '@/APIs/SearchAPI';
+import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse, StructuredSearchSuggestionsResponse, StructuredSearchSuggestion } from '@/APIs/SearchAPI';
 import { PaginatedResponse } from '@/utils/http';
 import { useApiCall } from './useApiCall';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -21,6 +21,7 @@ export interface UseSearchReturn {
   error: string | null;
   performSearch: (query: string, filters?: SearchFilters, page?: number, limit?: number) => Promise<void>;
   getSuggestions: (query: string, type?: string) => Promise<string[]>;
+  getStructuredSuggestions: (query: string, type?: string) => Promise<StructuredSearchSuggestion[]>;
   clearResults: () => void;
 }
 
@@ -108,6 +109,30 @@ export const useSearch = (): UseSearchReturn => {
     }
   }, [execute]);
 
+  const getStructuredSuggestions = useCallback(async (query: string, type?: string): Promise<StructuredSearchSuggestion[]> => {
+    if (!query.trim() || query.length < 2) {
+      return [];
+    }
+
+    if (!api?.searchApi) {
+      console.error('Search API not available');
+      return [];
+    }
+
+    try {
+      const data: StructuredSearchSuggestionsResponse = await execute(
+        () => api.searchApi.getStructuredSuggestions(query, type),
+        {
+          showSuccessMessage: false
+        }
+      );
+      return data?.suggestions || [];
+    } catch (err) {
+      console.error('Structured suggestions error:', err);
+      return [];
+    }
+  }, [execute, api?.searchApi]);
+
   const clearResults = useCallback(() => {
     setSearchResults(null);
     setError(null);
@@ -119,6 +144,7 @@ export const useSearch = (): UseSearchReturn => {
     error,
     performSearch,
     getSuggestions,
+    getStructuredSuggestions,
     clearResults
   };
 };

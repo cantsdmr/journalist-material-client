@@ -9,17 +9,27 @@ import {
     CardContent,
     Skeleton,
     Divider,
+    Button,
+    Tabs,
+    Tab
 } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import {
+    Receipt as ReceiptIcon,
+    AttachMoney as MoneyIcon
+} from '@mui/icons-material';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import JCard from '@/components/common/Card';
+import { PayoutDashboard } from '@/components/expense-order';
 
 const ViewChannelStudio: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
     const [loading, setLoading] = useState(true);
+    const [tabValue, setTabValue] = useState(0);
     const { channelId } = useParams();
     const { api } = useApiContext();
+    const navigate = useNavigate();
 
     const fetchChannel = async () => {
         try {
@@ -39,6 +49,18 @@ const ViewChannelStudio: React.FC = () => {
     useEffect(() => {
         fetchChannel();
     }, []);
+
+    const handleCreateExpenseOrder = () => {
+        navigate('/studio/payouts');
+    };
+
+    const handleViewExpenseOrder = (expenseOrderId: string) => {
+        navigate(`/studio/payouts/orders/${expenseOrderId}`);
+    };
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setTabValue(newValue);
+    };
 
     if (loading) {
         return (
@@ -129,59 +151,115 @@ const ViewChannelStudio: React.FC = () => {
                 </Box>
             </Box>
 
-            <Typography variant="h5" gutterBottom sx={{
-                fontSize: { xs: '1.125rem', sm: '1.25rem' },
-                fontWeight: 600,
-                mb: 3
-            }}>
-                Subscription Tiers
-            </Typography>
-            <Grid container spacing={3}>
-                {channel.tiers?.map((tier) => (
-                    <Grid item xs={12} md={4} key={tier.id}>
-                        <JCard>
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" gutterBottom sx={{
-                                    fontWeight: 600,
-                                    fontSize: '1rem'
-                                }}>
-                                    {tier.name}
-                                </Typography>
-                                <Typography variant="h4" sx={{
-                                    fontWeight: 700,
-                                    fontSize: '2rem',
-                                    display: 'flex',
-                                    alignItems: 'baseline',
-                                    gap: 0.5
-                                }}>
-                                    ${tier.price}
-                                    <Typography
-                                        component="span"
-                                        sx={{
-                                            fontSize: '0.875rem',
-                                            fontWeight: 400,
-                                            color: 'text.secondary'
-                                        }}
-                                    >
-                                        /month
-                                    </Typography>
-                                </Typography>
-                            </Box>
+            <Box sx={{ mb: 3 }}>
+                <Tabs 
+                    value={tabValue} 
+                    onChange={handleTabChange} 
+                    aria-label="channel tabs"
+                    sx={{
+                        borderBottom: 1,
+                        borderColor: 'divider'
+                    }}
+                >
+                    <Tab 
+                        label="Subscription Tiers" 
+                        id="channel-tab-0"
+                        aria-controls="channel-tabpanel-0"
+                    />
+                    <Tab 
+                        label="Payouts" 
+                        icon={<MoneyIcon />}
+                        iconPosition="start"
+                        id="channel-tab-1"
+                        aria-controls="channel-tabpanel-1"
+                    />
+                </Tabs>
+            </Box>
 
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    mb: 3,
-                                    color: 'text.secondary',
-                                    minHeight: 60
-                                }}
-                            >
-                                {tier.description}
-                            </Typography>
-                        </JCard>
-                    </Grid>
-                ))}
-            </Grid>
+            {/* Subscription Tiers Tab */}
+            <div
+                role="tabpanel"
+                hidden={tabValue !== 0}
+                id="channel-tabpanel-0"
+                aria-labelledby="channel-tab-0"
+            >
+                {tabValue === 0 && (
+                    <Box>
+                        <Typography variant="h5" gutterBottom sx={{
+                            fontSize: { xs: '1.125rem', sm: '1.25rem' },
+                            fontWeight: 600,
+                            mb: 3
+                        }}>
+                            Subscription Tiers
+                        </Typography>
+                        <Grid container spacing={3}>
+                            {channel.tiers?.map((tier) => (
+                                <Grid item xs={12} md={4} key={tier.id}>
+                                    <JCard>
+                                        <Box sx={{ mb: 3 }}>
+                                            <Typography variant="h6" gutterBottom sx={{
+                                                fontWeight: 600,
+                                                fontSize: '1rem'
+                                            }}>
+                                                {tier.name}
+                                            </Typography>
+                                            <Typography variant="h4" sx={{
+                                                fontWeight: 700,
+                                                fontSize: '2rem',
+                                                display: 'flex',
+                                                alignItems: 'baseline',
+                                                gap: 0.5
+                                            }}>
+                                                ${tier.price}
+                                                <Typography
+                                                    component="span"
+                                                    sx={{
+                                                        fontSize: '0.875rem',
+                                                        fontWeight: 400,
+                                                        color: 'text.secondary'
+                                                    }}
+                                                >
+                                                    /month
+                                                </Typography>
+                                            </Typography>
+                                        </Box>
+
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                mb: 3,
+                                                color: 'text.secondary',
+                                                minHeight: 60
+                                            }}
+                                        >
+                                            {tier.description}
+                                        </Typography>
+                                    </JCard>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                )}
+            </div>
+
+            {/* Payouts Tab */}
+            <div
+                role="tabpanel"
+                hidden={tabValue !== 1}
+                id="channel-tabpanel-1"
+                aria-labelledby="channel-tab-1"
+            >
+                {tabValue === 1 && (
+                    <Box>
+                        <PayoutDashboard
+                            channelId={channelId}
+                            onCreateExpenseOrder={handleCreateExpenseOrder}
+                            onViewExpenseOrder={handleViewExpenseOrder}
+                            userRole="journalist"
+                        />
+                    </Box>
+                )}
+            </div>
         </Container>
     );
 };

@@ -20,6 +20,7 @@ import JCard from '@/components/common/Card';
 import ExpenseOrderStatusChip from './ExpenseOrderStatusChip';
 import { ExpenseOrder } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
+import { getExpenseTypeLabel } from '@/enums/ExpenseTypeEnums';
 import { formatDistanceToNow } from 'date-fns';
 
 interface ExpenseOrderCardProps {
@@ -151,7 +152,7 @@ const ExpenseOrderCard: React.FC<ExpenseOrderCardProps> = ({
             {expenseOrder.description}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {expenseOrder.channel.name} • {expenseOrder.type.name}
+            {expenseOrder.channel.name} • {getExpenseTypeLabel(expenseOrder.type.id)}
           </Typography>
         </Box>
         

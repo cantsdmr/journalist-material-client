@@ -28,15 +28,23 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async getPaymentMethods() {
-    return this._list<PaymentMethod>(`${API_PATH}/payment-methods`);
+    return this._get<{ data: PaymentMethod[], pagination: any }>(`${API_PATH}/payment-methods`);
+  }
+
+  public async getPaymentMethod(paymentMethodId: string) {
+    return this._get<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}`);
+  }
+
+  public async getDefaultPaymentMethod() {
+    return this._get<PaymentMethod>(`${API_PATH}/payment-methods/default`);
   }
 
   public async addPaymentMethod(data: AddPaymentMethodData) {
-    return this._post<PaymentMethod>(`${API_PATH}/payment-methods`, data);
+    return this._post<{ data: PaymentMethod }>(`${API_PATH}/payment-methods`, data);
   }
 
   public async updatePaymentMethod(paymentMethodId: string, data: UpdatePaymentMethodData) {
-    return this._put<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
+    return this._put<{ data: PaymentMethod }>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
   }
 
   public async deletePaymentMethod(paymentMethodId: string) {
@@ -44,12 +52,13 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async setDefaultPaymentMethod(paymentMethodId: string) {
-    return this._patch<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
+    return this._patch<{ data: PaymentMethod }>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
   }
 
   public async getAvailablePaymentMethods() {
-    return this._list<PaymentMethodType>(`${API_PATH}/payment-methods/available`);
+    return this._get<PaymentMethodType[]>(`${API_PATH}/payment-methods/available`);
   }
+
 
   public async getSubscriptions() {
     return this._list<Subscription>(`${API_PATH}/subscriptions`);

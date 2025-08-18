@@ -16,4 +16,13 @@ export const camelCaseToTitleCase = (str: string): string => {
     .map(word => specialCases[word] || word)
     .join(' ')
     .trim();
+};
+
+export const formatCurrency = (amount: number, currency: string = 'USD'): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    notation: 'compact',
+    maximumFractionDigits: 2
+  }).format(amount);
 }; 

@@ -251,7 +251,7 @@ const ListNews: React.FC<ListNewsProps> = ({
           onTagsChange={handleTagsChange}
           contentType="news"
           maxTags={5}
-          showCounts={true}
+          showCounts={false}
         />
       </Box>
 

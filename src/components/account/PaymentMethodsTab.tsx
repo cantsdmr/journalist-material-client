@@ -18,13 +18,12 @@ import {
 } from '@mui/material';
 import { Add, Delete, Star, StarBorder, CreditCard, AccountBalanceWallet } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { PaymentMethod, PaymentMethodType } from '@/types/index';
+import { PaymentMethod, PaymentMethodTypes, PaymentMethodTypeEnum } from '@/types/index';
 import { AddPaymentMethodDialog } from '@/components/account/AddPaymentMethodDialog';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const PaymentMethodsTab: React.FC = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [availableTypes, setAvailableTypes] = useState<PaymentMethodType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -43,23 +42,13 @@ const PaymentMethodsTab: React.FC = () => {
     setLoading(true);
     setError(null);
     
-    const [methodsResult, typesResult] = await Promise.all([
-      execute(
-        () => api.accountApi.getPaymentMethods(),
-        { showErrorToast: true }
-      ),
-      execute(
-        () => api.accountApi.getAvailablePaymentMethods(),
-        { showErrorToast: true }
-      )
-    ]);
+    const methodsResult = await execute(
+      () => api.accountApi.getPaymentMethods(),
+      { showErrorToast: true }
+    );
     
     if (methodsResult) {
-      setPaymentMethods(methodsResult.items ?? []);
-    }
-    
-    if (typesResult) {
-      setAvailableTypes(typesResult.items ?? []);
+      setPaymentMethods(methodsResult.data ?? []);
     }
     
     setLoading(false);
@@ -126,9 +115,9 @@ const PaymentMethodsTab: React.FC = () => {
 
   const getPaymentMethodIcon = (typeId: number) => {
     switch (typeId) {
-      case 3: // PayPal
+      case PaymentMethodTypeEnum.PAYPAL:
         return <AccountBalanceWallet />;
-      case 4: // iyzico
+      case PaymentMethodTypeEnum.IYZICO:
         return <CreditCard />;
       default:
         return <CreditCard />;
@@ -137,9 +126,9 @@ const PaymentMethodsTab: React.FC = () => {
 
   const getPaymentMethodDetails = (method: PaymentMethod) => {
     switch (method.typeId) {
-      case 3: // PayPal
+      case PaymentMethodTypeEnum.PAYPAL:
         return method.details.email;
-      case 4: // iyzico
+      case PaymentMethodTypeEnum.IYZICO:
         return `${method.details.cardNumber} • ${method.details.cardHolderName}`;
       default:
         return 'Payment method';
@@ -266,7 +255,7 @@ const PaymentMethodsTab: React.FC = () => {
         open={addDialogOpen}
         onClose={closeAddDialog}
         onSuccess={handlePaymentMethodAdded}
-        availableTypes={availableTypes}
+        availableTypes={PaymentMethodTypes}
       />
 
       {/* Delete Confirmation Dialog */}

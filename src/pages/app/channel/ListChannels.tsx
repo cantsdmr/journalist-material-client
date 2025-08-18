@@ -135,7 +135,7 @@ const ListChannels: React.FC = () => {
           onTagsChange={handleTagsChange}
           contentType="channels"
           maxTags={3}
-          showCounts={true}
+          showCounts={false}
         />
       </Box>
 

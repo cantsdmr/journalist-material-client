@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   Typography, 
@@ -11,12 +11,14 @@ import {
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { News } from '@/types/index';
-import { NEWS_MEDIA_TYPE } from '@/enums/NewsEnums';
+import { NEWS_MEDIA_TYPE, NEWS_MEDIA_FORMAT } from '@/enums/NewsEnums';
 import DefaultNewsAvatar from '@/assets/BG_journo.png';
 import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { PATHS } from '@/constants/paths';
+import { FundingButton } from '@/components/funding';
+import { useApiContext } from '@/contexts/ApiContext';
 
 interface NewsEntryProps {
   news: News;
@@ -24,12 +26,68 @@ interface NewsEntryProps {
 
 const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
   const navigate = useNavigate();
-  const avatarMedia = news.media?.find(m => m.type === NEWS_MEDIA_TYPE.AVATAR);
+  const { api } = useApiContext();
+  const coverMedia = news.media?.find(m => m.type === NEWS_MEDIA_TYPE.COVER);
+  const [fundingData, setFundingData] = useState<{
+    currentAmount: number;
+    goalAmount?: number;
+    contributorCount: number;
+    currency: string;
+  }>({
+    currentAmount: 0,
+    goalAmount: undefined,
+    contributorCount: 0,
+    currency: 'USD'
+  });
+
+  // Load funding data
+  useEffect(() => {
+    const loadFundingData = async () => {
+      try {
+        const fund = await api.fundingApi.getFund('news', news.id);
+        if (fund) {
+          const summary = await api.fundingApi.getFundSummary('news', news.id);
+          setFundingData({
+            currentAmount: fund.current_amount / 100, // Convert from cents
+            goalAmount: fund.goal_amount ? fund.goal_amount / 100 : undefined,
+            contributorCount: summary?.total_contributors || 0,
+            currency: fund.currency
+          });
+        }
+      } catch (error) {
+        // Fund doesn't exist yet - use default values
+        console.debug('No funding data for news:', news.id);
+      }
+    };
+
+    loadFundingData();
+  }, [news.id, api.fundingApi]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (!(e.target as HTMLElement).closest('.action-button')) {
       navigate(PATHS.APP_NEWS_VIEW.replace(':id', news.id));
     }
+  };
+
+  const handleFundingSuccess = () => {
+    // Reload funding data after successful contribution
+    const loadFundingData = async () => {
+      try {
+        const fund = await api.fundingApi.getFund('news', news.id);
+        if (fund) {
+          const summary = await api.fundingApi.getFundSummary('news', news.id);
+          setFundingData({
+            currentAmount: fund.current_amount / 100,
+            goalAmount: fund.goal_amount ? fund.goal_amount / 100 : undefined,
+            contributorCount: summary?.total_contributors || 0,
+            currency: fund.currency
+          });
+        }
+      } catch (error) {
+        console.error('Error reloading funding data:', error);
+      }
+    };
+    loadFundingData();
   };
 
   return (
@@ -102,19 +160,36 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
             bgcolor: 'grey.100'
           }}
         >
-          <Box
-            component="img"
-            src={avatarMedia?.url || DefaultNewsAvatar}
-            alt={news.title}
-            className="news-thumbnail"
-            sx={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              transition: 'transform 0.3s ease',
-              display: 'block'
-            }}
-          />
+          {coverMedia?.format === NEWS_MEDIA_FORMAT.VIDEO ? (
+            <Box
+              component="video"
+              src={coverMedia.url}
+              preload="metadata"
+              className="news-thumbnail"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.3s ease',
+                display: 'block',
+                bgcolor: 'black'
+              }}
+            />
+          ) : (
+            <Box
+              component="img"
+              src={coverMedia?.url || DefaultNewsAvatar}
+              alt={news.title}
+              className="news-thumbnail"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.3s ease',
+                display: 'block'
+              }}
+            />
+          )}
           {news.qualityMetrics?.overallQualityScore && (
             <Box
               sx={{
@@ -206,6 +281,20 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
                   <FavoriteIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
+              
+              <Box className="action-button" onClick={(e) => e.stopPropagation()}>
+                <FundingButton
+                  contentType="news"
+                  contentId={news.id}
+                  contentTitle={news.title}
+                  fundingData={fundingData}
+                  onContributionSuccess={handleFundingSuccess}
+                  variant="icon"
+                  icon="heart"
+                  size="small"
+                />
+              </Box>
+              
               <Tooltip title="Share">
                 <IconButton 
                   className="action-button"

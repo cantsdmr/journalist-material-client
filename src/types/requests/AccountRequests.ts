@@ -5,30 +5,34 @@ export type UpdateProfileData = {
 };
 
 export type AddPaymentMethodData = {
-  type_id: number;
-  currency: string;
-  is_default?: boolean;
+  typeId: number;
+  currency?: string;
+  isDefault?: boolean;
   details: {
     email?: string; // PayPal
+    accountType?: 'personal' | 'business'; // PayPal
     cardNumber?: string; // iyzico
-    expiryMonth?: number; // iyzico
-    expiryYear?: number; // iyzico
+    expiryMonth?: string; // iyzico
+    expiryYear?: string; // iyzico
     cvv?: string; // iyzico
     cardHolderName?: string; // iyzico
+    cardType?: 'CREDIT' | 'DEBIT'; // iyzico
     [key: string]: any;
   };
 };
 
 export type UpdatePaymentMethodData = {
   currency?: string;
-  is_default?: boolean;
+  isDefault?: boolean;
   details?: {
     email?: string; // PayPal
+    accountType?: 'personal' | 'business'; // PayPal
     cardNumber?: string; // iyzico
-    expiryMonth?: number; // iyzico
-    expiryYear?: number; // iyzico
+    expiryMonth?: string; // iyzico
+    expiryYear?: string; // iyzico
     cvv?: string; // iyzico
     cardHolderName?: string; // iyzico
+    cardType?: 'CREDIT' | 'DEBIT'; // iyzico
     [key: string]: any;
   };
 };

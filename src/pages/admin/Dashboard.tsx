@@ -101,32 +101,67 @@ const AdminDashboard: React.FC = () => {
 
   const adminSections = [
     {
+      title: 'News Management',
+      description: 'Manage news articles and moderate content',
+      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
+      path: PATHS.ADMIN_NEWS,
+      color: '#1976d2'
+    },
+    {
+      title: 'Poll Management',
+      description: 'Oversee polls and voting analytics',
+      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
+      path: PATHS.ADMIN_POLLS,
+      color: '#7b1fa2'
+    },
+    {
       title: 'User Management',
       description: 'Manage users, roles, and permissions',
       icon: <UsersIcon sx={{ fontSize: 40 }} />,
       path: PATHS.ADMIN_USERS,
-      color: '#1976d2'
+      color: '#388e3c'
     },
     {
       title: 'Channel Management',
       description: 'Oversee channels and content moderation',
       icon: <ChannelsIcon sx={{ fontSize: 40 }} />,
       path: PATHS.ADMIN_CHANNELS,
-      color: '#388e3c'
+      color: '#f57c00'
+    },
+    {
+      title: 'Expense Orders',
+      description: 'Review and approve expense claims',
+      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
+      path: PATHS.ADMIN_EXPENSE_ORDERS,
+      color: '#d32f2f'
+    },
+    {
+      title: 'Payout Management',
+      description: 'Process payouts and financial transactions',
+      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
+      path: PATHS.ADMIN_PAYOUTS,
+      color: '#2e7d32'
+    },
+    {
+      title: 'Tag Management',
+      description: 'Moderate tags and manage taxonomy',
+      icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
+      path: PATHS.ADMIN_TAGS,
+      color: '#795548'
     },
     {
       title: 'Subscription Management',
       description: 'Monitor subscriptions and billing',
       icon: <SubscriptionsIcon sx={{ fontSize: 40 }} />,
       path: PATHS.ADMIN_SUBSCRIPTIONS,
-      color: '#f57c00'
+      color: '#ff5722'
     },
     {
       title: 'Analytics',
       description: 'Platform analytics and insights',
       icon: <AnalyticsIcon sx={{ fontSize: 40 }} />,
       path: PATHS.ADMIN_ANALYTICS,
-      color: '#7b1fa2'
+      color: '#9c27b0'
     },
     {
       title: 'Settings',

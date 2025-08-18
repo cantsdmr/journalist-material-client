@@ -203,7 +203,7 @@ const TagFilter: React.FC<TagFilterProps> = ({
               label={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   {tag.name}
-                  {showCounts && tag.count && (
+                  {showCounts && tag.count && tag.count > 0 && (
                     <Typography
                       variant="caption"
                       sx={{

@@ -17,7 +17,7 @@ import { News } from '@/types/index';
 import NewsSocialLinks from '@/components/news/NewsSocialLinks';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CoverPlaceholder from '@/assets/BG_journo.png';
-import { NEWS_MEDIA_TYPE } from '@/enums/NewsEnums';
+import { NEWS_MEDIA_TYPE, NEWS_MEDIA_FORMAT } from '@/enums/NewsEnums';
 import PersonIcon from '@mui/icons-material/Person';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { Link as RouterLink } from 'react-router-dom';
@@ -27,6 +27,7 @@ import { alpha } from '@mui/material/styles';
 import { parseContent } from '@/utils/json';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
+import TransactionTransparency from '@/components/news/TransactionTransparency';
 
 const ViewNewsSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -148,7 +149,7 @@ const ViewNews: React.FC = () => {
     );
   }
 
-  const coverImage = entry.media.find(m => m.type === NEWS_MEDIA_TYPE.COVER);
+  const coverMedia = entry.media.find(m => m.type === NEWS_MEDIA_TYPE.COVER);
 
   const formatFundAmount = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -173,17 +174,33 @@ const ViewNews: React.FC = () => {
               overflow: 'hidden'
             }}
           >
-            <Box
-              component="img"
-              src={coverImage?.url || CoverPlaceholder}
-              alt={entry.title}
-              sx={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
-            />
+            {coverMedia?.format === NEWS_MEDIA_FORMAT.VIDEO ? (
+              <Box
+                component="video"
+                src={coverMedia.url}
+                controls
+                preload="metadata"
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  bgcolor: 'black'
+                }}
+              />
+            ) : (
+              <Box
+                component="img"
+                src={coverMedia?.url || CoverPlaceholder}
+                alt={entry.title}
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+              />
+            )}
             <Box
               sx={{
                 position: 'absolute',
@@ -337,6 +354,14 @@ const ViewNews: React.FC = () => {
           </Stack>
         </Grid>
       </Grid>
+      
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <TransactionTransparency 
+          newsId={entry.id}
+          channelId={entry.channelId}
+          newsFund={entry.newsFund}
+        />
+      </Container>
     </Container>
   );
 };

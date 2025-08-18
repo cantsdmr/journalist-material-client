@@ -6,11 +6,11 @@ import {
 } from '@mui/material';
 import { CreateNewsData, NewsMedia, SocialLink, News } from '../../../types';
 import { OutputData } from '@editorjs/editorjs';
-import { NEWS_MEDIA_FORMAT, NEWS_MEDIA_TYPE, NEWS_STATUS } from '@/enums/NewsEnums';
+import { NEWS_MEDIA_TYPE, NEWS_STATUS } from '@/enums/NewsEnums';
 import JEditor from '@/components/editor/JEditor';
 import NewsSocialLinks from '@/components/news/NewsSocialLinks';
 import { useProfile } from '@/contexts/ProfileContext';
-import ImageUpload from '@/components/common/ImageUpload';
+import MediaUpload from '@/components/common/MediaUpload';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -51,7 +51,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
   }));
   
   const [loading, setLoading] = useState(false);
-  const [coverImage, setCoverImage] = useState<NewsMedia | null>(initialData?.media?.[0] || null);
+  const [coverMedia, setCoverMedia] = useState<NewsMedia | null>(initialData?.media?.[0] || null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>(initialData?.socialLinks || []);
   const [error, setError] = useState<string | null>(null);
  
@@ -65,7 +65,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
     try {
       const newsData = {
         ...formData,
-        media: coverImage ? [coverImage] : [],
+        media: coverMedia ? [coverMedia] : [],
         socialLinks
       };
 
@@ -143,23 +143,23 @@ const NewsForm: React.FC<NewsFormProps> = ({
               <Stack spacing={4}>
                 {/* Cover Image */}
                 <Box>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    Cover Image
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    This image will be displayed at the top of your news article and in previews.
-                    Use a high-quality image for best results.
-                  </Typography>
-                  <ImageUpload
-                    label={null}
-                    value={coverImage?.url}
-                    onChange={(url) => setCoverImage(url ? {
-                      id: '0',
-                      newsId: '0',
-                      url,
-                      type: NEWS_MEDIA_TYPE.COVER,
-                      format: NEWS_MEDIA_FORMAT.IMAGE
+                  <MediaUpload
+                    title="Cover Media"
+                    description="Upload an image or short video that will be displayed at the top of your news article and in previews."
+                    value={coverMedia ? {
+                      id: coverMedia.id || '0',
+                      url: coverMedia.url,
+                      type: coverMedia.type,
+                      format: coverMedia.format
+                    } : null}
+                    onChange={(media) => setCoverMedia(media ? {
+                      id: media.id,
+                      url: media.url,
+                      type: media.type,
+                      format: media.format,
+                      newsId: ''
                     } : null)}
+                    mediaTypeId={NEWS_MEDIA_TYPE.COVER}
                   />
                 </Box>
               </Stack>
@@ -211,7 +211,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
                       required
                     >
                       {profile?.staffChannels.map((channel) => (
-                        <MenuItem key={channel.id} value={channel.id}>
+                        <MenuItem key={channel.id} value={channel.channelId}>
                           {channel.channel.name}
                         </MenuItem>
                       ))}

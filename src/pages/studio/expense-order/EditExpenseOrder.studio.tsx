@@ -8,13 +8,13 @@ import {
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import ExpenseOrderForm from '@/components/expense-order/ExpenseOrderForm';
-import { ExpenseOrder, UpdateExpenseOrderData, ExpenseType } from '@/types/index';
-import { Channel } from '@/types/index';
+import { ExpenseOrder, UpdateExpenseOrderData } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
+import { getExpenseTypeOptions } from '@/enums/ExpenseTypeEnums';
 
 const EditExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
@@ -23,14 +23,18 @@ const EditExpenseOrderStudio: React.FC = () => {
   const { profile } = useProfile();
   
   const [expenseOrder, setExpenseOrder] = useState<ExpenseOrder | null>(null);
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
   const [loading, setLoading] = useState(true);
   const { execute, loading: saveLoading } = useApiCall();
 
+  // Get channels from profile context
+  const channels = profile?.staffChannels?.map(staffChannel => staffChannel.channel) || [];
+  
+  // Get expense types from static enum
+  const expenseTypes = getExpenseTypeOptions();
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!id || !profile) return;
+    const fetchExpenseOrder = async () => {
+      if (!id) return;
       
       try {
         setLoading(true);
@@ -44,33 +48,13 @@ const EditExpenseOrderStudio: React.FC = () => {
         if (expenseOrderResult) {
           setExpenseOrder(expenseOrderResult);
         }
-        
-        // Fetch user's channels
-        const channelsResult = await execute(
-          () => api.accountApi.getUserChannels(),
-          { showErrorToast: true }
-        );
-        
-        if (channelsResult) {
-          setChannels(channelsResult.items.map(cu => cu.channel));
-        }
-        
-        // Fetch expense types
-        const typesResult = await execute(
-          () => api.expenseOrderApi.getExpenseTypes(),
-          { showErrorToast: true }
-        );
-        
-        if (typesResult) {
-          setExpenseTypes(typesResult);
-        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [id, profile, execute]);
+    fetchExpenseOrder();
+  }, [id, execute]);
 
   const handleSave = async (data: UpdateExpenseOrderData) => {
     if (!id) return;

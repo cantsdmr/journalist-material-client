@@ -139,7 +139,7 @@ const ListPoll: React.FC = () => {
           onTagsChange={handleTagsChange}
           contentType="polls"
           maxTags={4}
-          showCounts={true}
+          showCounts={false}
         />
       </Box>
 

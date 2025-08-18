@@ -9,13 +9,16 @@ import {
   Chip,
   Stack,
   Paper,
-  Skeleton
+  Skeleton,
+  Button
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import PollChartResults from '@/components/studio/poll/PollChartResults';
+import PollConversionModal from '@/components/studio/poll/PollConversionModal';
 import HowToVoteIcon from '@mui/icons-material/HowToVote';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ArticleIcon from '@mui/icons-material/Article';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const ViewPollSkeleton = () => (
@@ -72,6 +75,7 @@ const ViewPollStudio: React.FC = () => {
   const { execute } = useApiCall();
   const [poll, setPoll] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [conversionModalOpen, setConversionModalOpen] = useState(false);
 
   useEffect(() => {
     const getPoll = async () => {
@@ -94,6 +98,30 @@ const ViewPollStudio: React.FC = () => {
     getPoll();
   }, [id, execute]);
 
+  const handleConvert = async (newsData: any) => {
+    if (!id) return;
+    
+    const result = await execute(
+      () => api?.pollApi.convertToNews(id, newsData),
+      {
+        showSuccessMessage: true,
+        successMessage: 'Poll converted to news successfully!'
+      }
+    );
+    
+    if (result) {
+      // Refresh poll data to update conversion status
+      const updatedPoll = await execute(
+        () => api?.pollApi.get(id),
+        { showErrorToast: true }
+      );
+      
+      if (updatedPoll) {
+        setPoll(updatedPoll);
+      }
+    }
+  };
+
   if (loading) {
     return <ViewPollSkeleton />;
   }
@@ -108,6 +136,9 @@ const ViewPollStudio: React.FC = () => {
 
   const isActive = new Date() >= new Date(poll.startDate) && new Date() <= new Date(poll.endDate);
   const hasStarted = new Date() >= new Date(poll.startDate);
+  
+  // Check if poll can be converted (in studio, creators can convert their own polls)
+  const canConvert = !poll.isConverted && !poll.stats?.hasEnded;
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -121,17 +152,37 @@ const ViewPollStudio: React.FC = () => {
               {poll.description}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
-            <Chip 
-              label={isActive ? 'Active' : (hasStarted ? 'Ended' : 'Scheduled')}
-              color={isActive ? 'success' : (hasStarted ? 'error' : 'warning')}
-            />
-            {poll.isTrending && (
+          <Box sx={{ display: 'flex', gap: 1, mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               <Chip 
-                icon={<TrendingUpIcon />}
-                label="Trending"
-                color="primary"
+                label={isActive ? 'Active' : (hasStarted ? 'Ended' : 'Scheduled')}
+                color={isActive ? 'success' : (hasStarted ? 'error' : 'warning')}
               />
+              {poll.isTrending && (
+                <Chip 
+                  icon={<TrendingUpIcon />}
+                  label="Trending"
+                  color="primary"
+                />
+              )}
+              {poll.isConverted && (
+                <Chip 
+                  icon={<ArticleIcon />}
+                  label="Converted to News"
+                  color="info"
+                />
+              )}
+            </Box>
+            
+            {canConvert && (
+              <Button
+                variant="contained"
+                startIcon={<ArticleIcon />}
+                onClick={() => setConversionModalOpen(true)}
+                size="small"
+              >
+                Convert to News
+              </Button>
             )}
           </Box>
         </Grid>
@@ -199,6 +250,13 @@ const ViewPollStudio: React.FC = () => {
           </Stack>
         </Grid>
       </Grid>
+      
+      <PollConversionModal
+        open={conversionModalOpen}
+        poll={poll}
+        onClose={() => setConversionModalOpen(false)}
+        onConvert={handleConvert}
+      />
     </Container>
   );
 };

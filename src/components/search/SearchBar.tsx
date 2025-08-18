@@ -20,6 +20,9 @@ import { styled } from '@mui/material/styles';
 import { debounce } from 'lodash';
 import { useSearch } from '@/hooks/useSearch';
 import { SearchSuggestion, SearchFilters } from '@/enums/SearchEnums';
+import { StructuredSearchSuggestion } from '@/APIs/SearchAPI';
+import { useNavigate } from 'react-router-dom';
+import { PATHS } from '@/constants/paths';
 
 // Styled components for AppBar usage
 const SearchContainer = styled(Box)(({ theme }) => ({
@@ -65,8 +68,8 @@ const SuggestionItem = styled(Box)(({ theme }) => ({
 }));
 
 interface SearchBarProps {
-  onSearch: (query: string, filters?: SearchFilters) => void;
-  onSuggestionSelect: (suggestion: SearchSuggestion) => void;
+  onSearch?: (query: string, filters?: SearchFilters) => void;
+  onSuggestionSelect?: (suggestion: SearchSuggestion) => void;
   placeholder?: string;
   className?: string;
   fullWidth?: boolean;
@@ -80,10 +83,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   fullWidth = false
 }) => {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<StructuredSearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { getSuggestions } = useSearch();
+  const { getStructuredSuggestions } = useSearch();
+  const navigate = useNavigate();
 
   // Debounced API call for suggestions using useSearch hook
   const fetchSuggestions = useCallback(
@@ -96,18 +100,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
       setIsLoading(true);
       
       try {
-        const suggestionStrings = await getSuggestions(searchQuery);
-        
-        // Transform API response to suggestions format
-        const transformedSuggestions: SearchSuggestion[] = suggestionStrings
-          .filter((suggestion: string) => suggestion && suggestion.trim()) // Filter out empty suggestions
-          .map((suggestion: string, index: number) => ({
-            id: `suggestion-${index}`,
-            text: suggestion.trim(),
-            type: 'tag' as const, // Default type, could be enhanced
-          }));
-    
-        setSuggestions(transformedSuggestions);
+        const structuredSuggestions = await getStructuredSuggestions(searchQuery);
+        setSuggestions(structuredSuggestions);
       } catch (error) {
         console.error('Error fetching suggestions:', error);
         setSuggestions([]);
@@ -115,7 +109,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         setIsLoading(false);
       }
     }, 300),
-    [getSuggestions]
+    [] // Dependencies managed by getStructuredSuggestions hook internally
   );
 
   useEffect(() => {
@@ -125,7 +119,54 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const handleSearch = () => {
     if (query.trim()) {
       setIsOpen(false);
-      onSearch(query);
+      if (onSearch) {
+        onSearch(query);
+      } else {
+        // Default behavior: navigate to search page
+        navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(query.trim())}`);
+      }
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: StructuredSearchSuggestion) => {
+    setIsOpen(false);
+    setQuery(''); // Clear the input
+
+    if (onSuggestionSelect) {
+      // Convert StructuredSearchSuggestion to SearchSuggestion for backward compatibility
+      const legacySuggestion: SearchSuggestion = {
+        id: suggestion.id,
+        text: suggestion.text,
+        type: suggestion.type as any,
+        metadata: suggestion.metadata
+      };
+      onSuggestionSelect(legacySuggestion);
+      return;
+    }
+
+    // Default behavior: navigate directly to the content
+    switch (suggestion.type) {
+      case 'news':
+        navigate(PATHS.APP_NEWS_VIEW.replace(':id', suggestion.id));
+        break;
+      case 'channel':
+        navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', suggestion.id));
+        break;
+      case 'poll':
+        navigate(PATHS.APP_POLL_VIEW.replace(':id', suggestion.id));
+        break;
+      case 'user':
+        // Users don't have individual view pages, so search for them
+        navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(suggestion.text)}&type=users`);
+        break;
+      case 'tag':
+        // For tags, search for content with that tag
+        navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(suggestion.text)}&type=tags`);
+        break;
+      default:
+        // Fallback: search for the text
+        navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(suggestion.text)}`);
+        break;
     }
   };
 
@@ -144,7 +185,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
   };
 
-  const renderSuggestionOption = (props: any, suggestion: SearchSuggestion) => (
+  const renderSuggestionOption = (props: any, suggestion: StructuredSearchSuggestion) => (
     <SuggestionItem {...props} key={suggestion.id}>
       <Box sx={{ mr: 2 }}>
         {getTypeIcon(suggestion.type)}
@@ -157,7 +198,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
           <Typography variant="caption" color="text.secondary">
             {suggestion.metadata.channelName && `in ${suggestion.metadata.channelName}`}
             {suggestion.metadata.handle && `@${suggestion.metadata.handle}`}
-            {suggestion.metadata.articleCount && `${suggestion.metadata.articleCount} articles`}
+            {suggestion.metadata.voteCount && `${suggestion.metadata.voteCount} votes`}
+            {suggestion.metadata.usageCount && `${suggestion.metadata.usageCount} uses`}
+            {suggestion.metadata.publishedAt && `${new Date(suggestion.metadata.publishedAt).toLocaleDateString()}`}
           </Typography>
         )}
       </Box>
@@ -192,9 +235,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
             return options;
           }}
           isOptionEqualToValue={(option, value) => {
-            const optionText = typeof option === 'string' ? option : option.text;
-            const valueText = typeof value === 'string' ? value : value.text;
-            return optionText === valueText;
+            if (typeof option === 'string' || typeof value === 'string') {
+              const optionText = typeof option === 'string' ? option : option.text;
+              const valueText = typeof value === 'string' ? value : value.text;
+              return optionText === valueText;
+            }
+            return option.id === value.id;
           }}
           renderOption={(props, option) => {
             return renderSuggestionOption(props, option);
@@ -275,7 +321,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           )}
           onChange={(_, value) => {
             if (value && typeof value === 'object') {
-              onSuggestionSelect(value);
+              handleSuggestionClick(value);
             }
           }}
         />

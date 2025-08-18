@@ -1,0 +1,14 @@
+Design system:
+- Use MUI
+- Use Typescript
+- Use React
+- Use React Router
+- Use React Context
+- Use React Hooks
+- Use React Hook Form
+- Use React Infinite Scroll
+- Use React Skeleton
+- Create common components under /components
+- Design the pages using mobile first approach
+- Use numbered enums
+- Use apiContext

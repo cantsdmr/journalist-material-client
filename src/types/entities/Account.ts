@@ -1,5 +1,18 @@
 import { ChannelStaff, ChannelSubscription } from "./Channel";
 
+export const PaymentMethodTypeEnum = {
+  CREDIT_CARD: 1,
+  BANK_TRANSFER: 2,
+  PAYPAL: 3,
+  IYZICO: 4,
+  OTHER: 5
+} as const;
+
+export const PaymentMethodTypes = [
+  { id: PaymentMethodTypeEnum.PAYPAL, name: 'PayPal', description: 'Pay with your PayPal account' },
+  { id: PaymentMethodTypeEnum.IYZICO, name: 'Credit/Debit Card', description: 'Pay with your credit or debit card via Iyzico' }
+];
+
 export type UserProfile = {
   id: string;
   externalId: string;

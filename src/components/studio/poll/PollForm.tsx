@@ -10,7 +10,8 @@ import {
   MenuItem,
   IconButton,
   Typography,
-  Paper
+  Paper,
+  Stack
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -20,9 +21,20 @@ import { useProfile } from '@/contexts/ProfileContext';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import { EmptyState } from '@/components/common/EmptyState';
+import MediaUpload from '@/components/common/MediaUpload';
+import { POLL_MEDIA_TYPE } from '@/enums/PollEnums';
 
 interface PollOption {
   text: string;
+}
+
+interface PollMedia {
+  id: string;
+  pollId: string;
+  url: string;
+  type: number;
+  format: number;
+  caption?: string;
 }
 
 interface PollFormData {
@@ -32,6 +44,7 @@ interface PollFormData {
   endDate: Date;
   channelId: string;
   options: PollOption[];
+  media: PollMedia[];
 }
 
 interface PollFormProps {
@@ -56,8 +69,13 @@ const PollForm: React.FC<PollFormProps> = ({
     startDate: initialData?.startDate || new Date(),
     endDate: initialData?.endDate || new Date(),
     channelId: initialData?.channelId || '',
-    options: initialData?.options || [{ text: '' }, { text: '' }]
+    options: initialData?.options || [{ text: '' }, { text: '' }],
+    media: initialData?.media || []
   });
+
+  const [coverMedia, setCoverMedia] = useState<PollMedia | null>(
+    initialData?.media?.find(m => m.type === POLL_MEDIA_TYPE.COVER) || null
+  );
 
   // Check if profile has channels
   useEffect(() => {
@@ -92,7 +110,11 @@ const PollForm: React.FC<PollFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    const pollData = {
+      ...formData,
+      media: coverMedia ? [coverMedia] : []
+    };
+    onSubmit(pollData);
   };
 
   return !hasChannel() ? (
@@ -128,7 +150,7 @@ const PollForm: React.FC<PollFormProps> = ({
               required
             >
               {profile?.staffChannels?.map((channel) => (
-                <MenuItem key={channel.id} value={channel.id}>
+                <MenuItem key={channel.id} value={channel.channelId}>
                   {channel.channel.name}
                 </MenuItem>
               ))}
@@ -173,6 +195,39 @@ const PollForm: React.FC<PollFormProps> = ({
             onChange={(date) => handleChange('endDate', date)}
             sx={{ width: '100%' }}
           />
+        </Grid>
+
+        {/* Media Section */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              Media
+            </Typography>
+            <Stack spacing={4}>
+              {/* Cover Media */}
+              <Box>
+                <MediaUpload
+                  title="Cover Media"
+                  description="Upload an image or short video that will be displayed with your poll and in previews."
+                  value={coverMedia ? {
+                    id: coverMedia.id || '0',
+                    url: coverMedia.url,
+                    type: coverMedia.type,
+                    format: coverMedia.format
+                  } : null}
+                  onChange={(media) => setCoverMedia(media ? {
+                    id: media.id,
+                    url: media.url,
+                    type: media.type,
+                    format: media.format,
+                    pollId: ''
+                  } : null)}
+                  mediaTypeId={POLL_MEDIA_TYPE.COVER}
+                  useNewsFormats={false}
+                />
+              </Box>
+            </Stack>
+          </Paper>
         </Grid>
 
         <Grid item xs={12}>

@@ -6,6 +6,12 @@ export type CreatePollData = {
         text: string;
         description?: string;
     }>;
+    media?: Array<{
+        mediaTypeId: number;
+        mediaFormatId: number;
+        url: string;
+        caption?: string;
+    }>;
     endDate?: string;
     allowMultipleVotes?: boolean;
     isPublic?: boolean;
@@ -15,6 +21,12 @@ export type CreatePollData = {
 export type UpdatePollData = {
     title?: string;
     description?: string;
+    media?: Array<{
+        mediaTypeId: number;
+        mediaFormatId: number;
+        url: string;
+        caption?: string;
+    }>;
     endDate?: string;
     allowMultipleVotes?: boolean;
     isPublic?: boolean;
@@ -36,6 +48,12 @@ export type StudioCreatePollData = {
     description?: string;
     channelId: string;
     options: string[];
+    media?: Array<{
+        mediaTypeId: number;
+        mediaFormatId: number;
+        url: string;
+        caption?: string;
+    }>;
     startDate?: string;
     endDate?: string;
     allowMultipleVotes?: boolean;

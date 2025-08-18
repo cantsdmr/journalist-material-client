@@ -50,5 +50,5 @@ export const getPlatformColor = (platform: number): string => {
 
 export const getPlatformName = (platform: number): string => {
   return Object.entries(SOCIAL_PLATFORM_TYPE)
-    .find(([_, value]) => value === platform)?.[0] || 'Other';
+    .find(([, value]) => value === platform)?.[0] || 'Other';
 }; 

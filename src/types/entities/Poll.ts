@@ -8,6 +8,7 @@ export type Poll = {
     updatedAt: string;
     endDate?: string;
     options: PollOption[];
+    media: PollMedia[];
     channel: {
         id: string;
         name: string;
@@ -33,6 +34,15 @@ export type PollOption = {
     id: string;
     text: string;
     voteCount: number;
+};
+
+export type PollMedia = {
+    id: string;
+    pollId: string;
+    type: number;
+    format: number;
+    url: string;
+    caption?: string;
 };
 
 export type PollStatus = {

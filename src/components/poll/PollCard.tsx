@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -21,6 +21,9 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ShareIcon from '@mui/icons-material/Share';
 import CommentIcon from '@mui/icons-material/Comment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { POLL_MEDIA_FORMAT } from '@/enums/PollEnums';
+import { FundingButton } from '@/components/funding';
+import { useApiContext } from '@/contexts/ApiContext';
 
 interface PollCardProps {
   poll: Poll;
@@ -33,13 +36,69 @@ interface PollCardProps {
 
 const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVote, showResults = false, disabled = false }) => {
   const theme = useTheme();
+  const { api } = useApiContext();
   const [hoveredOption, setHoveredOption] = useState<string | null>(null);
   const totalVotes = poll.stats?.totalVotes || 0;
+  const [fundingData, setFundingData] = useState<{
+    currentAmount: number;
+    goalAmount?: number;
+    contributorCount: number;
+    currency: string;
+  }>({
+    currentAmount: 0,
+    goalAmount: undefined,
+    contributorCount: 0,
+    currency: 'USD'
+  });
+
+  // Load funding data
+  useEffect(() => {
+    const loadFundingData = async () => {
+      try {
+        const fund = await api.fundingApi.getFund('poll', poll.id.toString());
+        if (fund) {
+          const summary = await api.fundingApi.getFundSummary('poll', poll.id.toString());
+          setFundingData({
+            currentAmount: fund.current_amount / 100, // Convert from cents
+            goalAmount: fund.goal_amount ? fund.goal_amount / 100 : undefined,
+            contributorCount: summary?.total_contributors || 0,
+            currency: fund.currency
+          });
+        }
+      } catch (error) {
+        // Fund doesn't exist yet - use default values
+        console.debug('No funding data for poll:', poll.id);
+      }
+    };
+
+    loadFundingData();
+  }, [poll.id, api.fundingApi]);
 
   const handleOptionHover = (optionId: string | null) => {
     if (!disabled) {
       setHoveredOption(optionId);
     }
+  };
+
+  const handleFundingSuccess = () => {
+    // Reload funding data after successful contribution
+    const loadFundingData = async () => {
+      try {
+        const fund = await api.fundingApi.getFund('poll', poll.id.toString());
+        if (fund) {
+          const summary = await api.fundingApi.getFundSummary('poll', poll.id.toString());
+          setFundingData({
+            currentAmount: fund.current_amount / 100,
+            goalAmount: fund.goal_amount ? fund.goal_amount / 100 : undefined,
+            contributorCount: summary?.total_contributors || 0,
+            currency: fund.currency
+          });
+        }
+      } catch (error) {
+        console.error('Error reloading funding data:', error);
+      }
+    };
+    loadFundingData();
   };
 
   return (
@@ -93,6 +152,63 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
           >
             {poll.description}
           </Typography>
+        )}
+
+        {/* Poll Media */}
+        {poll.media && poll.media.length > 0 && (
+          <Box sx={{ mb: 3 }}>
+            {poll.media.map((media) => (
+              <Box
+                key={media.id}
+                sx={{
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  mb: 2
+                }}
+              >
+                {media.format === POLL_MEDIA_FORMAT.VIDEO ? (
+                  <Box
+                    component="video"
+                    src={media.url}
+                    controls
+                    preload="metadata"
+                    sx={{
+                      width: '100%',
+                      height: 200,
+                      objectFit: 'cover',
+                      objectPosition: 'center',
+                      bgcolor: 'black'
+                    }}
+                  />
+                ) : (
+                  <Box
+                    component="img"
+                    src={media.url}
+                    alt={media.caption || poll.title}
+                    sx={{
+                      width: '100%',
+                      height: 200,
+                      objectFit: 'cover',
+                      objectPosition: 'center'
+                    }}
+                  />
+                )}
+                {media.caption && (
+                  <Typography 
+                    variant="caption" 
+                    color="text.secondary"
+                    sx={{ 
+                      display: 'block',
+                      mt: 1,
+                      px: 1
+                    }}
+                  >
+                    {media.caption}
+                  </Typography>
+                )}
+              </Box>
+            ))}
+          </Box>
         )}
 
         {/* Poll Options */}
@@ -322,6 +438,18 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
           Comment
         </Button>
         <Stack direction="row" spacing={1}>
+          <Box onClick={(e) => e.stopPropagation()}>
+            <FundingButton
+              contentType="poll"
+              contentId={poll.id.toString()}
+              contentTitle={poll.title}
+              fundingData={fundingData}
+              onContributionSuccess={handleFundingSuccess}
+              variant="icon"
+              icon="heart"
+              size="small"
+            />
+          </Box>
           <IconButton 
             size="small"
             sx={{ 
