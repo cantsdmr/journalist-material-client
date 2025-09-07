@@ -38,7 +38,6 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ mobileOpen, onDrawerToggle }) => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 

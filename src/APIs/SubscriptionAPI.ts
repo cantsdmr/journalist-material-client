@@ -92,6 +92,59 @@ export class SubscriptionAPI extends HTTPApi {
     });
   }
 
+  // ==================== DIRECT SUBSCRIPTION ENDPOINTS ====================
+
+  /**
+   * Create a direct subscription to a channel (PayPal Plans API compliant)
+   */
+  public async createDirectSubscription(
+    channelId: string, 
+    data: { 
+      tierId: string; 
+      notificationLevel?: number; 
+      paymentMethodId?: string; 
+    }
+  ): Promise<{ 
+    subscription: AdminSubscription; 
+    approvalUrl?: string; 
+    requiresPayment: boolean 
+  }> {
+    return this._post<{ 
+      subscription: AdminSubscription; 
+      approvalUrl?: string; 
+      requiresPayment: boolean 
+    }>(
+      `${API_PATH}/channels/${channelId}/subscribe`, 
+      data
+    );
+  }
+
+  /**
+   * Cancel user's own subscription
+   */
+  public async cancelUserSubscription(subscriptionId: string): Promise<{ message: string }> {
+    return this._remove<{ message: string }>(`${API_PATH}/${subscriptionId}/cancel`);
+  }
+
+  /**
+   * Get user's own subscriptions
+   */
+  public async getMySubscriptions(
+    pagination: PaginationObject = DEFAULT_PAGINATION,
+    filters: SubscriptionFilters = {}
+  ): Promise<PaginatedResponse<AdminSubscription>> {
+    const params = { ...pagination, ...filters };
+    return this._list<AdminSubscription>(`${API_PATH}/my`, params);
+  }
+
+  /**
+   * Get subscription status by ID (for polling)
+   */
+  public async getSubscriptionStatus(subscriptionId: string): Promise<string> {
+    const response = await this._get<{ status: string; subscription: AdminSubscription }>(`${API_PATH}/${subscriptionId}/status`);
+    return response.status;
+  }
+
   // ==================== SEARCH AND FILTERING ====================
 
   public async searchSubscriptions(

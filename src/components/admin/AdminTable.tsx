@@ -20,7 +20,6 @@ import {
   Button,
   Menu,
   MenuItem,
-  Chip,
   Stack,
   Dialog,
   DialogTitle,
@@ -34,7 +33,6 @@ import {
   MoreVert as MoreIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  FilterList as FilterIcon,
   Add as AddIcon,
   Refresh as RefreshIcon
 } from '@mui/icons-material';
@@ -116,7 +114,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
     }
   };
 
-  const handleRowClick = (event: React.MouseEvent<unknown>, id: string) => {
+  const handleRowClick = (_event: React.MouseEvent<unknown>, id: string) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected: string[] = [];
 

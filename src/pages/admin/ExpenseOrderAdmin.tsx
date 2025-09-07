@@ -17,7 +17,6 @@ import {
   Stack,
   Typography,
   Avatar,
-  Link,
   Grid,
   Alert,
   Card,
@@ -25,19 +24,16 @@ import {
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
   Payment as PaymentIcon,
   Receipt as ReceiptIcon,
-  AttachMoney as MoneyIcon
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { ExpenseOrder } from '@/types/entities/ExpenseOrder';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
+import { PaginatedResponse } from '@/utils/http';
 import { ExpenseOrderStatus, ExpenseOrderStatusLabels } from '@/enums/ExpenseOrderEnums';
 
 const ExpenseOrderAdmin: React.FC = () => {
@@ -61,7 +57,7 @@ const ExpenseOrderAdmin: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [channelFilter, setChannelFilter] = useState<string>('');
+  const [channelFilter] = useState<string>('');
   const [sortColumn, setSortColumn] = useState('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
@@ -71,15 +67,7 @@ const ExpenseOrderAdmin: React.FC = () => {
     
     try {
       // For admin, we want to get all expense orders, not just user's own
-      const params = {
-        page: page + 1,
-        limit: rowsPerPage,
-        sort: sortColumn,
-        order: sortDirection,
-        search: searchQuery || undefined,
-        status: statusFilter || undefined,
-        channel: channelFilter || undefined
-      };
+      // Prepare filters for API call
 
       // Using my-orders endpoint but should be modified for admin to get all orders
       const result = await execute(
@@ -124,12 +112,11 @@ const ExpenseOrderAdmin: React.FC = () => {
           await execute(() => api.expenseOrderApi.approveExpenseOrder(selectedOrder.id, { notes: actionReason }));
           break;
         case 'reject':
-          await execute(() => api.expenseOrderApi.rejectExpenseOrder(selectedOrder.id, { reason: actionReason }));
+          await execute(() => api.expenseOrderApi.rejectExpenseOrder(selectedOrder.id, { rejectionReason: actionReason }));
           break;
         case 'payment':
           await execute(() => api.expenseOrderApi.processPayment(selectedOrder.id, { 
-            paymentReference,
-            notes: actionReason 
+            paymentReference
           }));
           break;
       }
@@ -200,10 +187,10 @@ const ExpenseOrderAdmin: React.FC = () => {
       format: (value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 24, height: 24 }}>
-            {row.journalist?.displayName?.[0] || row.journalist?.firstName?.[0]}
+            {row.journalist?.displayName?.[0] || 'U'}
           </Avatar>
           <Typography variant="body2" noWrap>
-            {row.journalist?.displayName || `${row.journalist?.firstName} ${row.journalist?.lastName}`}
+            {row.journalist?.displayName || 'Unknown User'}
           </Typography>
         </Box>
       ),
@@ -443,7 +430,7 @@ const ExpenseOrderAdmin: React.FC = () => {
                     <Grid item xs={12} sm={6}>
                       <Typography variant="caption" color="text.secondary">Journalist</Typography>
                       <Typography variant="body2">
-                        {selectedOrder.journalist?.displayName || `${selectedOrder.journalist?.firstName} ${selectedOrder.journalist?.lastName}`}
+                        {selectedOrder.journalist?.displayName || 'Unknown User'}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>

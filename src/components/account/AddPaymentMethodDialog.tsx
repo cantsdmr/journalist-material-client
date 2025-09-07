@@ -42,6 +42,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paypalOAuthInProgress, setPaypalOAuthInProgress] = useState(false);
 
   const { api } = useApiContext();
 
@@ -53,7 +54,81 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
       details: {}
     });
     setError(null);
+    setPaypalOAuthInProgress(false);
     onClose();
+  };
+
+  const handlePayPalOAuth = async () => {
+    try {
+      setPaypalOAuthInProgress(true);
+      setError(null);
+
+      // Generate redirect URI (current origin + callback path)
+      const redirectUri = `${window.location.origin}/account/payment-methods/paypal/callback`;
+
+      // Get PayPal OAuth URL
+      const response = await api.accountApi.generatePayPalOAuthUrl(redirectUri);
+      const authUrl = response.data.authorization_url;
+
+      // Open PayPal OAuth popup
+      const popup = window.open(
+        authUrl,
+        'paypal_oauth',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      if (!popup) {
+        throw new Error('Popup blocked! Please allow popups and try again.');
+      }
+
+      // Listen for OAuth completion
+      const handleMessage = async (event: MessageEvent) => {
+        // Only accept messages from our domain
+        if (event.origin !== window.location.origin) {
+          return;
+        }
+
+        if (event.data.type === 'paypal_oauth_success') {
+          const { code, state } = event.data;
+          
+          try {
+            // Complete OAuth flow
+            await api.accountApi.completePayPalOAuth(code, state, redirectUri);
+            
+            // Success!
+            onSuccess();
+            handleClose();
+            popup.close();
+          } catch (error: any) {
+            setError(error.message || 'Failed to connect PayPal account');
+            popup.close();
+          }
+          
+          window.removeEventListener('message', handleMessage);
+          setPaypalOAuthInProgress(false);
+        } else if (event.data.type === 'paypal_oauth_error') {
+          setError(event.data.message || 'PayPal authentication failed');
+          popup.close();
+          window.removeEventListener('message', handleMessage);
+          setPaypalOAuthInProgress(false);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Monitor popup closure (fallback)
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
+          setPaypalOAuthInProgress(false);
+        }
+      }, 1000);
+
+    } catch (error: any) {
+      setError(error.message || 'Failed to start PayPal authentication');
+      setPaypalOAuthInProgress(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -67,9 +142,9 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
         return;
       }
 
-      // Validate PayPal fields
-      if (formData.typeId === PaymentMethodTypeEnum.PAYPAL && !formData.details.email) {
-        setError('PayPal email is required');
+      // PayPal now uses OAuth - should not reach here for PayPal
+      if (formData.typeId === PaymentMethodTypeEnum.PAYPAL) {
+        setError('Please use the "Connect with PayPal" button for PayPal accounts');
         return;
       }
 
@@ -125,15 +200,29 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
     switch (formData.typeId) {
       case PaymentMethodTypeEnum.PAYPAL:
         return (
-          <TextField
-            label="PayPal Email"
-            type="email"
-            value={formData.details.email || ''}
-            onChange={handleInputChange('details.email')}
-            fullWidth
-            required
-            placeholder="your-email@example.com"
-          />
+          <Box sx={{ textAlign: 'center', py: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Connect your PayPal account securely through PayPal's authentication system.
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlePayPalOAuth}
+              disabled={paypalOAuthInProgress}
+              size="large"
+              sx={{
+                background: '#0070ba',
+                '&:hover': { background: '#005ea6' }
+              }}
+            >
+              {paypalOAuthInProgress ? 'Connecting...' : 'Connect with PayPal'}
+            </Button>
+            {paypalOAuthInProgress && (
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 2 }}>
+                Complete the authentication in the popup window
+              </Typography>
+            )}
+          </Box>
         );
       
       case PaymentMethodTypeEnum.IYZICO:

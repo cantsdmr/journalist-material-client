@@ -3,35 +3,35 @@ import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from
 
 export interface FundData {
   id: string;
-  channel_id: string;
-  channel_wallet_id: string;
-  fundable_id: string;
-  fundable_type: number; // 1 = NEWS, 2 = POLL
-  current_amount: number;
-  goal_amount?: number;
+  channelId: string;
+  channelWalletId: string;
+  fundableId: string;
+  fundableType: number; // 1 = NEWS, 2 = POLL
+  currentAmount: number;
+  goalAmount?: number;
   currency: string;
-  expires_at?: string;
-  is_active: boolean;
-  goal_reached: boolean;
-  status_id: number;
-  created_at: string;
-  updated_at: string;
+  expiresAt?: string;
+  isActive: boolean;
+  goalReached: boolean;
+  statusId: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface FundContribution {
   id: string;
-  fund_id: string;
-  user_id: string;
-  channel_subscription_id?: string;
+  fundId: string;
+  userId: string;
+  channelSubscriptionId?: string;
   amount: number;
   currency: string;
-  transaction_id?: string;
+  transactionId?: string;
   comment?: string;
-  is_anonymous: boolean;
-  status_id: number;
-  type_id: number; // 1 = ONE_TIME, 2 = RECURRING
-  created_at: string;
-  updated_at: string;
+  isAnonymous: boolean;
+  statusId: number;
+  typeId: number; // 1 = ONE_TIME, 2 = RECURRING
+  createdAt: string;
+  updatedAt: string;
   user?: {
     id: string;
     handle: string;
@@ -42,17 +42,17 @@ export interface FundContribution {
 export interface CreateContributionRequest {
   amount: number;
   currency: string;
-  payment_method_id: string;
+  paymentMethodId: string;
   comment?: string;
-  is_anonymous?: boolean;
+  isAnonymous?: boolean;
 }
 
 export interface FundSummary {
   fund: FundData;
   contributions: FundContribution[];
-  total_contributors: number;
-  recent_contributions: FundContribution[];
-  top_contributors: FundContribution[];
+  totalContributors: number;
+  recentContributions: FundContribution[];
+  topContributors: FundContribution[];
 }
 
 const API_PATH = '/api/funding';
@@ -141,9 +141,9 @@ export class FundingAPI extends HTTPApi {
      * Create or update a fund for content (admin/creator only)
      */
     public async createFund(contentType: 'news' | 'poll', contentId: string, data: {
-        goal_amount?: number;
+        goalAmount?: number;
         currency?: string;
-        expires_at?: string;
+        expiresAt?: string;
     }): Promise<FundData> {
         return this._post<FundData>(`${API_PATH}/${contentType}/${contentId}/fund`, data);
     }
@@ -155,10 +155,10 @@ export class FundingAPI extends HTTPApi {
         contentType: 'news' | 'poll',
         contentId: string,
         data: Partial<{
-            goal_amount: number;
+            goalAmount: number;
             currency: string;
-            expires_at: string;
-            is_active: boolean;
+            expiresAt: string;
+            isActive: boolean;
         }>
     ): Promise<FundData> {
         return this._put<FundData>(`${API_PATH}/${contentType}/${contentId}/fund`, data);
@@ -172,18 +172,18 @@ export class FundingAPI extends HTTPApi {
         endDate?: string;
         contentType?: 'news' | 'poll';
     }): Promise<{
-        total_raised: number;
-        total_contributions: number;
-        active_funds: number;
-        completed_funds: number;
-        top_funded_content: Array<{
+        totalRaised: number;
+        totalContributions: number;
+        activeFunds: number;
+        completedFunds: number;
+        topFundedContent: Array<{
             id: string;
             title: string;
             type: 'news' | 'poll';
             amount: number;
             currency: string;
         }>;
-        currency_breakdown: Record<string, {
+        currencyBreakdown: Record<string, {
             amount: number;
             contributions: number;
         }>;
@@ -199,14 +199,14 @@ export class FundingAPI extends HTTPApi {
         contentId: string,
         data: {
             amount?: number; // If not specified, transfers all available funds
-            recipient_id: string; // journalist/creator ID
+            recipientId: string; // journalist/creator ID
             description?: string;
         }
     ): Promise<{
-        transaction_id: string;
+        transactionId: string;
         amount: number;
         currency: string;
-        recipient_id: string;
+        recipientId: string;
         status: string;
     }> {
         return this._post<any>(`${API_PATH}/${contentType}/${contentId}/payout`, data);

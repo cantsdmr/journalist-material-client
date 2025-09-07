@@ -17,17 +17,17 @@ export type ExpenseOrder = {
   amount: number;
   currency: string;
   status: ExpenseOrderStatus;
-  receipt_url?: string;
+  receiptUrl?: string;
   notes?: string;
   approver?: User;
-  approved_at?: Date;
-  rejection_reason?: string;
+  approvedAt?: Date;
+  rejectionReason?: string;
   paymentMethod?: ExpensePaymentMethod;
-  paid_at?: Date;
-  payment_reference?: string;
-  submitted_at?: Date;
-  created_at: Date;
-  updated_at: Date;
+  paidAt?: Date;
+  paymentReference?: string;
+  submittedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ExpensePaymentMethod = {

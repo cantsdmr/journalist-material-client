@@ -142,12 +142,22 @@ export class ChannelAPI extends HTTPApi {
         return this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.TIER}/${tierId}`);
     }
 
-    // ==================== SUBSCRIPTION OPERATIONS ====================
+    // ==================== SUBSCRIPTION OPERATIONS (LEGACY - FREE SUBSCRIPTIONS ONLY) ====================
+    // These methods are ONLY for free subscription tiers. Use SubscriptionAPI for paid tiers.
 
+    /**
+     * Subscribe to a FREE tier only. For paid tiers, use SubscriptionAPI.initiateSubscription()
+     * @param channelId - Channel to subscribe to
+     * @param data - Subscription data (should only be used for free tiers)
+     */
     public async subscribeToChannel(channelId: string, data: ChannelSubscribeData = {}) {
         return this._post<ChannelSubscription>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}`, data);
     }
 
+    /**
+     * Unsubscribe from channel (legacy method - works for all tiers currently)
+     * @param channelId - Channel to unsubscribe from
+     */
     public async unsubscribeFromChannel(channelId: string) {
         await this._remove<void>(`${API_PATH}/${channelId}/${SUB_PATH.SUBSCRIPTIONS}`);
     }

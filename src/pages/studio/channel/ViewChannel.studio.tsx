@@ -9,12 +9,10 @@ import {
     CardContent,
     Skeleton,
     Divider,
-    Button,
     Tabs,
     Tab
 } from '@mui/material';
 import {
-    Receipt as ReceiptIcon,
     AttachMoney as MoneyIcon
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -58,7 +56,7 @@ const ViewChannelStudio: React.FC = () => {
         navigate(`/studio/payouts/orders/${expenseOrderId}`);
     };
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabValue(newValue);
     };
 

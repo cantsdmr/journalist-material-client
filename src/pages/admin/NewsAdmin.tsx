@@ -50,7 +50,7 @@ const NewsAdmin: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [sortColumn, setSortColumn] = useState('created_at');
+  const [sortColumn, setSortColumn] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const fetchNews = async () => {
@@ -97,7 +97,7 @@ const NewsAdmin: React.FC = () => {
     
     try {
       await Promise.all(ids.map(id => 
-        execute(() => api.newsApi.deleteNews(id))
+        execute(() => api.newsApi.delete(id))
       ));
       
       setSelected([]);
@@ -109,7 +109,7 @@ const NewsAdmin: React.FC = () => {
 
   const handleStatusChange = async (newsItem: News, newStatus: number) => {
     try {
-      await execute(() => api.newsApi.updateNews(newsItem.id, { status: newStatus }));
+      await execute(() => api.newsApi.update(newsItem.id, { status: newStatus.toString() as any }));
       fetchNews();
     } catch (err) {
       setError('Failed to update news status');
@@ -120,7 +120,13 @@ const NewsAdmin: React.FC = () => {
     if (!selectedNews) return;
 
     try {
-      await execute(() => api.newsApi.updateNews(selectedNews.id, newsData));
+      // Convert news data to proper format for API
+      const updateData = {
+        title: newsData.title,
+        content: newsData.content,
+        status: newsData.status?.toString()
+      };
+      await execute(() => api.newsApi.update(selectedNews.id, updateData));
       setEditDialogOpen(false);
       setSelectedNews(null);
       fetchNews();
@@ -360,7 +366,7 @@ const NewsAdmin: React.FC = () => {
                 <Select
                   value={selectedNews.status}
                   label="Status"
-                  onChange={(e) => setSelectedNews({ ...selectedNews, status: e.target.value as number })}
+                  onChange={(e) => setSelectedNews({ ...selectedNews, status: parseInt(e.target.value.toString()) })}
                 >
                   {statusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -375,7 +381,7 @@ const NewsAdmin: React.FC = () => {
                   News ID: {selectedNews.id}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Created: {new Date(selectedNews.created_at).toLocaleString()}
+                  Created: {new Date(selectedNews.createdAt).toLocaleString()}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Channel: {selectedNews.channel?.name}

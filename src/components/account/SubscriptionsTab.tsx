@@ -14,13 +14,28 @@ import {
   DialogActions,
   Chip,
   Avatar,
-  Grid
+  Grid,
+  IconButton,
+  Divider,
+  Paper,
+  CardActions,
+  useTheme,
+  alpha
 } from '@mui/material';
-import { Cancel, Subscriptions as SubscriptionsIcon } from '@mui/icons-material';
+import { 
+  Cancel, 
+  Subscriptions as SubscriptionsIcon, 
+  Launch,
+  MonetizationOn,
+  Schedule,
+  TrendingUp,
+  MoreVert
+} from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Subscription } from '@/types/index';
-import { getSubscriptionStatusColor, getSubscriptionStatusLabel, canCancelSubscription as canCancelSubscriptionHelper } from '@/enums/SubscriptionEnums';
+import { getSubscriptionStatusColor, getSubscriptionStatusLabel, canCancelSubscription as canCancelSubscriptionHelper, SUBSCRIPTION_STATUS } from '@/enums/SubscriptionEnums';
 import { useApiCall } from '@/hooks/useApiCall';
+import { PATHS } from '@/constants/paths';
 
 const SubscriptionsTab: React.FC = () => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -33,10 +48,7 @@ const SubscriptionsTab: React.FC = () => {
   
   const { api } = useApiContext();
   const { execute } = useApiCall();
-
-  useEffect(() => {
-    fetchSubscriptions();
-  }, []);
+  const theme = useTheme();
 
   const fetchSubscriptions = async () => {
     setLoading(true);
@@ -53,6 +65,10 @@ const SubscriptionsTab: React.FC = () => {
     
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
 
   const handleCancelSubscription = async () => {
     if (!selectedSubscription) return;
@@ -87,12 +103,12 @@ const SubscriptionsTab: React.FC = () => {
     setSelectedSubscription(null);
   };
 
-  const getStatusColor = (status: string) => {
-    return getSubscriptionStatusColor(status);
+  const getStatusColor = (statusId: number) => {
+    return getSubscriptionStatusColor(statusId);
   };
 
-  const getStatusLabel = (status: string) => {
-    return getSubscriptionStatusLabel(status);
+  const getStatusLabel = (statusId: number) => {
+    return getSubscriptionStatusLabel(statusId);
   };
 
   const formatDate = (dateString: string) => {
@@ -111,40 +127,61 @@ const SubscriptionsTab: React.FC = () => {
   };
 
   const canCancelSubscription = (subscription: Subscription) => {
-    return canCancelSubscriptionHelper(subscription.status);
+    return canCancelSubscriptionHelper(subscription.statusId);
   };
 
   if (loading) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Stack spacing={2}>
-          {[...Array(3)].map((_, index) => (
-            <Card key={index}>
-              <CardContent>
-                <Stack direction="row" spacing={2} alignItems="center">
-                  <Skeleton variant="circular" width={60} height={60} />
-                  <Box sx={{ flex: 1 }}>
-                    <Skeleton variant="text" width="60%" />
-                    <Skeleton variant="text" width="40%" />
-                    <Skeleton variant="text" width="30%" />
-                  </Box>
-                  <Skeleton variant="rectangular" width={100} height={32} />
-                </Stack>
-              </CardContent>
-            </Card>
-          ))}
+      <Box sx={{ p: { xs: 2, md: 4 } }}>
+        <Stack spacing={3}>
+          <Box>
+            <Skeleton variant="text" sx={{ fontSize: '1.5rem', width: '200px', mb: 1 }} />
+            <Skeleton variant="text" sx={{ fontSize: '0.875rem', width: '150px' }} />
+          </Box>
+          <Grid container spacing={3}>
+            {[...Array(3)].map((_, index) => (
+              <Grid item xs={12} lg={6} key={index}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Stack direction="row" spacing={3}>
+                      <Skeleton variant="circular" width={64} height={64} />
+                      <Box sx={{ flex: 1 }}>
+                        <Skeleton variant="text" sx={{ fontSize: '1.25rem', width: '70%', mb: 1 }} />
+                        <Skeleton variant="text" sx={{ width: '50%', mb: 2 }} />
+                        <Stack direction="row" spacing={1} mb={2}>
+                          <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1 }} />
+                        </Stack>
+                        <Stack spacing={1}>
+                          <Skeleton variant="text" sx={{ width: '60%' }} />
+                          <Skeleton variant="text" sx={{ width: '40%' }} />
+                        </Stack>
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                  <CardActions sx={{ px: 3, pb: 3 }}>
+                    <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: 1 }} />
+                    <Skeleton variant="rectangular" width={120} height={36} sx={{ borderRadius: 1, ml: 1 }} />
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         </Stack>
       </Box>
     );
   }
 
+  const activeSubscriptions = subscriptions.filter(s => s.statusId === SUBSCRIPTION_STATUS.ACTIVE);
+  const totalRevenue = subscriptions.reduce((sum, sub) => sum + (sub.tier.price / 100), 0);
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack spacing={3}>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      <Stack spacing={4}>
         {error && (
           <Alert 
             severity="error" 
             onClose={() => setError(null)}
+            sx={{ borderRadius: 2 }}
           >
             {error}
           </Alert>
@@ -153,98 +190,292 @@ const SubscriptionsTab: React.FC = () => {
           <Alert 
             severity="success" 
             onClose={() => setSuccess(null)}
+            sx={{ borderRadius: 2 }}
           >
             {success}
           </Alert>
         )}
         
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">My Subscriptions</Typography>
-          <Typography variant="body2" color="text.secondary">
-            {subscriptions.filter(s => s.status === 'active').length} active subscription{subscriptions.filter(s => s.status === 'active').length !== 1 ? 's' : ''}
+        {/* Header Section */}
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+            My Subscriptions
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Manage your channel subscriptions and contributions
           </Typography>
         </Box>
 
+        {/* Stats Cards */}
+        {subscriptions.length > 0 && (
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  borderRadius: 3,
+                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                  color: 'white'
+                }}
+              >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                      {activeSubscriptions.length}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      Active
+                    </Typography>
+                  </Box>
+                  <TrendingUp sx={{ fontSize: 40, opacity: 0.8 }} />
+                </Stack>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  borderRadius: 3,
+                  background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
+                  color: 'white'
+                }}
+              >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+                      ${totalRevenue.toFixed(0)}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                      Monthly Value
+                    </Typography>
+                  </Box>
+                  <MonetizationOn sx={{ fontSize: 40, opacity: 0.8 }} />
+                </Stack>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  borderRadius: 3,
+                  border: `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5, color: 'text.primary' }}>
+                      {subscriptions.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Total
+                    </Typography>
+                  </Box>
+                  <SubscriptionsIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
+                </Stack>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Paper 
+                sx={{ 
+                  p: 3, 
+                  borderRadius: 3,
+                  border: `1px solid ${theme.palette.divider}`,
+                }}
+              >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5, color: 'text.primary' }}>
+                      {subscriptions.filter(s => s.autoContribute).length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Auto-contribute
+                    </Typography>
+                  </Box>
+                  <Schedule sx={{ fontSize: 40, color: 'text.secondary' }} />
+                </Stack>
+              </Paper>
+            </Grid>
+          </Grid>
+        )}
+
         {subscriptions.length === 0 ? (
-          <Card>
-            <CardContent sx={{ textAlign: 'center', py: 6 }}>
-              <SubscriptionsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                No Subscriptions Found
+          <Paper 
+            sx={{ 
+              textAlign: 'center', 
+              py: 8, 
+              px: 4,
+              borderRadius: 4,
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.02)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+            }}
+          >
+            <Box sx={{ maxWidth: 400, mx: 'auto' }}>
+              <SubscriptionsIcon 
+                sx={{ 
+                  fontSize: 80, 
+                  color: 'primary.main', 
+                  opacity: 0.6,
+                  mb: 3 
+                }} 
+              />
+              <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+                No Subscriptions Yet
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                You haven't subscribed to any channels yet. Explore channels to find content you love!
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 4, lineHeight: 1.6 }}>
+                Discover amazing channels and support creators by subscribing to their content. 
+                Your subscriptions will appear here.
               </Typography>
-              <Button variant="contained" href="/app/channels">
-                Browse Channels
+              <Button 
+                variant="contained" 
+                size="large"
+                href="/app/channels"
+                sx={{ 
+                  borderRadius: 2,
+                  py: 1.5,
+                  px: 4,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 600
+                }}
+              >
+                Explore Channels
               </Button>
-            </CardContent>
-          </Card>
+            </Box>
+          </Paper>
         ) : (
-          <Grid container spacing={2}>
+          <Grid container spacing={3}>
             {subscriptions.map((subscription) => (
-              <Grid item xs={12} key={subscription.id}>
-                <Card>
-                  <CardContent>
-                    <Stack direction="row" spacing={3} alignItems="center">
+              <Grid item xs={12} lg={6} key={subscription.id}>
+                <Card 
+                  sx={{ 
+                    height: '100%',
+                    borderRadius: 3,
+                    border: `1px solid ${theme.palette.divider}`,
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: theme.shadows[8]
+                    }
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Stack direction="row" spacing={3}>
                       <Avatar
-                        sx={{ width: 60, height: 60 }}
-                        src={`https://via.placeholder.com/60x60?text=${subscription.channel_name.charAt(0)}`}
+                        sx={{ 
+                          width: 64, 
+                          height: 64,
+                          border: `2px solid ${theme.palette.divider}`,
+                          fontSize: '1.5rem',
+                          fontWeight: 600
+                        }}
+                        src={`https://via.placeholder.com/64x64?text=${subscription.channel.name.charAt(0)}`}
                       >
-                        {subscription.channel_name.charAt(0)}
+                        {subscription.channel.name.charAt(0)}
                       </Avatar>
                       
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" gutterBottom>
-                          {subscription.channel_name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                          {subscription.tier_name} • {formatPrice(subscription.tier_price, subscription.currency)}
-                        </Typography>
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                          <Chip 
-                            label={getStatusLabel(subscription.status)}
-                            color={getStatusColor(subscription.status) as any}
-                            size="small"
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            Started: {formatDate(subscription.started_at)}
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" mb={1}>
+                          <Typography 
+                            variant="h6" 
+                            sx={{ 
+                              fontWeight: 600,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {subscription.channel.name}
                           </Typography>
-                          {subscription.expires_at && (
+                          <IconButton size="small" sx={{ ml: 1 }}>
+                            <MoreVert fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                        
+                        <Stack direction="row" alignItems="center" spacing={2} mb={2}>
+                          <Typography variant="body2" color="text.secondary">
+                            {subscription.tier.name}
+                          </Typography>
+                          <Typography 
+                            variant="body2" 
+                            sx={{ 
+                              fontWeight: 600,
+                              color: 'primary.main'
+                            }}
+                          >
+                            {formatPrice(subscription.tier.price, subscription.tier.currency)}/month
+                          </Typography>
+                        </Stack>
+
+                        <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
+                          <Chip 
+                            label={getStatusLabel(subscription.statusId)}
+                            color={getStatusColor(subscription.statusId) as any}
+                            size="small"
+                            sx={{ borderRadius: 1 }}
+                          />
+                          {subscription.autoContribute && (
+                            <Chip 
+                              label="Auto-contribute"
+                              variant="outlined"
+                              size="small"
+                              sx={{ borderRadius: 1 }}
+                            />
+                          )}
+                        </Stack>
+
+                        <Stack spacing={0.5}>
+                          <Typography variant="caption" color="text.secondary">
+                            Started: {formatDate(subscription.subscribedAt)}
+                          </Typography>
+                          {subscription.expiresAt && (
                             <Typography variant="caption" color="text.secondary">
-                              • Expires: {formatDate(subscription.expires_at)}
+                              Expires: {formatDate(subscription.expiresAt)}
                             </Typography>
                           )}
-                          {subscription.canceled_at && (
-                            <Typography variant="caption" color="text.secondary">
-                              • Canceled: {formatDate(subscription.canceled_at)}
+                          {subscription.totalContributions > 0 && (
+                            <Typography variant="caption" color="success.main">
+                              Total contributed: {formatPrice(subscription.totalContributions, subscription.tier.currency)}
                             </Typography>
                           )}
                         </Stack>
                       </Box>
-
-                      <Stack spacing={1} alignItems="flex-end">
-                        {canCancelSubscription(subscription) && (
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            size="small"
-                            startIcon={<Cancel />}
-                            onClick={() => openCancelDialog(subscription)}
-                          >
-                            Cancel
-                          </Button>
-                        )}
-                        <Button
-                          variant="text"
-                          size="small"
-                          href={`/app/channels/${subscription.channel_id}`}
-                        >
-                          View Channel
-                        </Button>
-                      </Stack>
                     </Stack>
                   </CardContent>
+                  
+                  <Divider />
+                  
+                  <CardActions sx={{ p: 3, pt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      href={`${PATHS.APP_CHANNEL_VIEW}`.replace(':id', subscription.channel.id)}
+                      endIcon={<Launch />}
+                      sx={{ 
+                        borderRadius: 1.5,
+                        textTransform: 'none',
+                        fontWeight: 500
+                      }}
+                    >
+                      View Channel
+                    </Button>
+                    {canCancelSubscription(subscription) && (
+                      <Button
+                        variant="text"
+                        color="error"
+                        size="small"
+                        startIcon={<Cancel />}
+                        onClick={() => openCancelDialog(subscription)}
+                        sx={{ 
+                          borderRadius: 1.5,
+                          textTransform: 'none',
+                          fontWeight: 500,
+                          ml: 'auto'
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </CardActions>
                 </Card>
               </Grid>
             ))}
@@ -257,22 +488,58 @@ const SubscriptionsTab: React.FC = () => {
           onClose={closeCancelDialog}
           maxWidth="sm"
           fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              p: 1
+            }
+          }}
         >
-          <DialogTitle>Cancel Subscription</DialogTitle>
-          <DialogContent>
-            <Typography variant="body1" gutterBottom>
-              Are you sure you want to cancel your subscription to{' '}
-              <strong>{selectedSubscription?.channel_name}</strong>?
+          <DialogTitle sx={{ pb: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600 }}>
+              Cancel Subscription
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              You will continue to have access until your current billing period ends
-              {selectedSubscription?.expires_at && (
-                <> on {formatDate(selectedSubscription.expires_at)}</>
-              )}.
-            </Typography>
+          </DialogTitle>
+          <DialogContent sx={{ pb: 2 }}>
+            <Stack spacing={2}>
+              <Typography variant="body1">
+                Are you sure you want to cancel your subscription to{' '}
+                <Typography component="span" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                  {selectedSubscription?.channel.name}
+                </Typography>?
+              </Typography>
+              
+              <Paper 
+                sx={{ 
+                  p: 2, 
+                  borderRadius: 2,
+                  bgcolor: alpha(theme.palette.warning.main, 0.05),
+                  border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  You will continue to have access until your current billing period ends
+                  {selectedSubscription?.expiresAt && (
+                    <Typography component="span" sx={{ fontWeight: 500 }}>
+                      {' '}on {formatDate(selectedSubscription.expiresAt)}
+                    </Typography>
+                  )}.
+                </Typography>
+              </Paper>
+            </Stack>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={closeCancelDialog} disabled={canceling}>
+          <DialogActions sx={{ p: 3, pt: 1 }}>
+            <Button 
+              onClick={closeCancelDialog} 
+              disabled={canceling}
+              variant="outlined"
+              sx={{ 
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 500,
+                px: 3
+              }}
+            >
               Keep Subscription
             </Button>
             <Button
@@ -280,6 +547,12 @@ const SubscriptionsTab: React.FC = () => {
               color="error"
               variant="contained"
               disabled={canceling}
+              sx={{ 
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 500,
+                px: 3
+              }}
             >
               {canceling ? 'Canceling...' : 'Cancel Subscription'}
             </Button>

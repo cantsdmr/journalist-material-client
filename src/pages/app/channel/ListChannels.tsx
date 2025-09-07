@@ -75,16 +75,55 @@ const ListChannels: React.FC = () => {
   }, [selectedTags]); // Refetch when tags change
 
   const handleJoin = async (channelId: string, tierId?: string) => {
-    const result = await execute(
-      () => api?.channelApi.subscribeToChannel(channelId, { tier_id: tierId }),
-      {
-        showSuccessMessage: true,
-        successMessage: 'Successfully joined channel!'
-      }
-    );
+    if (!tierId) return;
     
-    if (result) {
-      await actions.refreshProfile();
+    // Find the channel and tier to determine if it's paid
+    const channel = channels.find(c => c.id === channelId);
+    const tier = channel?.tiers?.find(t => t.id === tierId);
+    
+    if (!tier) return;
+
+    try {
+      // Use direct subscription API for all tiers
+      const result = await api?.subscriptionApi?.createDirectSubscription(channelId, {
+        tierId,
+        notificationLevel: 1,
+        paymentMethodId: tier.price > 0 ? 'paypal_default' : undefined
+      });
+
+      if (result?.approvalUrl) {
+        // Open PayPal approval URL for paid subscriptions
+        const paymentWindow = window.open(
+          result.approvalUrl, 
+          'paypal_payment',
+          'width=600,height=700,scrollbars=yes,resizable=yes'
+        );
+        
+        if (!paymentWindow) {
+          alert('Popup blocked! Please allow popups and try again.');
+        }
+      } else {
+        // Free subscription completed immediately
+        await actions.refreshProfile();
+      }
+    } catch (error: any) {
+      console.error('Subscription failed:', error);
+      
+      // Check if error is due to missing payment method
+      const errorMessage = error?.response?.data?.message || error?.message || '';
+      if (errorMessage.includes('PAYMENT_METHOD_REQUIRED') || 
+          errorMessage.includes('PayPal payment method') ||
+          errorMessage.includes('No PayPal payment method found')) {
+          
+          // Show confirmation dialog to redirect to payment method setup
+          const shouldRedirect = window.confirm(
+              'You need to add a PayPal payment method to subscribe to paid tiers. Would you like to add one now?'
+          );
+          
+          if (shouldRedirect) {
+              navigate('/app/account/payment-methods');
+          }
+      }
     }
   };
 

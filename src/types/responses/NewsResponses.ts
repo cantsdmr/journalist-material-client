@@ -11,5 +11,5 @@ export type NewsTagResponse = {
     id: string;
     title: string;
     slug: string;
-    usage_count: number;
+    usageCount: number;
 }; 

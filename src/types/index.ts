@@ -7,6 +7,7 @@ export * from './entities/Tag';
 export * from './entities/Account';
 export * from './entities/ExpenseOrder';
 export * from './entities/Subscription';
+export * from './entities/Funding';
 
 // Requests
 export * from './requests/NewsRequests';
@@ -17,6 +18,7 @@ export * from './requests/AccountRequests';
 export * from './requests/AuthRequests';
 export * from './requests/ExpenseOrderRequests';
 export * from './requests/SubscriptionRequests';
+export * from './requests/FundingRequests';
 
 // Responses
 export * from './responses/NewsResponses';

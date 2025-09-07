@@ -12,18 +12,9 @@ import {
   Alert,
   LinearProgress,
   Divider,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   InputAdornment,
   Chip
 } from '@mui/material';
-import {
-  AttachMoney as MoneyIcon,
-  TrendingUp as TrendingIcon,
-  People as PeopleIcon
-} from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import FundingProgress from './FundingProgress';
@@ -161,9 +152,10 @@ const FundingModal: React.FC<FundingModalProps> = ({
     }
   };
 
-  const progressPercentage = fundingData.goalAmount 
-    ? Math.min((fundingData.currentAmount / fundingData.goalAmount) * 100, 100)
-    : 0;
+  // Calculate progress percentage for funding display
+  // const progressPercentage = fundingData.goalAmount 
+  //   ? Math.min((fundingData.currentAmount / fundingData.goalAmount) * 100, 100)
+  //   : 0;
 
   const renderAmountStep = () => (
     <Stack spacing={3}>

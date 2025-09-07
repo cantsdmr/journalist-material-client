@@ -121,11 +121,17 @@ const PollAdmin: React.FC = () => {
     }
   };
 
-  const handleSaveEdit = async (pollData: Partial<Poll>) => {
+  const handleSaveEdit = async () => {
     if (!selectedPoll) return;
 
     try {
-      await execute(() => api.pollApi.update(selectedPoll.id, pollData));
+      // Convert Poll data to UpdatePollData format
+      const updateData = {
+        title: selectedPoll.title,
+        description: selectedPoll.description,
+        endDate: selectedPoll.endDate
+      };
+      await execute(() => api.pollApi.update(selectedPoll.id, updateData));
       setEditDialogOpen(false);
       setSelectedPoll(null);
       fetchPolls();
@@ -467,7 +473,7 @@ const PollAdmin: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
           <Button 
-            onClick={() => handleSaveEdit(selectedPoll!)} 
+            onClick={() => handleSaveEdit()} 
             variant="contained"
           >
             Save Changes

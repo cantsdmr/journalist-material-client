@@ -3,11 +3,11 @@ export type SignInData = {
 };
 
 export type SignUpData = {
-    external_id: string | null;
+    externalId: string | null;
     email: string | null;
-    display_name: string | null;
-    photo_url: string | null;
-    role_id: number;
+    displayName: string | null;
+    photoUrl: string | null;
+    roleId: number;
 };
 
 export type VerifyTokenData = {

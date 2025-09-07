@@ -1,4 +1,4 @@
-import { NEWS_STATUS } from "@/enums/NewsEnums";
+// import { NEWS_STATUS } from "@/enums/NewsEnums";
 import { Channel } from "./Channel";
 import { User } from "./User";
 
@@ -7,7 +7,7 @@ export type News = {
     title: string;
     content: string;
     channelId: string;
-    status: keyof typeof NEWS_STATUS;
+    status: number;
     requiredTierId: string;
     isPremium: boolean;
 

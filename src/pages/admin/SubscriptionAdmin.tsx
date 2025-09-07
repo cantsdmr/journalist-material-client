@@ -138,9 +138,8 @@ const SubscriptionAdmin: React.FC = () => {
       const blob = await execute(() => 
         api.subscriptionApi.exportSubscriptions(
           { 
-            status: statusFilter,
-            channel_id: channelFilter,
-            search: searchQuery
+            status: statusFilter as "active" | "canceled" | "expired" | "suspended" | undefined,
+            channel_id: channelFilter
           },
           'csv'
         )

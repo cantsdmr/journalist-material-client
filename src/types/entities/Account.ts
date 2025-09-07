@@ -32,7 +32,7 @@ export type PaymentMethodType = {
   id: number;
   name: string;
   description?: string;
-  is_active: boolean;
+  isActive: boolean;
 };
 
 export type PaymentMethod = {
@@ -53,16 +53,3 @@ export type PaymentMethod = {
   };
 };
 
-export type Subscription = {
-  id: string;
-  channel_id: string;
-  channel_name: string;
-  tier_id: string;
-  tier_name: string;
-  tier_price: number;
-  currency: string;
-  status: 'active' | 'canceled' | 'expired' | 'suspended';
-  started_at: string;
-  expires_at?: string;
-  canceled_at?: string;
-};

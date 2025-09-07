@@ -38,6 +38,6 @@ export type UpdatePaymentMethodData = {
 };
 
 export type SubscribeData = {
-  tier_id: string;
-  payment_method_id?: string;
+  tierId: string;
+  paymentMethodId?: string;
 }; 

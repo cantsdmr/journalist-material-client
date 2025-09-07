@@ -3,14 +3,12 @@ import {
   Box,
   Typography,
   LinearProgress,
-  Stack,
   Card,
   CardContent,
   Grid
 } from '@mui/material';
 import {
   AttachMoney as MoneyIcon,
-  TrendingUp as TrendingIcon,
   People as PeopleIcon,
   Flag as GoalIcon
 } from '@mui/icons-material';

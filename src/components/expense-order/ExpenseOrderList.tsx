@@ -91,7 +91,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
     await loadExpenseOrders(currentPage);
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     loadExpenseOrders(value);
   };
 
@@ -129,7 +129,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
     try {
       const reason = prompt('Please provide a reason for rejection:');
       if (reason) {
-        await api.expenseOrderApi.rejectExpenseOrder(expenseOrder.id, { reason });
+        await api.expenseOrderApi.rejectExpenseOrder(expenseOrder.id, { rejectionReason: reason });
         await loadExpenseOrders(currentPage);
       }
     } catch (err: any) {

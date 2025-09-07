@@ -11,13 +11,14 @@ import {
 } from '@mui/icons-material';
 import FundingModal, { FundingData } from './FundingModal';
 
-interface FundingButtonProps extends Omit<ButtonProps, 'onClick'> {
+interface FundingButtonProps extends Omit<ButtonProps, 'onClick' | 'variant'> {
   contentType: 'news' | 'poll';
   contentId: string;
   contentTitle: string;
   fundingData: Omit<FundingData, 'id' | 'title'>;
   onContributionSuccess?: (contribution: any) => void;
   variant?: 'button' | 'icon';
+  buttonVariant?: ButtonProps['variant'];
   icon?: 'money' | 'heart';
   text?: string;
 }
@@ -29,6 +30,7 @@ const FundingButton: React.FC<FundingButtonProps> = ({
   fundingData,
   onContributionSuccess,
   variant = 'button',
+  buttonVariant = 'contained',
   icon = 'money',
   text,
   ...buttonProps
@@ -101,7 +103,7 @@ const FundingButton: React.FC<FundingButtonProps> = ({
       <Button
         startIcon={getIcon()}
         onClick={() => setModalOpen(true)}
-        variant="outlined"
+        variant={buttonVariant}
         color="primary"
         {...buttonProps}
       >

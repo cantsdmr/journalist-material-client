@@ -8,7 +8,7 @@ export type ApiContextValue = {
     isLoading: boolean
 }
 
-const ApiContext = createContext(null as any)
+export const ApiContext = createContext(null as any)
 const useApiContext = () => useContext<ApiContextValue>(ApiContext)
 
 export const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {

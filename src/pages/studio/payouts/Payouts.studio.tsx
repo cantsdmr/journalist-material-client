@@ -17,7 +17,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { PayoutDashboard, ExpenseOrderForm } from '@/components/expense-order';
-import { Channel } from '@/types/index';
+// import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getExpenseTypeOptions } from '@/enums/ExpenseTypeEnums';
@@ -88,7 +88,7 @@ const PayoutsStudio: React.FC = () => {
     navigate(`/studio/payouts/orders/${expenseOrderId}`);
   };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     if (newValue === 0) {
       setShowCreateForm(false);

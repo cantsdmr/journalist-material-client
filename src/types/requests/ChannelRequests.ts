@@ -29,6 +29,6 @@ export type CreateChannelTierData = {
 export type EditChannelTierData = CreateChannelTierData;
 
 export type ChannelSubscribeData = {
-    tier_id?: string;
-    payment_method_id?: string;
+    tierId?: string;
+    paymentMethodId?: string;
 }; 

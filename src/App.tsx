@@ -36,6 +36,7 @@ import ViewPoll from '@/pages/app/poll/ViewPoll';
 
 // Account pages
 import Account from '@/pages/app/account/Account';
+import PayPalOAuthCallbackPage from '@/pages/app/account/paypal-oauth-callback';
 
 // Expense Order pages
 import ListExpenseOrders from '@/pages/app/expense-order/ListExpenseOrders';
@@ -129,6 +130,7 @@ const App: React.FC = () => {
         </Route>
         <Route path={`${ACCOUNT.ROOT}/*`}>
           <Route index element={<Account />} />
+          <Route path="payment-methods/paypal/callback" element={<PayPalOAuthCallbackPage />} />
         </Route>
         <Route path={`${EXPENSE_ORDER.ROOT}/*`}>
           <Route index element={<ListExpenseOrders />} />

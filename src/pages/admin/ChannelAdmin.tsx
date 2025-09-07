@@ -17,7 +17,6 @@ import {
   Stack,
   Typography,
   Avatar,
-  Link,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -27,8 +26,6 @@ import {
   Visibility as ViewIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  TrendingUp as TrendingIcon,
-  Verified as VerifiedIcon,
   People as SubscribersIcon,
   Article as NewsIcon,
   Poll as PollIcon,
@@ -39,7 +36,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Channel } from '@/types/entities/Channel';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
+import { PaginatedResponse } from '@/utils/http';
 
 const ChannelAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -75,13 +72,7 @@ const ChannelAdmin: React.FC = () => {
       if (trendingFilter === 'true') filters.trending = true;
       if (verifiedFilter === 'true') filters.verified = true;
 
-      const params = {
-        page: page + 1,
-        limit: rowsPerPage,
-        sort: sortColumn,
-        order: sortDirection,
-        ...filters
-      };
+      // API call uses filters and pagination directly
 
       const result = await execute(
         () => api.channelApi.getChannels(filters, { page: page + 1, limit: rowsPerPage }),
@@ -208,7 +199,7 @@ const ChannelAdmin: React.FC = () => {
       id: 'stats',
       label: 'Stats',
       minWidth: 150,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Stack spacing={0.5}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <SubscribersIcon sx={{ fontSize: 14 }} color="action" />
@@ -236,7 +227,7 @@ const ChannelAdmin: React.FC = () => {
       label: 'Tiers',
       minWidth: 80,
       align: 'center',
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, justifyContent: 'center' }}>
           <TierIcon sx={{ fontSize: 14 }} color="action" />
           <Typography variant="body2">
