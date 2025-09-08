@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Chip,
@@ -57,7 +57,7 @@ const PollAdmin: React.FC = () => {
   const [sortColumn, setSortColumn] = useState('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const fetchPolls = async () => {
+  const fetchPolls = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -86,11 +86,11 @@ const PollAdmin: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage, searchQuery, statusFilter, trendingFilter, fundedFilter, sortColumn, sortDirection, api.pollApi, execute]);
 
   useEffect(() => {
     fetchPolls();
-  }, [page, rowsPerPage, searchQuery, statusFilter, trendingFilter, fundedFilter, sortColumn, sortDirection]);
+  }, [fetchPolls]);
 
   const handleEdit = (poll: Poll) => {
     setSelectedPoll(poll);

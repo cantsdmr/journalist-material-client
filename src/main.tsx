@@ -12,6 +12,9 @@ import { NotificationProvider } from '@/contexts/NotificationContext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
+// Set document title with version
+document.title = `Meta Journo v${__APP_VERSION__}`;
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <BrowserRouter>
