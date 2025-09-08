@@ -59,9 +59,9 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
         if (fund) {
           const summary = await api.fundingApi.getFundSummary('poll', poll.id.toString());
           setFundingData({
-            currentAmount: fund.current_amount / 100, // Convert from cents
-            goalAmount: fund.goal_amount ? fund.goal_amount / 100 : undefined,
-            contributorCount: summary?.total_contributors || 0,
+            currentAmount: fund.currentAmount / 100, // Convert from cents
+            goalAmount: fund.goalAmount ? fund.goalAmount / 100 : undefined,
+            contributorCount: summary?.totalContributors || 0,
             currency: fund.currency
           });
         }
@@ -88,9 +88,9 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
         if (fund) {
           const summary = await api.fundingApi.getFundSummary('poll', poll.id.toString());
           setFundingData({
-            currentAmount: fund.current_amount / 100,
-            goalAmount: fund.goal_amount ? fund.goal_amount / 100 : undefined,
-            contributorCount: summary?.total_contributors || 0,
+            currentAmount: fund.currentAmount / 100,
+            goalAmount: fund.goalAmount ? fund.goalAmount / 100 : undefined,
+            contributorCount: summary?.totalContributors || 0,
             currency: fund.currency
           });
         }

@@ -10,7 +10,6 @@ import {
   Divider,
   Typography,
   Toolbar,
-  useTheme,
   Chip
 } from '@mui/material';
 import {

@@ -47,7 +47,7 @@ const ExpenseOrderForm: React.FC<ExpenseOrderFormProps> = ({
     description: expenseOrder?.description || '',
     amount: expenseOrder?.amount || 0,
     currency: expenseOrder?.currency || 'USD',
-    receiptUrl: expenseOrder?.receipt_url || '',
+    receiptUrl: expenseOrder?.receiptUrl || '',
     notes: expenseOrder?.notes || ''
   });
 

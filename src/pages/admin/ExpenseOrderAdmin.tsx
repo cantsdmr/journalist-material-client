@@ -130,18 +130,18 @@ const ExpenseOrderAdmin: React.FC = () => {
     }
   };
 
-  const handleSaveEdit = async (orderData: Partial<ExpenseOrder>) => {
-    if (!selectedOrder) return;
+  // const handleSaveEdit = async (orderData: Partial<ExpenseOrder>) => {
+  //   if (!selectedOrder) return;
 
-    try {
-      await execute(() => api.expenseOrderApi.updateExpenseOrder(selectedOrder.id, orderData));
-      setEditDialogOpen(false);
-      setSelectedOrder(null);
-      fetchExpenseOrders();
-    } catch (err) {
-      setError('Failed to update expense order');
-    }
-  };
+  //   try {
+  //     await execute(() => api.expenseOrderApi.updateExpenseOrder(selectedOrder.id, orderData));
+  //     setEditDialogOpen(false);
+  //     setSelectedOrder(null);
+  //     fetchExpenseOrders();
+  //   } catch (err) {
+  //     setError('Failed to update expense order');
+  //   }
+  // };
 
   const getStatusColor = (status: ExpenseOrderStatus): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
     switch (status) {
@@ -184,7 +184,7 @@ const ExpenseOrderAdmin: React.FC = () => {
       id: 'journalist',
       label: 'Journalist',
       minWidth: 150,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 24, height: 24 }}>
             {row.journalist?.displayName?.[0] || 'U'}
@@ -199,7 +199,7 @@ const ExpenseOrderAdmin: React.FC = () => {
       id: 'channel',
       label: 'Channel',
       minWidth: 120,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Typography variant="body2" noWrap>
           {row.channel?.name || 'Unknown'}
         </Typography>
@@ -304,13 +304,13 @@ const ExpenseOrderAdmin: React.FC = () => {
         </IconButton>
       </Tooltip>
 
-      {row.receipt_url && (
+      {row.receiptUrl && (
         <Tooltip title="View Receipt">
           <IconButton
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              window.open(row.receipt_url, '_blank');
+              window.open(row.receiptUrl, '_blank');
             }}
           >
             <ReceiptIcon fontSize="small" />
@@ -459,15 +459,15 @@ const ExpenseOrderAdmin: React.FC = () => {
                 </Alert>
               )}
 
-              {selectedOrder.rejection_reason && (
+              {selectedOrder.rejectionReason && (
                 <Alert severity="error">
-                  <Typography variant="body2">{selectedOrder.rejection_reason}</Typography>
+                  <Typography variant="body2">{selectedOrder.rejectionReason}</Typography>
                 </Alert>
               )}
 
-              {selectedOrder.payment_reference && (
+              {selectedOrder.paymentReference && (
                 <Alert severity="success">
-                  <Typography variant="body2">Payment Reference: {selectedOrder.payment_reference}</Typography>
+                  <Typography variant="body2">Payment Reference: {selectedOrder.paymentReference}</Typography>
                 </Alert>
               )}
             </Stack>

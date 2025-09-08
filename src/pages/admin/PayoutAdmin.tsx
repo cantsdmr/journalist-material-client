@@ -21,22 +21,16 @@ import {
   CardContent,
   Grid,
   Alert,
-  Divider
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
   Payment as PaymentIcon,
-  AccountBalance as BankIcon,
   TrendingUp as StatsIcon,
   Receipt as ReceiptIcon,
-  MonetizationOn as MoneyIcon,
   PlayArrow as ProcessIcon,
   Warning as WarningIcon
 } from '@mui/icons-material';
-import { useApiContext } from '@/contexts/ApiContext';
-import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
-import { DEFAULT_PAGINATION } from '@/utils/http';
 
 // Define types for payout data based on the backend DTOs
 interface PayoutData {
@@ -85,9 +79,6 @@ const generateMockPayouts = (): PayoutData[] => {
 };
 
 const PayoutAdmin: React.FC = () => {
-  const { api } = useApiContext();
-  const { execute } = useApiCall();
-  
   const [payouts, setPayouts] = useState<PayoutData[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -241,7 +232,7 @@ const PayoutAdmin: React.FC = () => {
       id: 'channel_name',
       label: 'Channel',
       minWidth: 120,
-      format: (value, row) => (
+      format: (value) => (
         <Typography variant="body2" noWrap>
           {value}
         </Typography>
@@ -251,7 +242,7 @@ const PayoutAdmin: React.FC = () => {
       id: 'recipient_name',
       label: 'Recipient',
       minWidth: 120,
-      format: (value, row) => (
+      format: (value) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 24, height: 24 }}>
             {value?.[0]}

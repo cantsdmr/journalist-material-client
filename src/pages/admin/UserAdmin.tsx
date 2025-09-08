@@ -19,26 +19,21 @@ import {
   Avatar,
   Card,
   CardContent,
-  Grid,
-  Alert,
-  Divider
+  Grid
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   Block as BlockIcon,
   CheckCircle as ActivateIcon,
   Security as SecurityIcon,
   AdminPanelSettings as AdminIcon,
-  Person as UserIcon,
-  Verified as VerifiedIcon
+  Person as UserIcon
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { User } from '@/types/entities/User';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
+import { PaginatedResponse } from '@/utils/http';
 import { USER_ROLE, USER_STATUS } from '@/enums/UserEnums';
 
 const UserAdmin: React.FC = () => {
@@ -78,7 +73,7 @@ const UserAdmin: React.FC = () => {
       };
 
       const result = await execute(
-        () => api.userApi.getAll({ page: page + 1, limit: rowsPerPage }),
+        () => api.userApi.getAll(params),
         { showErrorToast: false }
       ) as PaginatedResponse<any>;
 

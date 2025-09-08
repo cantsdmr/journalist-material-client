@@ -298,13 +298,13 @@ const TransactionTransparency: React.FC<TransactionTransparencyProps> = ({
                     <ListItemText
                       primary={`${formatCurrency(contribution.amount)} ${contribution.currency}`}
                       secondary={
-                        contribution.is_anonymous 
+                        contribution.isAnonymous 
                           ? 'Anonymous contributor'
                           : contribution.user?.name || 'Unknown contributor'
                       }
                     />
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(contribution.created_at).toLocaleDateString()}
+                      {new Date(contribution.createdAt).toLocaleDateString()}
                     </Typography>
                   </ListItem>
                 ))}
@@ -362,7 +362,7 @@ const TransactionTransparency: React.FC<TransactionTransparencyProps> = ({
                             {expense.journalist.displayName} • {expense.type.name}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {new Date(expense.created_at).toLocaleDateString()}
+                            {new Date(expense.createdAt).toLocaleDateString()}
                           </Typography>
                         </Box>
                       }
@@ -381,11 +381,11 @@ const TransactionTransparency: React.FC<TransactionTransparencyProps> = ({
                         }}
                       />
                     </Box>
-                    {expense.receipt_url && (
+                    {expense.receiptUrl && (
                       <Tooltip title="View Receipt">
                         <IconButton 
                           size="small" 
-                          onClick={() => window.open(expense.receipt_url, '_blank')}
+                          onClick={() => window.open(expense.receiptUrl, '_blank')}
                         >
                           <Visibility fontSize="small" />
                         </IconButton>

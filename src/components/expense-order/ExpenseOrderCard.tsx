@@ -173,7 +173,7 @@ const ExpenseOrderCard: React.FC<ExpenseOrderCardProps> = ({
           <Typography variant="h5" component="span" sx={{ fontWeight: 700, color: 'primary.main' }}>
             {formatCurrency(expenseOrder.amount, expenseOrder.currency)}
           </Typography>
-          {expenseOrder.receipt_url && (
+          {expenseOrder.receiptUrl && (
             <Tooltip title="Receipt attached">
               <ReceiptIcon sx={{ ml: 1, color: 'success.main' }} fontSize="small" />
             </Tooltip>
@@ -181,7 +181,7 @@ const ExpenseOrderCard: React.FC<ExpenseOrderCardProps> = ({
         </Box>
         
         <Typography variant="caption" color="text.secondary">
-          {formatDistanceToNow(new Date(expenseOrder.created_at), { addSuffix: true })}
+          {formatDistanceToNow(new Date(expenseOrder.createdAt), { addSuffix: true })}
         </Typography>
       </Box>
 
@@ -193,10 +193,10 @@ const ExpenseOrderCard: React.FC<ExpenseOrderCardProps> = ({
         </Box>
       )}
 
-      {expenseOrder.rejection_reason && (
+      {expenseOrder.rejectionReason && (
         <Box sx={{ mt: 2, p: 2, bgcolor: 'error.lighter', borderRadius: 1 }}>
           <Typography variant="body2" color="error.main" sx={{ fontWeight: 500 }}>
-            Rejection Reason: {expenseOrder.rejection_reason}
+            Rejection Reason: {expenseOrder.rejectionReason}
           </Typography>
         </Box>
       )}

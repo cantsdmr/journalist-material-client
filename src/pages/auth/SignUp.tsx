@@ -81,11 +81,11 @@ const SignUp: React.FC = () => {
       if (userCredential) {
         const result = await execute(
           () => api?.authApi.signUp({
-            external_id: userCredential.uid,
+            externalId: userCredential.uid,
             email: userCredential.email,   
-            display_name: userCredential.displayName ?? '',
-            photo_url: userCredential.photoURL ?? '',
-            role_id: USER_ROLE.REGULAR_USER
+            displayName: userCredential.displayName ?? '',
+            photoUrl: userCredential.photoURL ?? '',
+            roleId: USER_ROLE.REGULAR_USER
           }),
           {
             showSuccessMessage: true,

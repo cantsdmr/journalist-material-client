@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Chip,
@@ -20,26 +20,27 @@ import {
   Card,
   CardContent,
   Grid,
-  Alert,
-  Divider
+  Alert
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
-  Edit as EditIcon,
   Block as SuspendIcon,
   CheckCircle as ActivateIcon,
   Cancel as CancelIcon,
   TrendingUp as AnalyticsIcon,
   Download as ExportIcon,
-  MonetizationOn as RevenueIcon,
-  People as UsersIcon
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { AdminSubscription } from '@/types/entities/Subscription';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
-import { Subscription } from '@/types/index';
+import { PaginatedResponse } from '@/utils/http';
+import { 
+  SUBSCRIPTION_STATUS,
+  getSubscriptionStatusColor,
+  getSubscriptionStatusLabel,
+  ALL_SUBSCRIPTION_STATUSES
+} from '@/enums/SubscriptionEnums';
 
 const SubscriptionAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -61,11 +62,11 @@ const SubscriptionAdmin: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [channelFilter, setChannelFilter] = useState<string>('');
+  const [channelFilter] = useState<string>('');
   const [sortColumn, setSortColumn] = useState('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -93,11 +94,11 @@ const SubscriptionAdmin: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage, searchQuery, statusFilter, channelFilter, api.subscriptionApi, execute]);
 
   useEffect(() => {
     fetchSubscriptions();
-  }, [page, rowsPerPage, searchQuery, statusFilter, channelFilter, sortColumn, sortDirection]);
+  }, [fetchSubscriptions]);
 
   const handleView = (subscription: AdminSubscription) => {
     setSelectedSubscription(subscription);
@@ -115,10 +116,16 @@ const SubscriptionAdmin: React.FC = () => {
     if (!selectedSubscription || !actionType) return;
 
     try {
+      // Map frontend enum to backend expected format
+      const backendStatus = 
+        actionType === 'activate' ? 'active' : 
+        actionType === 'suspend' ? 'suspended' : 
+        'canceled'; // Note: backend uses 'canceled' not 'cancelled'
+        
       await execute(() => 
         api.subscriptionApi.updateSubscriptionStatus(
           selectedSubscription.id, 
-          actionType === 'activate' ? 'active' : actionType === 'suspend' ? 'suspended' : 'canceled',
+          backendStatus,
           actionReason
         )
       );
@@ -135,10 +142,13 @@ const SubscriptionAdmin: React.FC = () => {
 
   const handleExport = async () => {
     try {
+      // Map frontend status to backend expected format
+      const backendStatus = statusFilter === 'cancelled' ? 'canceled' : statusFilter;
+      
       const blob = await execute(() => 
         api.subscriptionApi.exportSubscriptions(
           { 
-            status: statusFilter as "active" | "canceled" | "expired" | "suspended" | undefined,
+            status: backendStatus as "active" | "canceled" | "expired" | "suspended" | undefined,
             channel_id: channelFilter
           },
           'csv'
@@ -160,15 +170,7 @@ const SubscriptionAdmin: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: AdminSubscription['status']): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-    switch (status) {
-      case 'active': return 'success';
-      case 'canceled': return 'error';
-      case 'expired': return 'warning';
-      case 'suspended': return 'secondary';
-      default: return 'default';
-    }
-  };
+  // Use the enum utility function for status colors
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
@@ -186,7 +188,7 @@ const SubscriptionAdmin: React.FC = () => {
       id: 'user',
       label: 'User',
       minWidth: 180,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 32, height: 32 }}>
             {row.user.display_name?.[0] || row.user.email?.[0]}
@@ -206,7 +208,7 @@ const SubscriptionAdmin: React.FC = () => {
       id: 'channel',
       label: 'Channel',
       minWidth: 120,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Typography variant="body2" noWrap>
           {row.channel.name}
         </Typography>
@@ -216,7 +218,7 @@ const SubscriptionAdmin: React.FC = () => {
       id: 'tier',
       label: 'Tier',
       minWidth: 150,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box>
           <Typography variant="body2" fontWeight="medium" noWrap>
             {row.tier.name}
@@ -232,10 +234,10 @@ const SubscriptionAdmin: React.FC = () => {
       label: 'Status',
       minWidth: 100,
       sortable: true,
-      format: (value) => (
+      format: (_value, row) => (
         <Chip
-          label={value}
-          color={getStatusColor(value)}
+          label={getSubscriptionStatusLabel(row.statusId)}
+          color={getSubscriptionStatusColor(row.statusId)}
           size="small"
           sx={{ textTransform: 'capitalize' }}
         />
@@ -276,12 +278,7 @@ const SubscriptionAdmin: React.FC = () => {
     },
   ];
 
-  const statusOptions = [
-    { value: 'active', label: 'Active' },
-    { value: 'canceled', label: 'Canceled' },
-    { value: 'expired', label: 'Expired' },
-    { value: 'suspended', label: 'Suspended' }
-  ];
+  const statusOptions = ALL_SUBSCRIPTION_STATUSES;
 
   const filters = (
     <Stack direction="row" spacing={1}>
@@ -317,7 +314,7 @@ const SubscriptionAdmin: React.FC = () => {
         </IconButton>
       </Tooltip>
 
-      {row.status === 'suspended' && (
+      {row.statusId === SUBSCRIPTION_STATUS.SUSPENDED && (
         <Tooltip title="Activate">
           <IconButton
             size="small"
@@ -331,7 +328,7 @@ const SubscriptionAdmin: React.FC = () => {
         </Tooltip>
       )}
 
-      {row.status === 'active' && (
+      {row.statusId === SUBSCRIPTION_STATUS.ACTIVE && (
         <Tooltip title="Suspend">
           <IconButton
             size="small"
@@ -345,7 +342,7 @@ const SubscriptionAdmin: React.FC = () => {
         </Tooltip>
       )}
 
-      {row.status !== 'canceled' && (
+      {row.statusId !== SUBSCRIPTION_STATUS.CANCELLED && (
         <Tooltip title="Cancel">
           <IconButton
             size="small"
@@ -463,8 +460,8 @@ const SubscriptionAdmin: React.FC = () => {
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Status</Typography>
                       <Chip
-                        label={selectedSubscription.status}
-                        color={getStatusColor(selectedSubscription.status)}
+                        label={getSubscriptionStatusLabel(selectedSubscription.statusId)}
+                        color={getSubscriptionStatusColor(selectedSubscription.statusId)}
                         size="small"
                         sx={{ textTransform: 'capitalize' }}
                       />
@@ -480,14 +477,14 @@ const SubscriptionAdmin: React.FC = () => {
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Started</Typography>
                       <Typography variant="body2">
-                        {formatDate(selectedSubscription.started_at)}
+                        {formatDate(selectedSubscription.startedAt)}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Expires</Typography>
                       <Typography variant="body2">
-                        {selectedSubscription.expires_at 
-                          ? formatDate(selectedSubscription.expires_at)
+                        {selectedSubscription.expiresAt 
+                          ? formatDate(selectedSubscription.expiresAt)
                           : 'Never'
                         }
                       </Typography>
@@ -495,13 +492,13 @@ const SubscriptionAdmin: React.FC = () => {
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Created</Typography>
                       <Typography variant="body2">
-                        {formatDate(selectedSubscription.created_at)}
+                        {formatDate(selectedSubscription.createdAt)}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Updated</Typography>
                       <Typography variant="body2">
-                        {formatDate(selectedSubscription.updated_at)}
+                        {formatDate(selectedSubscription.updatedAt)}
                       </Typography>
                     </Grid>
                   </Grid>

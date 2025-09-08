@@ -26,6 +26,27 @@ export const StringToSubscriptionStatus = {
   'suspended': SUBSCRIPTION_STATUS.SUSPENDED
 } as const;
 
+// Core utility functions for type normalization
+function normalizeToStatusId(status: string | number): SubscriptionStatusValue {
+  if (typeof status === 'number') {
+    return Object.values(SUBSCRIPTION_STATUS).includes(status as SubscriptionStatusValue) 
+      ? status as SubscriptionStatusValue 
+      : SUBSCRIPTION_STATUS.PENDING; // fallback
+  }
+  
+  const lowercaseStatus = status.toLowerCase();
+  return StringToSubscriptionStatus[lowercaseStatus as keyof typeof StringToSubscriptionStatus] || SUBSCRIPTION_STATUS.PENDING;
+}
+
+function normalizeToStatusString(status: string | number): string {
+  if (typeof status === 'string') {
+    const lowercaseStatus = status.toLowerCase();
+    return lowercaseStatus in StringToSubscriptionStatus ? lowercaseStatus : 'pending';
+  }
+  
+  return SubscriptionStatusStrings[status as SubscriptionStatusValue] || 'pending';
+}
+
 // Helper functions
 export function getSubscriptionStatusString(statusId: SubscriptionStatusValue): string {
   return SubscriptionStatusStrings[statusId] || 'unknown';
@@ -36,35 +57,22 @@ export function getSubscriptionStatusId(statusString: string): SubscriptionStatu
 }
 
 export function isSubscriptionStatusActive(status: string | number): boolean {
-  if (typeof status === 'string') {
-    return status.toLowerCase() === 'active';
-  }
-  return status === SUBSCRIPTION_STATUS.ACTIVE;
+  return normalizeToStatusId(status) === SUBSCRIPTION_STATUS.ACTIVE;
 }
 
 export function isSubscriptionStatusCancelled(status: string | number): boolean {
-  if (typeof status === 'string') {
-    return status.toLowerCase() === 'cancelled';
-  }
-  return status === SUBSCRIPTION_STATUS.CANCELLED;
+  return normalizeToStatusId(status) === SUBSCRIPTION_STATUS.CANCELLED;
 }
 
 // UI Helper functions
 export function getSubscriptionStatusLabel(status: string | number): string {
-  let statusString: string;
-  
-  if (typeof status === 'number') {
-    statusString = getSubscriptionStatusString(status as SubscriptionStatusValue);
-  } else {
-    statusString = status.toLowerCase();
-  }
+  const statusString = normalizeToStatusString(status);
 
   switch (statusString) {
   case 'active':
     return 'Active';
-  case 'canceled':
   case 'cancelled':
-    return 'Canceled';
+    return 'Cancelled';
   case 'expired':
     return 'Expired';
   case 'pending':
@@ -77,13 +85,7 @@ export function getSubscriptionStatusLabel(status: string | number): string {
 }
 
 export function getSubscriptionStatusColor(status: string | number): 'success' | 'warning' | 'error' | 'info' | 'default' {
-  let statusString: string;
-  
-  if (typeof status === 'number') {
-    statusString = getSubscriptionStatusString(status as SubscriptionStatusValue);
-  } else {
-    statusString = status.toLowerCase();
-  }
+  const statusString = normalizeToStatusString(status);
 
   switch (statusString) {
   case 'active':
@@ -103,10 +105,12 @@ export function getSubscriptionStatusColor(status: string | number): 'success' |
 
 // Validation functions
 export function isValidSubscriptionStatus(status: string | number): boolean {
-  if (typeof status === 'string') {
-    return status.toLowerCase() in StringToSubscriptionStatus;
+  if (typeof status === 'number') {
+    return Object.values(SUBSCRIPTION_STATUS).includes(status as SubscriptionStatusValue);
   }
-  return Object.values(SUBSCRIPTION_STATUS).includes(status as SubscriptionStatusValue);
+  
+  const lowercaseStatus = status.toLowerCase();
+  return lowercaseStatus in StringToSubscriptionStatus;
 }
 
 export function canCancelSubscription(status: string | number): boolean {
@@ -114,15 +118,14 @@ export function canCancelSubscription(status: string | number): boolean {
 }
 
 export function canReactivateSubscription(status: string | number): boolean {
-  return isSubscriptionStatusCancelled(status) || 
-         (typeof status === 'string' && status.toLowerCase() === 'suspended') ||
-         (typeof status === 'number' && status === SUBSCRIPTION_STATUS.SUSPENDED);
+  const statusId = normalizeToStatusId(status);
+  return statusId === SUBSCRIPTION_STATUS.CANCELLED || statusId === SUBSCRIPTION_STATUS.SUSPENDED;
 }
 
 // All available statuses for dropdowns/selects
 export const ALL_SUBSCRIPTION_STATUSES = [
   { id: SUBSCRIPTION_STATUS.ACTIVE, value: 'active', label: 'Active' },
-  { id: SUBSCRIPTION_STATUS.CANCELLED, value: 'canceled', label: 'Canceled' },
+  { id: SUBSCRIPTION_STATUS.CANCELLED, value: 'cancelled', label: 'Cancelled' },
   { id: SUBSCRIPTION_STATUS.EXPIRED, value: 'expired', label: 'Expired' },
   { id: SUBSCRIPTION_STATUS.PENDING, value: 'pending', label: 'Pending' },
   { id: SUBSCRIPTION_STATUS.SUSPENDED, value: 'suspended', label: 'Suspended' }

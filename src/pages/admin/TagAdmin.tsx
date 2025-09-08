@@ -21,13 +21,11 @@ import {
   Grid,
   Alert,
   FormControlLabel,
-  Switch,
-  Divider
+  Switch
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
   CheckCircle as ApproveIcon,
   Cancel as RejectIcon,
   TrendingUp as TrendingIcon,
@@ -40,7 +38,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Tag } from '@/types/entities/Tag';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
+import { PaginatedResponse } from '@/utils/http';
 
 const TagAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -250,7 +248,7 @@ const TagAdmin: React.FC = () => {
       id: 'analytics',
       label: 'Analytics',
       minWidth: 150,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
             Views: {row.analytics?.viewCount?.toLocaleString() || '0'}

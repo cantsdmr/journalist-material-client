@@ -16,13 +16,11 @@ import {
   MenuItem,
   Stack,
   Typography,
-  Avatar,
-  Link
+  Avatar
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
   Publish as PublishIcon,
   Unpublished as UnpublishIcon
 } from '@mui/icons-material';
@@ -31,7 +29,7 @@ import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { News } from '@/types/entities/News';
 import { NEWS_STATUS } from '@/enums/NewsEnums';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
+import { PaginatedResponse } from '@/utils/http';
 
 const NewsAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -126,7 +124,7 @@ const NewsAdmin: React.FC = () => {
         content: newsData.content,
         status: newsData.status?.toString()
       };
-      await execute(() => api.newsApi.update(selectedNews.id, updateData));
+      await execute(() => api.newsApi.update(selectedNews.id, updateData as any));
       setEditDialogOpen(false);
       setSelectedNews(null);
       fetchNews();
@@ -167,7 +165,7 @@ const NewsAdmin: React.FC = () => {
       id: 'channel',
       label: 'Channel',
       minWidth: 150,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar src={row.channel?.photoUrl} sx={{ width: 24, height: 24 }}>
             {row.channel?.name?.[0]}

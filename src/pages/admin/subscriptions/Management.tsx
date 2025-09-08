@@ -43,7 +43,7 @@ import {
   BulkUpdateData 
 } from '@/types/index';
 import { PaginationObject, DEFAULT_PAGINATION } from '@/utils/http';
-import { getSubscriptionStatusColor} from '@/enums/SubscriptionEnums';
+import { getSubscriptionStatusColor, getSubscriptionStatusLabel } from '@/enums/SubscriptionEnums';
 import { useApiCall } from '@/hooks/useApiCall';
 
 const SubscriptionManagement: React.FC = () => {
@@ -168,7 +168,7 @@ const SubscriptionManagement: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | number) => {
     return getSubscriptionStatusColor(status);
   };
 
@@ -402,19 +402,19 @@ const SubscriptionManagement: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={subscription.status}
-                        color={getStatusColor(subscription.status) as any}
+                        label={getSubscriptionStatusLabel(subscription.statusId)}
+                        color={getStatusColor(subscription.statusId)}
                         size="small"
                       />
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {formatDate(subscription.started_at)}
+                        {formatDate(subscription.startedAt)}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {subscription.expires_at ? formatDate(subscription.expires_at) : 'Never'}
+                        {subscription.expiresAt ? formatDate(subscription.expiresAt) : 'Never'}
                       </Typography>
                     </TableCell>
                     <TableCell>

@@ -25,7 +25,6 @@ import {
 import {
   Visibility as ViewIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
   People as SubscribersIcon,
   Article as NewsIcon,
   Poll as PollIcon,
@@ -456,7 +455,7 @@ const ChannelAdmin: React.FC = () => {
                   </AccordionSummary>
                   <AccordionDetails>
                     <Stack spacing={2}>
-                      {selectedChannel.tiers.map((tier, index) => (
+                      {selectedChannel.tiers.map((tier) => (
                         <Box key={tier.id} sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
                           <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>

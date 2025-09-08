@@ -139,7 +139,7 @@ const FundingModal: React.FC<FundingModalProps> = ({
       const contribution = await api.fundingApi.createContribution(
         contentType,
         contentId,
-        contributionData
+        contributionData as any
       );
 
       onSuccess(contribution);

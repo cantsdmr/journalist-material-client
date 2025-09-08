@@ -204,12 +204,12 @@ const ViewExpenseOrderStudio: React.FC = () => {
                   Created
                 </Typography>
                 <Typography variant="body1">
-                  {format(new Date(expenseOrder.created_at), 'PPP')}
+                  {format(new Date(expenseOrder.createdAt), 'PPP')}
                 </Typography>
               </Grid>
             </Grid>
 
-            {expenseOrder.receipt_url && (
+            {expenseOrder.receiptUrl && (
               <>
                 <Divider sx={{ my: 3 }} />
                 <Box>
@@ -217,7 +217,7 @@ const ViewExpenseOrderStudio: React.FC = () => {
                     Receipt
                   </Typography>
                   <Link
-                    href={expenseOrder.receipt_url}
+                    href={expenseOrder.receiptUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
@@ -298,28 +298,28 @@ const ViewExpenseOrderStudio: React.FC = () => {
                   Created
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {formatDistanceToNow(new Date(expenseOrder.created_at), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(expenseOrder.createdAt), { addSuffix: true })}
                 </Typography>
               </Box>
 
-              {expenseOrder.submitted_at && (
+              {expenseOrder.submittedAt && (
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
                     Submitted
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {formatDistanceToNow(new Date(expenseOrder.submitted_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(expenseOrder.submittedAt), { addSuffix: true })}
                   </Typography>
                 </Box>
               )}
 
-              {expenseOrder.approved_at && (
+              {expenseOrder.approvedAt && (
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
                     {expenseOrder.status === ExpenseOrderStatus.APPROVED ? 'Approved' : 'Reviewed'}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {formatDistanceToNow(new Date(expenseOrder.approved_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(expenseOrder.approvedAt), { addSuffix: true })}
                   </Typography>
                   {expenseOrder.approver && (
                     <Typography variant="caption" display="block" color="text.secondary">
@@ -329,17 +329,17 @@ const ViewExpenseOrderStudio: React.FC = () => {
                 </Box>
               )}
 
-              {expenseOrder.paid_at && (
+              {expenseOrder.paidAt && (
                 <Box>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
                     Paid
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {formatDistanceToNow(new Date(expenseOrder.paid_at), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(expenseOrder.paidAt), { addSuffix: true })}
                   </Typography>
-                  {expenseOrder.payment_reference && (
+                  {expenseOrder.paymentReference && (
                     <Typography variant="caption" display="block" color="text.secondary">
-                      Ref: {expenseOrder.payment_reference}
+                      Ref: {expenseOrder.paymentReference}
                     </Typography>
                   )}
                 </Box>
@@ -347,13 +347,13 @@ const ViewExpenseOrderStudio: React.FC = () => {
             </Box>
           </Paper>
 
-          {expenseOrder.rejection_reason && (
+          {expenseOrder.rejectionReason && (
             <Paper sx={{ p: 3, bgcolor: 'error.lighter' }}>
               <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, color: 'error.main' }}>
                 Rejection Reason
               </Typography>
               <Typography variant="body2" color="error.main">
-                {expenseOrder.rejection_reason}
+                {expenseOrder.rejectionReason}
               </Typography>
             </Paper>
           )}

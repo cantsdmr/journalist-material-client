@@ -17,7 +17,6 @@ import {
   Stack,
   Typography,
   Avatar,
-  Link,
   Accordion,
   AccordionSummary,
   AccordionDetails
@@ -25,10 +24,7 @@ import {
 import {
   Visibility as ViewIcon,
   Edit as EditIcon,
-  Delete as DeleteIcon,
-  Poll as PollIcon,
   TrendingUp as TrendingIcon,
-  MonetizationOn as FundedIcon,
   ExpandMore as ExpandMoreIcon,
   Assignment as ConvertIcon
 } from '@mui/icons-material';
@@ -36,7 +32,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Poll } from '@/types/entities/Poll';
-import { DEFAULT_PAGINATION, PaginatedResponse } from '@/utils/http';
+import { PaginatedResponse } from '@/utils/http';
 import { POLL_STATUS } from '@/enums/PollEnums';
 
 const PollAdmin: React.FC = () => {
@@ -73,13 +69,8 @@ const PollAdmin: React.FC = () => {
       if (trendingFilter === 'true') filters.trending = true;
       if (fundedFilter === 'true') filters.funded = true;
 
-      const params = {
-        page: page + 1,
-        limit: rowsPerPage,
-        sort: sortColumn,
-        order: sortDirection,
-        ...filters
-      };
+      filters.sort = sortColumn;
+      filters.order = sortDirection;
 
       const result = await execute(
         () => api.pollApi.getPolls(filters, { page: page + 1, limit: rowsPerPage }),
@@ -152,26 +143,6 @@ const PollAdmin: React.FC = () => {
     }
   };
 
-  const getStatusColor = (statusId: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-    switch (statusId) {
-      case POLL_STATUS.ACTIVE: return 'success';
-      case POLL_STATUS.INACTIVE: return 'default';
-      case POLL_STATUS.COMPLETED: return 'info';
-      case POLL_STATUS.CANCELLED: return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getStatusName = (statusId: number): string => {
-    switch (statusId) {
-      case POLL_STATUS.ACTIVE: return 'Active';
-      case POLL_STATUS.INACTIVE: return 'Inactive';
-      case POLL_STATUS.COMPLETED: return 'Completed';
-      case POLL_STATUS.CANCELLED: return 'Cancelled';
-      default: return 'Unknown';
-    }
-  };
-
   const columns: Column[] = [
     {
       id: 'title',
@@ -204,7 +175,7 @@ const PollAdmin: React.FC = () => {
       id: 'channel',
       label: 'Channel',
       minWidth: 150,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar src={row.channel?.photoUrl} sx={{ width: 24, height: 24 }}>
             {row.channel?.name?.[0]}
@@ -219,7 +190,7 @@ const PollAdmin: React.FC = () => {
       id: 'creator',
       label: 'Creator',
       minWidth: 120,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Typography variant="body2" noWrap>
           {row.creator?.displayName || 'Unknown'}
         </Typography>
@@ -241,7 +212,7 @@ const PollAdmin: React.FC = () => {
       id: 'stats',
       label: 'Stats',
       minWidth: 120,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
             Views: {row.stats?.viewCount?.toLocaleString() || '0'}
