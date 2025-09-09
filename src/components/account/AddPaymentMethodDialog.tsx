@@ -64,7 +64,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
       setError(null);
 
       // Generate redirect URI (current origin + callback path)
-      const redirectUri = `${window.location.origin}/account/payment-methods/paypal/callback`;
+      const redirectUri = `${window.location.origin}/app/account/payment-methods/paypal/callback`;
 
       // Get PayPal OAuth URL
       const response = await api.accountApi.generatePayPalOAuthUrl(redirectUri);
