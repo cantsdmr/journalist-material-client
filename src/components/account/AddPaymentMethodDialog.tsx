@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField,
   FormControl,
   InputLabel,
   Select,
@@ -15,8 +14,7 @@ import {
   Stack,
   Alert,
   FormControlLabel,
-  Checkbox,
-  Grid
+  Checkbox
 } from '@mui/material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PaymentMethodTypeEnum, AddPaymentMethodData } from '@/types/index';

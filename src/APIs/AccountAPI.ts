@@ -79,6 +79,6 @@ export class AccountAPI extends HTTPApi {
 
   // PayPal Payment Tokens methods
   public async savePayPalPaymentMethod(data: { payment_token: string; payer_id?: string }) {
-    return this._post<UserPaymentMethod>(`${API_PATH}/payment-methods/paypal/tokens/save`, data);
+    return this._post<PaymentMethod>(`${API_PATH}/payment-methods/paypal/tokens/save`, data);
   }
 } 
