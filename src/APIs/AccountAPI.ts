@@ -59,27 +59,6 @@ export class AccountAPI extends HTTPApi {
     return this._get<PaymentMethodType[]>(`${API_PATH}/payment-methods/available`);
   }
 
-  // ============= PAYPAL OAUTH METHODS =============
-
-  /**
-   * Generate PayPal OAuth authorization URL
-   */
-  public async generatePayPalOAuthUrl(redirectUri: string) {
-    return this._post<{ success: boolean; data: { authorization_url: string } }>(
-      `${API_PATH}/payment-methods/paypal/oauth/url`,
-      { redirect_uri: redirectUri }
-    );
-  }
-
-  /**
-   * Complete PayPal OAuth flow and create payment method
-   */
-  public async completePayPalOAuth(code: string, state: string, redirectUri: string) {
-    return this._post<{ success: boolean; message: string; data: PaymentMethod }>(
-      `${API_PATH}/payment-methods/paypal/oauth/complete`,
-      { code, state, redirect_uri: redirectUri }
-    );
-  }
 
 
   public async getSubscriptions() {
@@ -96,5 +75,10 @@ export class AccountAPI extends HTTPApi {
 
   public async getUserChannels(pagination: PaginationObject = DEFAULT_PAGINATION) {
     return this._list<Channel>(`${API_PATH}/channels`, pagination);
+  }
+
+  // PayPal Payment Tokens methods
+  public async savePayPalPaymentMethod(data: { payment_token: string; payer_id?: string }) {
+    return this._post<UserPaymentMethod>(`${API_PATH}/payment-methods/paypal/tokens/save`, data);
   }
 } 

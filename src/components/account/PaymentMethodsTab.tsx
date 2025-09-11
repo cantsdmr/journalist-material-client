@@ -36,6 +36,8 @@ import {
 import { useApiContext } from '@/contexts/ApiContext';
 import { PaymentMethod, PaymentMethodTypeEnum } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
+import PayPalPaymentTokens from './PayPalPaymentTokens';
+import IyzicoPaymentTokens from './IyzicoPaymentTokens';
 
 const PaymentMethodsTab: React.FC = () => {
   const theme = useTheme();
@@ -46,14 +48,15 @@ const PaymentMethodsTab: React.FC = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addSectionOpen, setAddSectionOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
-  const [connectingPayPal, setConnectingPayPal] = useState(false);
+  const [showPayPalDialog, setShowPayPalDialog] = useState(false);
+  const [showIyzicoDialog, setShowIyzicoDialog] = useState(false);
   
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchData = async () => {
     setLoading(true);
@@ -127,62 +130,34 @@ const PaymentMethodsTab: React.FC = () => {
     setAddSectionOpen(false);
   };
 
-  const handlePayPalConnect = async () => {
-    try {
-      setConnectingPayPal(true);
-      setError(null);
+  const handlePayPalConnect = () => {
+    setShowPayPalDialog(true);
+  };
 
-      const redirectUri = `${window.location.origin}/account/payment-methods/paypal/callback`;
-      const response = await api.accountApi.generatePayPalOAuthUrl(redirectUri);
-      const authUrl = response.data.authorization_url;
+  const handlePayPalSuccess = () => {
+    setShowPayPalDialog(false);
+    handlePaymentMethodAdded();
+    setSuccess('PayPal account connected successfully!');
+  };
 
-      const popup = window.open(
-        authUrl,
-        'paypal_oauth',
-        'width=600,height=700,scrollbars=yes,resizable=yes'
-      );
+  const handlePayPalError = (error: string) => {
+    setError(error);
+    setShowPayPalDialog(false);
+  };
 
-      if (!popup) {
-        throw new Error('Popup blocked! Please allow popups and try again.');
-      }
+  const handleIyzicoConnect = () => {
+    setShowIyzicoDialog(true);
+  };
 
-      const handleMessage = async (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+  const handleIyzicoSuccess = () => {
+    setShowIyzicoDialog(false);
+    handlePaymentMethodAdded();
+    setSuccess('Iyzico card added successfully!');
+  };
 
-        if (event.data.type === 'paypal_oauth_success') {
-          const { code, state } = event.data;
-          try {
-            await api.accountApi.completePayPalOAuth(code, state, redirectUri);
-            handlePaymentMethodAdded();
-            popup.close();
-          } catch (error: any) {
-            setError(error.message || 'Failed to connect PayPal account');
-            popup.close();
-          }
-          window.removeEventListener('message', handleMessage);
-          setConnectingPayPal(false);
-        } else if (event.data.type === 'paypal_oauth_error') {
-          setError(event.data.message || 'PayPal authentication failed');
-          popup.close();
-          window.removeEventListener('message', handleMessage);
-          setConnectingPayPal(false);
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      const checkClosed = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(checkClosed);
-          window.removeEventListener('message', handleMessage);
-          setConnectingPayPal(false);
-        }
-      }, 1000);
-
-    } catch (error: any) {
-      setError(error.message || 'Failed to start PayPal authentication');
-      setConnectingPayPal(false);
-    }
+  const handleIyzicoError = (error: string) => {
+    setError(error);
+    setShowIyzicoDialog(false);
   };
 
   const getPaymentMethodLogo = (typeId: number) => {
@@ -230,8 +205,12 @@ const PaymentMethodsTab: React.FC = () => {
     switch (method.typeId) {
       case PaymentMethodTypeEnum.PAYPAL:
         return method.details.email;
-      case PaymentMethodTypeEnum.IYZICO:
-        return `${method.details.cardNumber} • ${method.details.cardHolderName}`;
+      case PaymentMethodTypeEnum.IYZICO: {
+        // For tokenized Iyzico payments, show card type and last 4 digits
+        const cardType = method.details.cardAssociation || 'Card';
+        const lastFour = method.details.lastFourDigits || '****';
+        return `${cardType} •••• ${lastFour}`;
+      }
       default:
         return 'Payment method';
     }
@@ -324,7 +303,7 @@ const PaymentMethodsTab: React.FC = () => {
                 >
                   <CardActionArea 
                     onClick={handlePayPalConnect}
-                    disabled={connectingPayPal}
+                    disabled={false}
                     sx={{ p: 3 }}
                   >
                     <Stack direction="row" spacing={2} alignItems="center">
@@ -361,30 +340,36 @@ const PaymentMethodsTab: React.FC = () => {
                           />
                         </Stack>
                       </Box>
-                      {connectingPayPal && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Typography variant="body2" color="primary" sx={{ mr: 1 }}>
-                            Connecting...
-                          </Typography>
-                        </Box>
-                      )}
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" color="primary" sx={{ mr: 1 }}>
+                          Click to Connect
+                        </Typography>
+                      </Box>
                     </Stack>
                   </CardActionArea>
                 </Card>
               </Grid>
 
-              {/* Credit Card Option */}
+              {/* Iyzico Credit Card Option */}
               <Grid item xs={12} md={6}>
                 <Card 
                   elevation={0}
                   sx={{ 
                     border: `1px solid ${theme.palette.divider}`,
                     borderRadius: 2,
-                    opacity: 0.6,
-                    position: 'relative'
+                    transition: 'all 0.2s ease',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      borderColor: theme.palette.primary.main,
+                      boxShadow: `0 4px 12px ${theme.palette.primary.main}20`
+                    }
                   }}
                 >
-                  <CardContent sx={{ p: 3 }}>
+                  <CardActionArea 
+                    onClick={handleIyzicoConnect}
+                    disabled={false}
+                    sx={{ p: 3 }}
+                  >
                     <Stack direction="row" spacing={2} alignItems="center">
                       <Avatar 
                         sx={{ 
@@ -402,35 +387,30 @@ const PaymentMethodsTab: React.FC = () => {
                           Credit/Debit Card
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Visa, Mastercard, and more
+                          Güvenli kart ödeme sistemi
                         </Typography>
                         <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                           <Chip 
+                            icon={<Security />} 
+                            label="Güvenli" 
+                            size="small" 
+                            variant="outlined"
+                          />
+                          <Chip 
                             icon={<Verified />} 
-                            label="Verified" 
+                            label="Doğrulanmış" 
                             size="small" 
                             variant="outlined"
                           />
                         </Stack>
                       </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body2" color="primary" sx={{ mr: 1 }}>
+                          Kart Ekle
+                        </Typography>
+                      </Box>
                     </Stack>
-                    <Box 
-                      sx={{ 
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        bgcolor: 'warning.main',
-                        color: 'warning.contrastText',
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        fontSize: '11px',
-                        fontWeight: 600
-                      }}
-                    >
-                      Coming Soon
-                    </Box>
-                  </CardContent>
+                  </CardActionArea>
                 </Card>
               </Grid>
             </Grid>
@@ -583,6 +563,50 @@ const PaymentMethodsTab: React.FC = () => {
             variant="contained"
           >
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* PayPal Connection Dialog */}
+      <Dialog 
+        open={showPayPalDialog} 
+        onClose={() => setShowPayPalDialog(false)}
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle>Connect PayPal Account</DialogTitle>
+        <DialogContent>
+          <PayPalPaymentTokens
+            onSuccess={handlePayPalSuccess}
+            onError={handlePayPalError}
+            disabled={false}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowPayPalDialog(false)}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Iyzico Connection Dialog */}
+      <Dialog 
+        open={showIyzicoDialog} 
+        onClose={() => setShowIyzicoDialog(false)}
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle>Kart Ekleme</DialogTitle>
+        <DialogContent>
+          <IyzicoPaymentTokens
+            onSuccess={handleIyzicoSuccess}
+            onError={handleIyzicoError}
+            disabled={false}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowIyzicoDialog(false)}>
+            İptal
           </Button>
         </DialogActions>
       </Dialog>
