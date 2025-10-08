@@ -13,14 +13,29 @@ import {
     Stack,
     CircularProgress,
     Alert,
-    LinearProgress
+    LinearProgress,
+    Chip,
+    Paper,
+    alpha,
+    Tabs,
+    Tab,
+    IconButton,
+    Link
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
-import JCard from '@/components/common/Card';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useApiCall } from '@/hooks/useApiCall';
+import PeopleIcon from '@mui/icons-material/People';
+import LayersIcon from '@mui/icons-material/Layers';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import InfoIcon from '@mui/icons-material/Info';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import LanguageIcon from '@mui/icons-material/Language';
+import EmailIcon from '@mui/icons-material/Email';
 
 const ViewChannel: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
@@ -33,6 +48,7 @@ const ViewChannel: React.FC = () => {
         tierId: string;
     } | null>(null);
     const [planStatus, setPlanStatus] = useState<'checking' | 'creating' | 'ready'>('ready');
+    const [activeTab, setActiveTab] = useState(0);
     const { id } = useParams();
     const navigate = useNavigate();
     const { api } = useApiContext();
@@ -263,110 +279,250 @@ const ViewChannel: React.FC = () => {
 
     if (loading) {
         return (
-            <Container maxWidth="lg" sx={{ mt: 4 }}>
-                <Box sx={{ textAlign: 'center', mb: 4 }}>
-                    <Skeleton variant="circular" width={100} height={100} sx={{ mx: 'auto', mb: 2 }} />
-                    <Skeleton variant="text" width="60%" sx={{ mx: 'auto', mb: 1 }} />
-                    <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 2 }} />
-                    <Skeleton variant="rectangular" width={120} height={36} sx={{ mx: 'auto' }} />
-                </Box>
-                <Grid container spacing={3}>
-                    {[...Array(3)].map((_, index) => (
-                        <Grid item xs={12} md={4} key={index}>
-                            <Card>
-                                <CardContent>
-                                    <Skeleton variant="text" width="80%" />
-                                    <Skeleton variant="text" width="60%" />
-                                    <Skeleton variant="rectangular" height={100} sx={{ my: 2 }} />
-                                    <Skeleton variant="rectangular" width={100} height={36} />
-                                </CardContent>
-                            </Card>
+            <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+                <Container maxWidth="lg">
+                    {/* Banner and Avatar Skeleton */}
+                    <Box sx={{ position: 'relative', mb: 8 }}>
+                        <Skeleton
+                            variant="rectangular"
+                            sx={{
+                                height: { xs: 150, md: 200 },
+                                borderRadius: 3
+                            }}
+                        />
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                bottom: -50,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                            }}
+                        >
+                            <Skeleton
+                                variant="circular"
+                                sx={{
+                                    width: { xs: 100, md: 128 },
+                                    height: { xs: 100, md: 128 },
+                                    border: '4px solid',
+                                    borderColor: 'background.paper',
+                                }}
+                            />
+                        </Box>
+                    </Box>
+
+                    <Paper elevation={0} sx={{ mb: 4, p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+                        <Box sx={{ textAlign: 'center', pt: 3 }}>
+                            <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 2, fontSize: '2.5rem' }} />
+                            <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 3 }}>
+                                <Skeleton variant="rounded" width={150} height={32} />
+                                <Skeleton variant="rounded" width={100} height={32} />
+                            </Stack>
+                            <Skeleton variant="text" width="70%" sx={{ mx: 'auto', mb: 1 }} />
+                            <Skeleton variant="text" width="60%" sx={{ mx: 'auto', mb: 4 }} />
+                            <Skeleton variant="rounded" width={180} height={48} sx={{ mx: 'auto', borderRadius: 50 }} />
+                        </Box>
+                    </Paper>
+
+                    {/* Tiers Skeleton */}
+                    <Box sx={{ mb: 6 }}>
+                        <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 4, fontSize: '2rem' }} />
+                        <Grid container spacing={3}>
+                            {[...Array(3)].map((_, index) => (
+                                <Grid item xs={12} md={4} key={index}>
+                                    <Card elevation={2} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+                                        <Skeleton variant="rectangular" height={120} />
+                                        <CardContent sx={{ p: 3 }}>
+                                            <Skeleton variant="text" width="60%" sx={{ mx: 'auto', mb: 2, fontSize: '2rem' }} />
+                                            <Skeleton variant="text" width="80%" sx={{ mb: 1 }} />
+                                            <Skeleton variant="text" width="70%" sx={{ mb: 1 }} />
+                                            <Skeleton variant="text" width="75%" sx={{ mb: 3 }} />
+                                            <Skeleton variant="rounded" height={48} sx={{ borderRadius: 50 }} />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
                         </Grid>
-                    ))}
-                </Grid>
-            </Container>
+                    </Box>
+                </Container>
+            </Box>
         );
     }
 
     if (!channel) {
         return (
-            <Container maxWidth="lg" sx={{ mt: 4 }}>
-                <Typography variant="h5" align="center">Channel not found</Typography>
-            </Container>
+            <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Container maxWidth="sm">
+                    <Paper elevation={3} sx={{ p: 6, borderRadius: 3, textAlign: 'center' }}>
+                        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'text.primary' }}>
+                            Channel not found
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+                            The channel you're looking for doesn't exist or has been removed.
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            onClick={() => navigate('/app')}
+                            sx={{
+                                borderRadius: 50,
+                                px: 4,
+                                py: 1.5,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                            }}
+                        >
+                            Go Home
+                        </Button>
+                    </Paper>
+                </Container>
+            </Box>
         );
     }
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
-            <Box 
-                sx={{ 
-                    position: 'relative',
-                    mb: 4,
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 200,
-                        backgroundImage: `url(${channel?.bannerUrl || 'https://via.placeholder.com/600x400'})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        filter: 'brightness(0.9)',
-                        borderRadius: 2,
-                    }
-                }}
-            >
-                <Box 
-                    sx={{ 
-                        position: 'relative',
-                        pt: 15,
-                        pb: 4,
-                        textAlign: 'center',
-                    }}
-                >
-                    <Avatar
-                        src={channel.logoUrl}
+        <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+            <Container maxWidth="lg">
+                {/* Banner and Avatar Section */}
+                <Box sx={{ position: 'relative', mb: 8 }}>
+                    {/* Banner */}
+                    <Box
                         sx={{
-                            width: 100,
-                            height: 100,
-                            mx: 'auto',
-                            mb: 2,
-                            border: '3px solid white',
-                            boxShadow: 2
+                            height: { xs: 150, md: 200 },
+                            backgroundImage: channel?.bannerUrl
+                                ? `url(${channel.bannerUrl})`
+                                : undefined,
+                            background: channel?.bannerUrl
+                                ? undefined
+                                : (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            borderRadius: 3,
+                            position: 'relative',
                         }}
                     />
-                    <Typography variant="h4" gutterBottom>{channel.name}</Typography>
-                    <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                        {channel.stats?.activeSubscriptionCount?.toLocaleString('en-US', {
-                            notation: 'compact',
-                            maximumFractionDigits: 1
-                        })} subscribers • {channel.tiers?.length || 0} tiers
-                    </Typography>
-                    <Typography variant="body1" sx={{ mb: 3 }}>
-                        {channel.description}
-                    </Typography>
-                    <Stack
-                        direction="row"
-                        spacing={2}
-                        justifyContent="center"
-                        sx={{ mb: 4 }}
+
+                    {/* Avatar positioned at bottom of banner */}
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            bottom: -50,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                        }}
                     >
+                        <Avatar
+                            src={channel.logoUrl}
+                            sx={{
+                                width: { xs: 100, md: 128 },
+                                height: { xs: 100, md: 128 },
+                                border: '4px solid',
+                                borderColor: 'background.paper',
+                                boxShadow: 3,
+                            }}
+                        />
+                    </Box>
+                </Box>
+
+                {/* Channel Info Card */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        mb: 4,
+                        p: { xs: 3, md: 4 },
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Box sx={{ textAlign: 'center', pt: 3 }}>
+
+                        {/* Channel Name */}
+                        <Typography
+                            variant="h3"
+                            gutterBottom
+                            sx={{
+                                fontWeight: 700,
+                                fontSize: { xs: '2rem', md: '2.5rem' },
+                                color: 'text.primary',
+                                mb: 1,
+                            }}
+                        >
+                            {channel.name}
+                        </Typography>
+
+                        {/* Stats Badges */}
+                        <Stack
+                            direction="row"
+                            spacing={2}
+                            justifyContent="center"
+                            sx={{ mb: 3 }}
+                        >
+                            <Chip
+                                icon={<PeopleIcon />}
+                                label={`${channel.stats?.activeSubscriptionCount?.toLocaleString('en-US', {
+                                    notation: 'compact',
+                                    maximumFractionDigits: 1
+                                })} subscribers`}
+                                sx={{
+                                    fontWeight: 600,
+                                    bgcolor: alpha('#0b6cff', 0.1),
+                                    color: '#0b6cff',
+                                    '& .MuiChip-icon': { color: '#0b6cff' }
+                                }}
+                            />
+                            <Chip
+                                icon={<LayersIcon />}
+                                label={`${channel.tiers?.length || 0} tiers`}
+                                sx={{
+                                    fontWeight: 600,
+                                    bgcolor: alpha('#589aff', 0.1),
+                                    color: '#589aff',
+                                    '& .MuiChip-icon': { color: '#589aff' }
+                                }}
+                            />
+                        </Stack>
+
+                        {/* Description */}
+                        <Typography
+                            variant="body1"
+                            sx={{
+                                mb: 4,
+                                maxWidth: 800,
+                                mx: 'auto',
+                                color: 'text.secondary',
+                                lineHeight: 1.8,
+                                fontSize: '1.1rem',
+                            }}
+                        >
+                            {channel.description}
+                        </Typography>
+
+                        {/* Action Button */}
                         <Button
                             variant={isMember ? "outlined" : "contained"}
+                            size="large"
                             onClick={() => isMember ? handleCancelMembership() : handleJoin(channel?.tiers?.find(t => t.isDefault)?.id)}
                             disabled={subscriptionLoading}
                             startIcon={subscriptionLoading && <CircularProgress size={20} color="inherit" />}
+                            sx={{
+                                px: 4,
+                                py: 1.5,
+                                borderRadius: 50,
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                boxShadow: isMember ? 'none' : '0 4px 14px 0 rgba(11, 108, 255, 0.39)',
+                                '&:hover': {
+                                    boxShadow: isMember ? 'none' : '0 6px 20px rgba(11, 108, 255, 0.5)',
+                                }
+                            }}
                         >
                             {subscriptionLoading ? 'Processing...' : (isMember ? 'Cancel Membership' : 'Join Channel')}
                         </Button>
-                    </Stack>
+                    </Box>
 
                     {/* Plan creation status */}
                     {planStatus === 'creating' && (
-                        <Alert severity="info" sx={{ mt: 2 }}>
+                        <Alert severity="info" sx={{ mt: 3, borderRadius: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <CircularProgress size={16} />
                                 <Typography variant="body2">
@@ -378,9 +534,9 @@ const ViewChannel: React.FC = () => {
 
                     {/* Pending subscription status */}
                     {pendingSubscription && (
-                        <Alert 
-                            severity="warning" 
-                            sx={{ mt: 2 }}
+                        <Alert
+                            severity="warning"
+                            sx={{ mt: 3, borderRadius: 2 }}
                             action={
                                 <Button
                                     size="small"
@@ -397,105 +553,362 @@ const ViewChannel: React.FC = () => {
                                 <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
                                     {pendingSubscription.tierName} - Waiting for PayPal approval
                                 </Typography>
-                                <LinearProgress 
-                                    sx={{ mt: 1, borderRadius: 1 }} 
+                                <LinearProgress
+                                    sx={{ mt: 1, borderRadius: 1 }}
                                     color="warning"
                                 />
                             </Box>
                         </Alert>
                     )}
-                    
+
                     {/* Debug info - remove in production */}
                     {process.env.NODE_ENV === 'development' && (
-                        <Box sx={{ mt: 2, p: 2, backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: 1 }}>
+                        <Box sx={{ mt: 3, p: 2, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2 }}>
                             <Typography variant="caption" display="block">
-                                Debug: isMember={isMember.toString()}, currentTierId={currentTierId || 'none'}, 
+                                Debug: isMember={isMember.toString()}, currentTierId={currentTierId || 'none'},
                                 subscriptions={profile?.subscriptions?.length || 0}
                             </Typography>
                         </Box>
                     )}
-                    
-                    <Divider sx={{ mb: 4 }} />
-                </Box>
-            </Box>
+                </Paper>
 
-            <Typography variant="h5" gutterBottom sx={{
-                fontSize: { xs: '1.125rem', sm: '1.25rem' },
-                fontWeight: 600,
-                mb: 3
-            }}>
-                Membership Tiers
-            </Typography>
-            <Grid container spacing={3}>
-                {channel.tiers?.map((tier) => (
-                    <Grid item xs={12} md={4} key={tier.id}>
-                        <JCard
-                            isHighlighted={currentTierId === tier.id}
-                        >
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="h6" gutterBottom sx={{
-                                    fontWeight: 600,
-                                    fontSize: '1rem',
-                                    color: currentTierId === tier.id ? 'primary.main' : 'text.primary'
-                                }}>
-                                    {tier.name}
-                                </Typography>
-                                <Typography variant="h4" sx={{
-                                    fontWeight: 700,
-                                    fontSize: '2rem',
-                                    color: currentTierId === tier.id ? 'primary.main' : 'text.primary',
-                                    display: 'flex',
-                                    alignItems: 'baseline',
-                                    gap: 0.5
-                                }}>
-                                    ${tier.price}
-                                    <Typography
-                                        component="span"
-                                        sx={{
-                                            fontSize: '0.875rem',
-                                            fontWeight: 400,
-                                            color: 'text.secondary'
-                                        }}
-                                    >
-                                        /month
-                                    </Typography>
+                {/* Navigation Tabs */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        mb: 4,
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        overflow: 'hidden'
+                    }}
+                >
+                    <Tabs
+                        value={activeTab}
+                        onChange={(_, newValue) => setActiveTab(newValue)}
+                        sx={{
+                            borderBottom: 1,
+                            borderColor: 'divider',
+                            '& .MuiTab-root': {
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                                minHeight: 64,
+                            }
+                        }}
+                    >
+                        <Tab
+                            icon={<VolunteerActivismIcon />}
+                            iconPosition="start"
+                            label="Contribute"
+                        />
+                        <Tab
+                            icon={<ConnectWithoutContactIcon />}
+                            iconPosition="start"
+                            label="Connect"
+                        />
+                        <Tab
+                            icon={<AccountBalanceWalletIcon />}
+                            iconPosition="start"
+                            label="Budget"
+                        />
+                        <Tab
+                            icon={<InfoIcon />}
+                            iconPosition="start"
+                            label="About"
+                        />
+                    </Tabs>
+
+                    {/* Tab Panels */}
+                    <Box sx={{ p: 4 }}>
+                        {/* Contribute Tab */}
+                        {activeTab === 0 && (
+                            <Box>
+                                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                                    Become a financial contributor
                                 </Typography>
                             </Box>
+                        )}
 
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    mb: 3,
-                                    color: 'text.secondary',
-                                    minHeight: 60
-                                }}
-                            >
-                                {tier.description}
-                            </Typography>
+                        {/* Connect Tab */}
+                        {activeTab === 1 && (
+                            <Box>
+                                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                                    Connect with us
+                                </Typography>
+                                <Stack spacing={2}>
+                                    {channel.websiteUrl && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <IconButton color="primary" size="small">
+                                                <LanguageIcon />
+                                            </IconButton>
+                                            <Link
+                                                href={channel.websiteUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                sx={{ textDecoration: 'none' }}
+                                            >
+                                                {channel.websiteUrl}
+                                            </Link>
+                                        </Box>
+                                    )}
+                                    {channel.twitterHandle && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                            <IconButton color="primary" size="small">
+                                                <TwitterIcon />
+                                            </IconButton>
+                                            <Link
+                                                href={`https://twitter.com/${channel.twitterHandle}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                sx={{ textDecoration: 'none' }}
+                                            >
+                                                @{channel.twitterHandle}
+                                            </Link>
+                                        </Box>
+                                    )}
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <IconButton color="primary" size="small">
+                                            <EmailIcon />
+                                        </IconButton>
+                                        <Typography>Contact via membership</Typography>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        )}
 
-                            <Button
-                                variant={currentTierId === tier.id ? "outlined" : "contained"}
-                                fullWidth
-                                onClick={() => isMember ? handleUpdateMembership(tier.id) : handleJoin(tier.id)}
-                                disabled={currentTierId === tier.id || subscriptionLoading}
-                                sx={{
-                                    py: 1.5,
-                                    textTransform: 'none',
-                                    fontWeight: 600
-                                }}
-                                startIcon={subscriptionLoading &&
-                                    <CircularProgress size={20} color="inherit" />
-                                }
-                            >
-                                {subscriptionLoading ? 'Processing...' :
-                                    currentTierId === tier.id ? 'Current Plan' :
-                                        isMember ? 'Switch to This Plan' : 'Join'}
-                            </Button>
-                        </JCard>
+                        {/* Budget Tab */}
+                        {activeTab === 2 && (
+                            <Box>
+                                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                                    Budget
+                                </Typography>
+                                <Typography color="text.secondary">
+                                    Financial information will be displayed here
+                                </Typography>
+                            </Box>
+                        )}
+
+                        {/* About Tab */}
+                        {activeTab === 3 && (
+                            <Box>
+                                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                                    About
+                                </Typography>
+                                <Stack spacing={3}>
+                                    <Box>
+                                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                            DESCRIPTION
+                                        </Typography>
+                                        <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
+                                            {channel.description}
+                                        </Typography>
+                                    </Box>
+                                    <Divider />
+                                    <Box>
+                                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                            STATISTICS
+                                        </Typography>
+                                        <Grid container spacing={2}>
+                                            <Grid item xs={6} md={3}>
+                                                <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
+                                                    <Typography variant="h4" color="primary" sx={{ fontWeight: 700 }}>
+                                                        {channel.stats?.activeSubscriptionCount || 0}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Subscribers
+                                                    </Typography>
+                                                </Paper>
+                                            </Grid>
+                                            <Grid item xs={6} md={3}>
+                                                <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
+                                                    <Typography variant="h4" color="primary" sx={{ fontWeight: 700 }}>
+                                                        {channel.tiers?.length || 0}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Tiers
+                                                    </Typography>
+                                                </Paper>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        )}
+                    </Box>
+                </Paper>
+
+                {/* Membership Tiers Section - Only show in Contribute tab */}
+                {activeTab === 0 && (
+                <Box sx={{ mb: 6 }}>
+                    <Typography
+                        variant="h4"
+                        gutterBottom
+                        sx={{
+                            fontSize: { xs: '1.75rem', md: '2rem' },
+                            fontWeight: 700,
+                            mb: 4,
+                            textAlign: 'center',
+                        }}
+                    >
+                        Membership Tiers
+                    </Typography>
+
+                    <Grid container spacing={3}>
+                        {channel.tiers?.map((tier) => (
+                            <Grid item xs={12} md={4} key={tier.id}>
+                                <Card
+                                    elevation={currentTierId === tier.id ? 8 : 2}
+                                    sx={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        borderRadius: 3,
+                                        overflow: 'hidden',
+                                        transition: 'all 0.3s ease',
+                                        border: currentTierId === tier.id ? '2px solid #0b6cff' : '1px solid #e0e0e0',
+                                        '&:hover': {
+                                            transform: 'translateY(-8px)',
+                                            boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
+                                        }
+                                    }}
+                                >
+                                    {/* Tier Header with Gradient */}
+                                    <Box
+                                        sx={{
+                                            height: 120,
+                                            background: currentTierId === tier.id
+                                                ? 'linear-gradient(135deg, #0b6cff 0%, #589aff 100%)'
+                                                : 'linear-gradient(135deg, #589aff 0%, #7bb0ff 100%)',
+                                            position: 'relative',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            p: 3,
+                                        }}
+                                    >
+                                        {currentTierId === tier.id && (
+                                            <Chip
+                                                label="CURRENT PLAN"
+                                                size="small"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 12,
+                                                    right: 12,
+                                                    bgcolor: 'white',
+                                                    color: '#0b6cff',
+                                                    fontWeight: 700,
+                                                    fontSize: '0.7rem',
+                                                }}
+                                            />
+                                        )}
+                                        {!currentTierId && tier.isDefault && (
+                                            <Chip
+                                                label="POPULAR"
+                                                size="small"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 12,
+                                                    right: 12,
+                                                    bgcolor: 'white',
+                                                    color: '#589aff',
+                                                    fontWeight: 700,
+                                                    fontSize: '0.7rem',
+                                                }}
+                                            />
+                                        )}
+                                        <Typography
+                                            variant="h5"
+                                            sx={{
+                                                color: 'white',
+                                                fontWeight: 700,
+                                                textAlign: 'center',
+                                            }}
+                                        >
+                                            {tier.name}
+                                        </Typography>
+                                    </Box>
+
+                                    <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+                                        {/* Price */}
+                                        <Box sx={{ mb: 3, textAlign: 'center' }}>
+                                            <Typography
+                                                variant="h3"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    color: 'text.primary',
+                                                    display: 'flex',
+                                                    alignItems: 'baseline',
+                                                    justifyContent: 'center',
+                                                    gap: 0.5,
+                                                }}
+                                            >
+                                                <Typography component="span" sx={{ fontSize: '1.5rem', fontWeight: 500 }}>
+                                                    $
+                                                </Typography>
+                                                {tier.price}
+                                                <Typography
+                                                    component="span"
+                                                    sx={{
+                                                        fontSize: '1rem',
+                                                        fontWeight: 400,
+                                                        color: 'text.secondary',
+                                                    }}
+                                                >
+                                                    /month
+                                                </Typography>
+                                            </Typography>
+                                        </Box>
+
+                                        <Divider sx={{ mb: 3 }} />
+
+                                        {/* Description */}
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                mb: 3,
+                                                color: 'text.secondary',
+                                                minHeight: 60,
+                                                lineHeight: 1.7,
+                                                flexGrow: 1,
+                                            }}
+                                        >
+                                            {tier.description}
+                                        </Typography>
+
+                                        {/* Action Button */}
+                                        <Button
+                                            variant={currentTierId === tier.id ? "outlined" : "contained"}
+                                            fullWidth
+                                            size="large"
+                                            onClick={() => isMember ? handleUpdateMembership(tier.id) : handleJoin(tier.id)}
+                                            disabled={currentTierId === tier.id || subscriptionLoading}
+                                            sx={{
+                                                py: 1.5,
+                                                borderRadius: 50,
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                fontSize: '1rem',
+                                                boxShadow: currentTierId === tier.id ? 'none' : '0 4px 12px rgba(11, 108, 255, 0.3)',
+                                                '&:hover': {
+                                                    boxShadow: currentTierId === tier.id ? 'none' : '0 6px 16px rgba(11, 108, 255, 0.4)',
+                                                }
+                                            }}
+                                            startIcon={subscriptionLoading && <CircularProgress size={20} color="inherit" />}
+                                        >
+                                            {subscriptionLoading ? 'Processing...' :
+                                                currentTierId === tier.id ? 'Current Plan' :
+                                                    isMember ? 'Switch to This Plan' : 'Contribute'}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
                     </Grid>
-                ))}
-            </Grid>
-        </Container>
+                </Box>
+                )}
+            </Container>
+        </Box>
     );
 };
 
