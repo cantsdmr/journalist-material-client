@@ -102,52 +102,53 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
   };
 
   return (
-    <Card sx={{ 
-      maxWidth: '100%', 
-      mb: 2,
+    <Card sx={{
+      maxWidth: '100%',
       borderRadius: 2,
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      boxShadow: 'none',
+      border: '1px solid',
+      borderColor: 'divider',
       '&:hover': {
-        boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
-        transform: 'translateY(-2px)',
-        transition: 'all 0.3s ease'
+        boxShadow: 1,
+        transition: 'box-shadow 0.2s ease'
       }
     }}>
-      <CardContent>
+      <CardContent sx={{ p: 2.5 }}>
         {/* Poll Creator Info */}
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Avatar 
-            sx={{ 
-              mr: 1,
+          <Avatar
+            sx={{
+              mr: 1.5,
               bgcolor: theme.palette.primary.main,
-              width: 40,
-              height: 40
+              width: 32,
+              height: 32
             }}
           >
             {poll.creator?.displayName?.charAt(0).toUpperCase()}
           </Avatar>
           <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>
               {poll.creator?.displayName}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
               {formatDistanceToNow(new Date(poll.createdAt), { addSuffix: true })}
             </Typography>
           </Box>
         </Box>
 
         {/* Poll Title and Description */}
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: '1rem', mb: 1 }}>
           {poll.title}
         </Typography>
         {poll.description && (
-          <Typography 
-            variant="body2" 
-            color="text.secondary" 
+          <Typography
+            variant="body2"
+            color="text.secondary"
             paragraph
-            sx={{ 
-              mb: 3,
-              lineHeight: 1.6
+            sx={{
+              mb: 2,
+              lineHeight: 1.5,
+              fontSize: '0.875rem'
             }}
           >
             {poll.description}
@@ -156,14 +157,14 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
 
         {/* Poll Media */}
         {poll.media && poll.media.length > 0 && (
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 2 }}>
             {poll.media.map((media) => (
               <Box
                 key={media.id}
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: 1.5,
                   overflow: 'hidden',
-                  mb: 2
+                  mb: 1.5
                 }}
               >
                 {media.format === POLL_MEDIA_FORMAT.VIDEO ? (
@@ -174,7 +175,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     preload="metadata"
                     sx={{
                       width: '100%',
-                      height: 200,
+                      height: 180,
                       objectFit: 'cover',
                       objectPosition: 'center',
                       bgcolor: 'black'
@@ -187,20 +188,20 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     alt={media.caption || poll.title}
                     sx={{
                       width: '100%',
-                      height: 200,
+                      height: 180,
                       objectFit: 'cover',
                       objectPosition: 'center'
                     }}
                   />
                 )}
                 {media.caption && (
-                  <Typography 
-                    variant="caption" 
+                  <Typography
+                    variant="caption"
                     color="text.secondary"
-                    sx={{ 
+                    sx={{
                       display: 'block',
-                      mt: 1,
-                      px: 1
+                      mt: 0.5,
+                      fontSize: '0.75rem'
                     }}
                   >
                     {media.caption}
@@ -212,7 +213,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
         )}
 
         {/* Poll Options */}
-        <Box sx={{ mt: 2 }}>
+        <Box sx={{ mt: 2, mb: 2 }}>
           {poll.options.map((option) => {
             const voteCount = option.voteCount || 0;
             const votePercentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
@@ -357,12 +358,12 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
           })}
         </Box>
 
-        {/* Poll Stats and Actions */}
-        <Box sx={{ 
-          display: 'flex', 
+        {/* Poll Stats and Tags */}
+        <Box sx={{
+          display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          mt: 3,
+          mt: 2,
           pt: 2,
           borderTop: '1px solid',
           borderColor: 'divider'
@@ -370,29 +371,31 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
           <Stack direction="row" spacing={2}>
             <Tooltip title="Total Votes">
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <ThumbUpIcon sx={{ fontSize: '1.2rem', mr: 0.5, color: 'text.secondary' }} />
-                <Typography variant="caption" color="text.secondary">
-                  {totalVotes} votes
+                <ThumbUpIcon sx={{ fontSize: '1rem', mr: 0.5, color: 'text.secondary' }} />
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                  {totalVotes}
                 </Typography>
               </Box>
             </Tooltip>
             <Tooltip title="Views">
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <CommentIcon sx={{ fontSize: '1.2rem', mr: 0.5, color: 'text.secondary' }} />
-                <Typography variant="caption" color="text.secondary">
+                <CommentIcon sx={{ fontSize: '1rem', mr: 0.5, color: 'text.secondary' }} />
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
                   {poll.stats?.viewCount || 0}
                 </Typography>
               </Box>
             </Tooltip>
           </Stack>
-          
-          <Stack direction="row" spacing={1}>
+
+          <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {poll.isTrending && (
-              <Chip 
-                label="Trending" 
+              <Chip
+                label="Trending"
                 color="primary"
-                size="small" 
-                sx={{ 
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
                   fontWeight: 600,
                   '& .MuiChip-label': {
                     px: 1
@@ -400,12 +403,14 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                 }}
               />
             )}
-            {poll.tags.map(tag => (
-              <Chip 
+            {poll.tags.slice(0, 2).map(tag => (
+              <Chip
                 key={tag.id}
-                label={tag.name} 
-                size="small" 
-                sx={{ 
+                label={tag.name}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
                   bgcolor: alpha(theme.palette.primary.main, 0.1),
                   color: 'primary.main',
                   '& .MuiChip-label': {
@@ -418,25 +423,16 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
         </Box>
       </CardContent>
 
-      <CardActions sx={{ 
-        justifyContent: 'space-between', 
-        px: 2, 
-        pb: 2,
+      <CardActions sx={{
+        justifyContent: 'space-between',
+        px: 2.5,
+        py: 1.5,
         borderTop: '1px solid',
         borderColor: 'divider'
       }}>
-        <Button 
-          size="small" 
-          startIcon={<CommentIcon />}
-          sx={{ 
-            color: 'text.secondary',
-            '&:hover': {
-              bgcolor: alpha(theme.palette.primary.main, 0.05)
-            }
-          }}
-        >
-          Comment
-        </Button>
+        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+          {formatDistanceToNow(new Date(poll.createdAt), { addSuffix: true })}
+        </Typography>
         <Stack direction="row" spacing={1}>
           <Box onClick={(e) => e.stopPropagation()}>
             <FundingButton
@@ -450,32 +446,17 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
               size="small"
             />
           </Box>
-          <IconButton 
+          <IconButton
             size="small"
-            sx={{ 
+            sx={{
               color: 'text.secondary',
               '&:hover': {
                 bgcolor: alpha(theme.palette.primary.main, 0.05)
               }
             }}
           >
-            <ShareIcon />
+            <ShareIcon fontSize="small" />
           </IconButton>
-          {!showResults && (
-            <Button 
-              size="small" 
-              color="primary"
-              variant="contained"
-              onClick={() => onViewResults?.(poll.id.toString())}
-              sx={{ 
-                borderRadius: 2,
-                textTransform: 'none',
-                px: 2
-              }}
-            >
-              View Results
-            </Button>
-          )}
         </Stack>
       </CardActions>
     </Card>

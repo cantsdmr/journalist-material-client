@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { 
-  AppBar, 
-  Toolbar, 
-  IconButton, 
-  Typography, 
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
   Box,
   useTheme as useMuiTheme,
   useMediaQuery,
@@ -17,6 +17,8 @@ import {
 } from '@mui/material';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
 import Sidebar from '@/components/navigation/Sidebar';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
@@ -35,6 +37,7 @@ const MainLayout: React.FC = () => {
   const muiTheme = useMuiTheme();
   const { isLoading } = useApp();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,6 +65,11 @@ const MainLayout: React.FC = () => {
 
   const handleSearch = (query: string) => {
     navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(query)}`);
+    setMobileSearchOpen(false);
+  };
+
+  const handleMobileSearchToggle = () => {
+    setMobileSearchOpen(!mobileSearchOpen);
   };
 
 
@@ -84,7 +92,7 @@ const MainLayout: React.FC = () => {
       }}
     >
       {profileMenuItems.map((item) => [
-        <MenuItem 
+        <MenuItem
           key={item.path}
           onClick={() => handleNavigate(item.path)}
         >
@@ -101,11 +109,11 @@ const MainLayout: React.FC = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar 
-        position="fixed" 
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default', overflow: 'hidden' }}>
+      <AppBar
+        position="fixed"
         elevation={0}
-        sx={{ 
+        sx={{
           zIndex: muiTheme.zIndex.drawer + 1,
           bgcolor: 'background.default',
           color: 'text.primary',
@@ -114,96 +122,125 @@ const MainLayout: React.FC = () => {
         }}
       >
         <Toolbar sx={{ px: '8px' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 200 }}>
-            <IconButton
-              color="inherit"
-              aria-label="toggle sidebar"
-              onClick={toggleSidebar}
-              sx={{ 
-                minWidth: 40,
-                ml: 0.5,
-                mr: 1.5,
-                '& .MuiSvgIcon-root': {
-                  fontSize: 24,
-                  filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))'
-                }
-              }}
-            >
-              <MenuRoundedIcon />
-            </IconButton>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontWeight: 700,
-                  display: 'block',
-                  letterSpacing: '.1rem',
-                  fontFamily: "'Inter', -apple-system, sans-serif"
-                }}
+          {/* Mobile Search Mode */}
+          {mobileSearchOpen && isMobile ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+              <IconButton
+                color="inherit"
+                onClick={handleMobileSearchToggle}
+                sx={{ flexShrink: 0 }}
               >
-                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-                  <span style={{ 
-                    color: '#2196F3',
-                    textTransform: 'uppercase',
-                    fontWeight: 800
-                  }}>Meta</span>
-                  <span style={{ 
-                    color: '#1976D2',
-                    fontWeight: 600
-                  }}>Journo</span>
-                </Box>
-                <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                  <span style={{ 
-                    color: '#2196F3',
-                    textTransform: 'uppercase',
-                    fontWeight: 800
-                  }}>M</span>
-                  <span style={{ 
-                    color: '#1976D2',
-                    fontWeight: 600
-                  }}>Journo</span>
-                </Box>
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  opacity: 0.7,
-                  fontWeight: 500,
-                  fontSize: '0.75rem',
-                  display: { xs: 'none', sm: 'block' }
-                }}
-              >
-                v{VERSION}
-              </Typography>
+                <ArrowBackIcon />
+              </IconButton>
+              <Box sx={{ flexGrow: 1, mt: 0.5 }}>
+                <SearchBar
+                  onSearch={handleSearch}
+                  placeholder="Search"
+                  className="app-search-bar"
+                  autoFocus
+                />
+              </Box>
             </Box>
-          </Box>
+          ) : (
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 200 }}>
+                <IconButton
+                  color="inherit"
+                  aria-label="toggle sidebar"
+                  onClick={toggleSidebar}
+                  sx={{
+                    minWidth: 40,
+                    ml: 0.5,
+                    mr: 1.5,
+                    '& .MuiSvgIcon-root': {
+                      fontSize: 24,
+                      filter: 'drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))'
+                    }
+                  }}
+                >
+                  <MenuRoundedIcon />
+                </IconButton>
 
-          <Box sx={{ 
-            flexGrow: 1,
-            display: 'flex',
-            justifyContent: 'center'
-          }}>
-            <SearchBar
-              onSearch={handleSearch}
-              placeholder="Search articles, channels, journalists..."
-              className="app-search-bar"
-            />
-          </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      display: 'block',
+                      letterSpacing: '.1rem',
+                      fontFamily: "'Inter', -apple-system, sans-serif"
+                    }}
+                  >
+                    <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                      <span style={{
+                        color: '#2196F3',
+                        textTransform: 'uppercase',
+                        fontWeight: 800
+                      }}>Meta</span>
+                      <span style={{
+                        color: '#1976D2',
+                        fontWeight: 600
+                      }}>Journo</span>
+                    </Box>
+                    <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
+                      <span style={{
+                        color: '#2196F3',
+                        textTransform: 'uppercase',
+                        fontWeight: 800
+                      }}>M</span>
+                      <span style={{
+                        color: '#1976D2',
+                        fontWeight: 600
+                      }}>Journo</span>
+                    </Box>
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      opacity: 0.7,
+                      fontWeight: 500,
+                      fontSize: '0.75rem',
+                      display: { xs: 'none', sm: 'block' }
+                    }}
+                  >
+                    v{VERSION}
+                  </Typography>
+                </Box>
+              </Box>
 
-          <IconButton onClick={toggleTheme} color="inherit">
-            {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
+              <Box sx={{
+                flexGrow: 1,
+                display: { xs: 'none', md: 'flex' },
+                justifyContent: 'center'
+              }}>
+                <SearchBar
+                  onSearch={handleSearch}
+                  placeholder="Search articles, channels, journalists..."
+                  className="app-search-bar"
+                />
+              </Box>
 
-          {/* Profile Menu */}
-          <IconButton
-            onClick={handleMenuOpen}
-            color="inherit"
-            sx={{ ml: 2 }}
-          >
-            <AccountCircleIcon />
-          </IconButton>
-          {renderProfileMenu()}
+              <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }} />
+
+              {/* Search Icon for Mobile */}
+              <IconButton
+                onClick={handleMobileSearchToggle}
+                color="inherit"
+                sx={{ display: { xs: 'flex', md: 'none' } }}
+              >
+                <SearchIcon />
+              </IconButton>
+
+              {/* Account Button */}
+              <IconButton
+                onClick={() => navigate(PATHS.APP_ACCOUNT)}
+                color="inherit"
+                sx={{ ml: 1 }}
+              >
+                <AccountCircleIcon />
+              </IconButton>
+            </>
+          )}
         </Toolbar>
       </AppBar>
 
@@ -230,7 +267,7 @@ const MainLayout: React.FC = () => {
           }}
         >
           <Toolbar />
-          <Box sx={{ 
+          <Box sx={{
             height: 'calc(100% - 64px)',
             overflow: 'auto'
           }}>
@@ -259,9 +296,11 @@ const MainLayout: React.FC = () => {
           }}
         >
           <Toolbar />
-          <Box sx={{ 
+          <Box sx={{
             height: 'calc(100% - 64px)',
-            overflow: 'auto'
+            overflow: 'auto',
+            overflowX: 'hidden',
+            width: '100%'
           }}>
             <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
           </Box>
@@ -273,21 +312,22 @@ const MainLayout: React.FC = () => {
         sx={{
           flexGrow: 1,
           pt: 8,
-          width: 0,
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          bgcolor: 'background.default'
+          bgcolor: 'background.default',
+          overflow: 'hidden',
+          maxWidth: '100%'
         }}
       >
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             flexGrow: 1,
             py: 3,
             px: { xs: 2, sm: 3 },
-            maxWidth: 900,
-            mx: 'auto',
-            width: '100%'
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            maxWidth: '100%'
           }}
         >
           <Outlet />

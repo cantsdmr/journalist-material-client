@@ -234,18 +234,18 @@ const ListNews: React.FC<ListNewsProps> = ({
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>      
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           {displayTitle}
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body2" color="text.secondary">
           {displayDescription}
         </Typography>
       </Box>
 
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 3 }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
@@ -267,9 +267,9 @@ const ListNews: React.FC<ListNewsProps> = ({
           hasMore={hasMore}
           loader={<ListNewsSkeleton />}
           endMessage={
-            <Box sx={{ 
-              textAlign: 'center', 
-              mt: 4, 
+            <Box sx={{
+              textAlign: 'center',
+              mt: 4,
               color: 'text.secondary',
               fontSize: '0.875rem'
             }}>
@@ -277,17 +277,17 @@ const ListNews: React.FC<ListNewsProps> = ({
             </Box>
           }
         >
-          <Stack spacing={4}>
+          <Stack spacing={3}>
             {news.map((item) => (
-              <NewsEntry 
-                key={item.id} 
+              <NewsEntry
+                key={item.id}
                 news={item}
               />
             ))}
           </Stack>
         </InfiniteScroll>
       )}
-    </Container>
+    </Box>
   );
 };
 

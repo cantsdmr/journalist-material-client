@@ -110,17 +110,17 @@ const ListPoll: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           Community Polls
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body2" color="text.secondary">
           Vote on polls from your favorite journalists and help shape their content
         </Typography>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
@@ -133,7 +133,7 @@ const ListPoll: React.FC = () => {
       </Box>
 
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 3 }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
@@ -188,9 +188,9 @@ const ListPoll: React.FC = () => {
             </Stack>
           }
           endMessage={
-            <Box sx={{ 
-              textAlign: 'center', 
-              mt: 4, 
+            <Box sx={{
+              textAlign: 'center',
+              mt: 4,
               color: 'text.secondary',
               fontSize: '0.875rem'
             }}>
@@ -198,11 +198,11 @@ const ListPoll: React.FC = () => {
             </Box>
           }
         >
-          <Stack spacing={2}>
+          <Stack spacing={3}>
             {polls.map((poll) => (
-              <Box 
+              <Box
                 key={poll.id}
-                component={RouterLink} 
+                component={RouterLink}
                 to={PATHS.APP_POLL_VIEW.replace(':id', poll.id)}
                 sx={{ textDecoration: 'none' }}
               >
@@ -212,7 +212,7 @@ const ListPoll: React.FC = () => {
           </Stack>
         </InfiniteScroll>
       )}
-    </Container>
+    </Box>
   );
 };
 

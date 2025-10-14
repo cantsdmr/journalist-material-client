@@ -19,7 +19,8 @@ import {
   Collapse,
   Avatar,
   CardActionArea,
-  useTheme
+  useTheme,
+  Divider
 } from '@mui/material';
 import { 
   Add, 
@@ -240,304 +241,248 @@ const PaymentMethodsTab: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box>
       <Stack spacing={3}>
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
-        
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
-              Payment Methods
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Securely manage your payment methods for subscriptions
-            </Typography>
-          </Box>
-          <Button
-            variant="contained"
-            startIcon={addSectionOpen ? <ExpandLess /> : <Add />}
-            onClick={toggleAddSection}
-            sx={{
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: 3,
-              py: 1.5
-            }}
-          >
-            {addSectionOpen ? 'Close' : 'Add Payment Method'}
-          </Button>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+            Payment Methods
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Manage your payment methods for subscriptions
+          </Typography>
         </Box>
 
-        {/* Add Payment Method Section */}
-        <Collapse in={addSectionOpen}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 3, 
-              mb: 3, 
-              border: `2px dashed ${theme.palette.divider}`,
-              borderRadius: 3,
-              bgcolor: theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50'
+        {/* PayPal Row */}
+        <Stack spacing={0} divider={<Divider />} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+          <Box
+            sx={{
+              p: 2.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2.5,
+              transition: 'background-color 0.2s',
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'
+              }
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-              Choose Payment Method
-            </Typography>
-            <Grid container spacing={2}>
-              {/* PayPal Option */}
-              <Grid item xs={12} md={6}>
-                <Card 
-                  elevation={0}
-                  sx={{ 
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: theme.palette.primary.main,
-                      boxShadow: `0 4px 12px ${theme.palette.primary.main}20`
-                    }
-                  }}
-                >
-                  <CardActionArea 
-                    onClick={handlePayPalConnect}
-                    disabled={false}
-                    sx={{ p: 3 }}
-                  >
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar 
-                        sx={{ 
-                          bgcolor: '#0070ba', 
-                          width: 48, 
-                          height: 48,
-                          fontSize: '13px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        PayPal
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          PayPal
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Connect your PayPal account securely
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                          <Chip 
-                            icon={<Security />} 
-                            label="Secure" 
-                            size="small" 
-                            variant="outlined"
-                          />
-                          <Chip 
-                            icon={<Speed />} 
-                            label="Fast" 
-                            size="small" 
-                            variant="outlined"
-                          />
-                        </Stack>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography variant="body2" color="primary" sx={{ mr: 1 }}>
-                          Click to Connect
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-
-              {/* Iyzico Credit Card Option */}
-              <Grid item xs={12} md={6}>
-                <Card 
-                  elevation={0}
-                  sx={{ 
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    transition: 'all 0.2s ease',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      borderColor: theme.palette.primary.main,
-                      boxShadow: `0 4px 12px ${theme.palette.primary.main}20`
-                    }
-                  }}
-                >
-                  <CardActionArea 
-                    onClick={handleIyzicoConnect}
-                    disabled={false}
-                    sx={{ p: 3 }}
-                  >
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar 
-                        sx={{ 
-                          bgcolor: '#00a650', 
-                          width: 48, 
-                          height: 48,
-                          fontSize: '11px',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        iyzico
-                      </Avatar>
-                      <Box sx={{ flex: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          Credit/Debit Card
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Güvenli kart ödeme sistemi
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                          <Chip 
-                            icon={<Security />} 
-                            label="Güvenli" 
-                            size="small" 
-                            variant="outlined"
-                          />
-                          <Chip 
-                            icon={<Verified />} 
-                            label="Doğrulanmış" 
-                            size="small" 
-                            variant="outlined"
-                          />
-                        </Stack>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography variant="body2" color="primary" sx={{ mr: 1 }}>
-                          Kart Ekle
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Collapse>
-
-        {paymentMethods.length === 0 ? (
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              textAlign: 'center', 
-              py: 6, 
-              px: 3,
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: 3,
-              bgcolor: 'transparent'
-            }}
-          >
-            <Box sx={{ mb: 3 }}>
-              <CreditCard sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-            </Box>
-            <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-              No Payment Methods Yet
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
-              Add a secure payment method to start subscribing to your favorite channels and unlock premium content.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<Add />}
-              onClick={toggleAddSection}
-              sx={{
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 4,
-                py: 1.5
-              }}
-            >
-              Add Your First Payment Method
-            </Button>
-          </Paper>
-        ) : (
-          <Stack spacing={2}>
-            {paymentMethods.map((method) => (
-              <Card 
-                key={method.id}
-                elevation={0}
-                sx={{ 
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: 2,
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    borderColor: method.isDefault ? theme.palette.primary.main : theme.palette.grey[400],
-                    boxShadow: `0 2px 8px ${theme.palette.grey[300]}30`
-                  }
+            {/* PayPal Logo */}
+            <Box sx={{ flexShrink: 0 }}>
+              <Avatar
+                sx={{
+                  bgcolor: '#0070ba',
+                  width: 40,
+                  height: 40,
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: 'white'
                 }}
               >
-                <CardContent sx={{ p: 3 }}>
-                  <Stack direction="row" spacing={3} alignItems="center">
+                PayPal
+              </Avatar>
+            </Box>
+
+            {/* Details */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                PayPal
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                Connect your PayPal account securely
+              </Typography>
+            </Box>
+
+            {/* Action */}
+            <Box sx={{ flexShrink: 0, width: 100 }}>
+              <Button
+                onClick={handlePayPalConnect}
+                size="small"
+                variant="outlined"
+                fullWidth
+                sx={{
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  fontSize: '0.8rem',
+                  fontWeight: 500
+                }}
+              >
+                Connect
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Iyzico Row */}
+          <Box
+            sx={{
+              p: 2.5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2.5,
+              transition: 'background-color 0.2s',
+              '&:hover': {
+                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'
+              }
+            }}
+          >
+            {/* Iyzico Logo */}
+            <Box sx={{ flexShrink: 0 }}>
+              <Avatar
+                sx={{
+                  bgcolor: '#00a650',
+                  width: 40,
+                  height: 40,
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}
+              >
+                iyzico
+              </Avatar>
+            </Box>
+
+            {/* Details */}
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                Credit/Debit Card
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                Güvenli kart ödeme sistemi
+              </Typography>
+            </Box>
+
+            {/* Action */}
+            <Box sx={{ flexShrink: 0, width: 100 }}>
+              <Button
+                onClick={handleIyzicoConnect}
+                size="small"
+                variant="outlined"
+                fullWidth
+                sx={{
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  fontSize: '0.8rem',
+                  fontWeight: 500
+                }}
+              >
+                Add Card
+              </Button>
+            </Box>
+          </Box>
+        </Stack>
+
+        {/* Connected Payment Methods */}
+        {paymentMethods.length > 0 && (
+          <>
+            <Box sx={{ mt: 4, mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                Connected Methods
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Your active payment methods
+              </Typography>
+            </Box>
+            <Stack spacing={0} divider={<Divider />} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
+              {paymentMethods.map((method, index) => (
+                <Box
+                  key={method.id}
+                  sx={{
+                    p: 2.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2.5,
+                    bgcolor: index % 2 === 0 ? 'transparent' : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'),
+                    transition: 'background-color 0.2s',
+                    '&:hover': {
+                      bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'
+                    }
+                  }}
+                >
+                  {/* Logo */}
+                  <Box sx={{ flexShrink: 0 }}>
                     {getPaymentMethodLogo(method.typeId)}
-                    
-                    <Box sx={{ flex: 1 }}>
-                      <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {method.type.name}
-                        </Typography>
-                        {method.isDefault && (
-                          <Chip 
-                            icon={<CheckCircle />}
-                            label="Default" 
-                            size="small" 
-                            color="primary" 
-                            variant="filled"
-                            sx={{ fontWeight: 600 }}
-                          />
-                        )}
-                      </Stack>
-                      
-                      <Typography variant="body1" sx={{ mb: 0.5, fontFamily: 'monospace' }}>
-                        {getPaymentMethodDetails(method)}
+                  </Box>
+
+                  {/* Details */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {method.type.name}
                       </Typography>
-                      
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          {method.currency.toUpperCase()}
-                        </Typography>
-                        {method.lastUsedAt && (
-                          <>
-                            <Box sx={{ width: 4, height: 4, bgcolor: 'text.secondary', borderRadius: '50%' }} />
-                            <Typography variant="body2" color="text.secondary">
-                              Last used {new Date(method.lastUsedAt).toLocaleDateString()}
-                            </Typography>
-                          </>
-                        )}
-                      </Stack>
+                      {method.isDefault && (
+                        <Chip
+                          label="Default"
+                          size="small"
+                          sx={{
+                            height: 20,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText'
+                          }}
+                        />
+                      )}
                     </Box>
-                    
-                    <Stack direction="row" spacing={1}>
-                      <IconButton
+
+                    <Typography variant="body2" color="text.primary" sx={{ mb: 0.5, fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                      {getPaymentMethodDetails(method)}
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {method.currency.toUpperCase()}
+                      </Typography>
+                      {method.lastUsedAt && (
+                        <>
+                          <Box sx={{ width: 3, height: 3, bgcolor: 'text.secondary', borderRadius: '50%', opacity: 0.5 }} />
+                          <Typography variant="caption" color="text.secondary">
+                            Last used {new Date(method.lastUsedAt).toLocaleDateString()}
+                          </Typography>
+                        </>
+                      )}
+                    </Box>
+                  </Box>
+
+                  {/* Actions */}
+                  <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
+                    {!method.isDefault && (
+                      <Button
                         onClick={() => handleSetDefault(method)}
-                        disabled={method.isDefault}
-                        title={method.isDefault ? "Already default" : "Set as default"}
-                        sx={{ 
-                          color: method.isDefault ? 'primary.main' : 'text.secondary',
-                          '&:hover': { bgcolor: 'primary.main', color: 'primary.contrastText' }
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 1.5,
+                          textTransform: 'none',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          px: 1.5,
+                          minWidth: 'auto'
                         }}
                       >
-                        {method.isDefault ? <Star /> : <RadioButtonUnchecked />}
-                      </IconButton>
-                      <IconButton
-                        onClick={() => openDeleteDialog(method)}
-                        sx={{ 
-                          color: 'text.secondary',
-                          '&:hover': { bgcolor: 'error.main', color: 'error.contrastText' }
-                        }}
-                        title="Delete payment method"
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
+                        Set default
+                      </Button>
+                    )}
+                    <IconButton
+                      onClick={() => openDeleteDialog(method)}
+                      size="small"
+                      sx={{
+                        color: 'text.secondary',
+                        '&:hover': {
+                          color: 'error.main',
+                          bgcolor: 'error.main',
+                          color: 'white'
+                        }
+                      }}
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+          </>
         )}
       </Stack>
 

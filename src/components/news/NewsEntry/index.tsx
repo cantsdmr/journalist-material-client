@@ -134,28 +134,31 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
         </Typography>
       </Box>
 
-      <Card 
+      <Card
         onClick={handleCardClick}
-        sx={{ 
+        sx={{
           display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
+          flexDirection: 'column',
           cursor: 'pointer',
           bgcolor: 'background.paper',
           borderRadius: 2,
           overflow: 'hidden',
-          '&:hover': { 
+          boxShadow: 'none',
+          border: '1px solid',
+          borderColor: 'divider',
+          '&:hover': {
             '& .news-thumbnail': { transform: 'scale(1.05)' },
-            '& .news-title': { color: 'primary.main' }
-          }
+            '& .news-title': { color: 'primary.main' },
+            boxShadow: 1
+          },
+          transition: 'box-shadow 0.2s ease'
         }}
       >
-        <Box 
-          sx={{ 
+        <Box
+          sx={{
             position: 'relative',
-            width: { xs: '100%', sm: '360px' },
-            minWidth: { sm: '360px' },
-            height: { xs: '220px', sm: '200px' },
-            flexShrink: 0,
+            width: '100%',
+            paddingTop: '56.25%', // 16:9 aspect ratio
             overflow: 'hidden',
             bgcolor: 'grey.100'
           }}
@@ -167,6 +170,9 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
               preload="metadata"
               className="news-thumbnail"
               sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
@@ -182,6 +188,9 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
               alt={news.title}
               className="news-thumbnail"
               sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
@@ -210,41 +219,43 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
           )}
         </Box>
 
-        <Box 
-          sx={{ 
-            p: 3,
+        <Box
+          sx={{
+            p: 2.5,
             flex: 1,
             display: 'flex',
             flexDirection: 'column'
           }}
         >
-          <Typography 
+          <Typography
             className="news-title"
-            variant="subtitle1" 
-            sx={{ 
+            variant="h6"
+            sx={{
               fontWeight: 600,
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              lineHeight: 1.4,
+              lineHeight: 1.3,
               transition: 'color 0.2s',
-              mb: 2
+              mb: 1,
+              fontSize: '1rem'
             }}
           >
             {news.title}
           </Typography>
 
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             color="text.secondary"
-            sx={{ 
+            sx={{
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              mb: 3,
-              lineHeight: 1.6
+              mb: 2,
+              lineHeight: 1.5,
+              fontSize: '0.875rem'
             }}
           >
             {news.content}

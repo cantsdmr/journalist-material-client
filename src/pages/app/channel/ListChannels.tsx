@@ -157,18 +157,18 @@ const ListChannels: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom>
+    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           Discover Channels
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body2" color="text.secondary">
           Find and subscribe to channels from your favorite journalists
         </Typography>
       </Box>
 
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 3 }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
@@ -185,7 +185,7 @@ const ListChannels: React.FC = () => {
         loader={
           <Stack spacing={2} sx={{ mt: 2 }}>
             {[...Array(2)].map((_, index) => (
-              <Box 
+              <Box
                 key={index}
                 sx={{
                   display: 'flex',
@@ -198,16 +198,16 @@ const ListChannels: React.FC = () => {
                       : alpha(theme.palette.common.black, 0.03)
                 }}
               >
-                <Box 
-                  sx={{ 
-                    width: 56, 
-                    height: 56, 
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
                     borderRadius: 2,
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
                         ? alpha(theme.palette.common.white, 0.1)
                         : alpha(theme.palette.common.black, 0.1)
-                  }} 
+                  }}
                 />
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ height: 24, width: '40%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.300' }} />
@@ -219,9 +219,9 @@ const ListChannels: React.FC = () => {
           </Stack>
         }
         endMessage={
-          <Box sx={{ 
-            textAlign: 'center', 
-            mt: 4, 
+          <Box sx={{
+            textAlign: 'center',
+            mt: 4,
             color: 'text.secondary',
             fontSize: '0.875rem'
           }}>
@@ -229,9 +229,9 @@ const ListChannels: React.FC = () => {
           </Box>
         }
       >
-        <Stack spacing={1}>
+        <Stack spacing={2}>
           {channels.map((channel) => (
-            <ChannelItem 
+            <ChannelItem
               key={channel.id}
               channel={channel}
               hasSubscription={channelRelations.hasSubscription(channel.id)}
@@ -242,7 +242,7 @@ const ListChannels: React.FC = () => {
           ))}
         </Stack>
       </InfiniteScroll>
-    </Container>
+    </Box>
   );
 };
 

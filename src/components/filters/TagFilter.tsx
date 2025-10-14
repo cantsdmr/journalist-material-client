@@ -3,9 +3,12 @@ import {
   Box,
   Chip,
   Typography,
-  Skeleton
+  Skeleton,
+  IconButton
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import { Tag as BaseTag } from '@/types/entities/Tag';
@@ -19,21 +22,35 @@ interface Tag extends BaseTag {
 
 // Styled components
 const TagChip = styled(Chip)(({ theme }) => ({
-  borderRadius: theme.spacing(3),
-  margin: theme.spacing(0.5),
+  borderRadius: theme.spacing(1),
+  height: 36,
   fontWeight: 500,
+  fontSize: '0.875rem',
+  padding: '0 12px',
+  transition: 'all 0.2s ease',
   '&.selected': {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.mode === 'dark'
+      ? theme.palette.grey[800]
+      : theme.palette.grey[900],
+    color: theme.palette.mode === 'dark'
+      ? theme.palette.common.white
+      : theme.palette.common.white,
     '&:hover': {
-      backgroundColor: theme.palette.primary.dark,
+      backgroundColor: theme.palette.mode === 'dark'
+        ? theme.palette.grey[700]
+        : theme.palette.grey[800],
     }
   },
   '&:not(.selected)': {
-    backgroundColor: theme.palette.background.paper,
-    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.08)'
+      : 'rgba(0, 0, 0, 0.06)',
+    color: theme.palette.text.primary,
+    border: 'none',
     '&:hover': {
-      backgroundColor: theme.palette.action.hover,
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255, 255, 255, 0.12)'
+        : 'rgba(0, 0, 0, 0.1)',
     }
   }
 }));
@@ -42,18 +59,27 @@ const ScrollableContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   overflowX: 'auto',
   overflowY: 'hidden',
-  paddingBottom: theme.spacing(1),
   gap: theme.spacing(1),
+  paddingBottom: theme.spacing(0.5),
+  scrollbarWidth: 'none', // Firefox
   '&::-webkit-scrollbar': {
-    height: 6,
+    display: 'none', // Chrome, Safari, Opera
   },
-  '&::-webkit-scrollbar-track': {
-    backgroundColor: theme.palette.action.hover,
-    borderRadius: 3,
-  },
-  '&::-webkit-scrollbar-thumb': {
-    backgroundColor: theme.palette.action.disabled,
-    borderRadius: 3,
+  msOverflowStyle: 'none', // IE and Edge
+  scrollBehavior: 'smooth'
+}));
+
+const ArrowButton = styled(IconButton)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark'
+    ? 'rgba(255, 255, 255, 0.08)'
+    : 'rgba(0, 0, 0, 0.06)',
+  width: 36,
+  height: 36,
+  flexShrink: 0,
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255, 255, 255, 0.12)'
+      : 'rgba(0, 0, 0, 0.1)',
   }
 }));
 
@@ -77,6 +103,9 @@ const TagFilter: React.FC<TagFilterProps> = ({
 }) => {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
@@ -160,7 +189,7 @@ const TagFilter: React.FC<TagFilterProps> = ({
   // Handle tag selection
   const handleTagClick = (tagName: string) => {
     const isSelected = selectedTags.includes(tagName);
-    
+
     if (isSelected) {
       // Remove tag
       onTagsChange(selectedTags.filter(tag => tag !== tagName));
@@ -172,18 +201,54 @@ const TagFilter: React.FC<TagFilterProps> = ({
     }
   };
 
+  // Check if content is scrollable
+  const checkScroll = () => {
+    if (containerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+      setShowLeftArrow(scrollLeft > 0);
+      setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScroll);
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        container.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+      };
+    }
+  }, [availableTags, loading]);
+
+  // Handle scroll left
+  const handleScrollLeft = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+  };
+
+  // Handle scroll right
+  const handleScrollRight = () => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+  };
+
   // Render loading state
   if (loading) {
     return (
-      <Box className={className} sx={{ py: 1 }}>
-        <ScrollableContainer>
-          {[...Array(8)].map((_, index) => (
+      <Box className={className} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <ScrollableContainer sx={{ flex: 1 }}>
+          {[...Array(10)].map((_, index) => (
             <Skeleton
               key={index}
               variant="rounded"
-              width={80}
-              height={32}
-              sx={{ borderRadius: 3, flexShrink: 0 }}
+              width={100}
+              height={36}
+              sx={{ borderRadius: 1, flexShrink: 0 }}
             />
           ))}
         </ScrollableContainer>
@@ -192,65 +257,43 @@ const TagFilter: React.FC<TagFilterProps> = ({
   }
 
   return (
-    <Box className={className} sx={{ py: 1 }}>
-      <ScrollableContainer>
+    <Box className={className} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {showLeftArrow && (
+        <ArrowButton onClick={handleScrollLeft} size="small">
+          <ArrowBackIcon fontSize="small" />
+        </ArrowButton>
+      )}
+
+      <ScrollableContainer ref={containerRef} sx={{ flex: 1 }}>
+        {/* All button */}
+        <TagChip
+          label="All"
+          className={selectedTags.length === 0 ? 'selected' : ''}
+          onClick={() => onTagsChange([])}
+          clickable
+          sx={{ flexShrink: 0 }}
+        />
+
         {availableTags.map((tag) => {
           const isSelected = selectedTags.includes(tag.name);
-          
+
           return (
             <TagChip
               key={tag.id}
-              label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  {tag.name}
-                  {showCounts && tag.count && tag.count > 0 && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        fontSize: '0.7rem',
-                        opacity: 0.8,
-                        ml: 0.5
-                      }}
-                    >
-                      {tag.count}
-                    </Typography>
-                  )}
-                </Box>
-              }
+              label={tag.name}
               className={isSelected ? 'selected' : ''}
               onClick={() => handleTagClick(tag.name)}
               clickable
-              size="small"
-              sx={{
-                flexShrink: 0,
-                ...(tag.trending && {
-                  background: 'linear-gradient(45deg, #f44336 30%, #ff9800 90%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #d32f2f 30%, #f57c00 90%)',
-                  }
-                }),
-                ...(tag.popular && !tag.trending && {
-                  background: 'linear-gradient(45deg, #2196f3 30%, #21cbf3 90%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(45deg, #1976d2 30%, #0097a7 90%)',
-                  }
-                })
-              }}
+              sx={{ flexShrink: 0 }}
             />
           );
         })}
       </ScrollableContainer>
-      
-      {selectedTags.length > 0 && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ ml: 1, mt: 1, display: 'block' }}
-        >
-          {selectedTags.length}/{maxTags} tags selected
-        </Typography>
+
+      {showRightArrow && (
+        <ArrowButton onClick={handleScrollRight} size="small">
+          <ArrowForwardIcon fontSize="small" />
+        </ArrowButton>
       )}
     </Box>
   );
