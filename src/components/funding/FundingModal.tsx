@@ -79,7 +79,7 @@ const FundingModal: React.FC<FundingModalProps> = ({
   const loadPaymentMethods = async () => {
     try {
       const methods = await api.accountApi.getPaymentMethods();
-      setPaymentMethods(methods.data || []);
+      setPaymentMethods(methods.items || []);
     } catch (err) {
       console.error('Failed to load payment methods:', err);
     }
@@ -168,7 +168,7 @@ const FundingModal: React.FC<FundingModalProps> = ({
         </Typography>
       </Box>
 
-      <FundingProgress 
+      <FundingProgress
         currentAmount={fundingData.currentAmount}
         goalAmount={fundingData.goalAmount}
         contributorCount={fundingData.contributorCount}
@@ -198,9 +198,9 @@ const FundingModal: React.FC<FundingModalProps> = ({
           label="Custom Amount"
           type="number"
           value={contributionData.amount || ''}
-          onChange={(e) => setContributionData(prev => ({ 
-            ...prev, 
-            amount: Number(e.target.value) 
+          onChange={(e) => setContributionData(prev => ({
+            ...prev,
+            amount: Number(e.target.value)
           }))}
           fullWidth
           InputProps={{
@@ -222,9 +222,9 @@ const FundingModal: React.FC<FundingModalProps> = ({
         multiline
         rows={3}
         value={contributionData.comment}
-        onChange={(e) => setContributionData(prev => ({ 
-          ...prev, 
-          comment: e.target.value 
+        onChange={(e) => setContributionData(prev => ({
+          ...prev,
+          comment: e.target.value
         }))}
         fullWidth
         placeholder="Leave a message of support..."
@@ -238,10 +238,10 @@ const FundingModal: React.FC<FundingModalProps> = ({
         <Typography variant="h6" gutterBottom>
           Payment Details
         </Typography>
-        <Box sx={{ 
-          p: 2, 
-          bgcolor: 'background.paper', 
-          borderRadius: 1, 
+        <Box sx={{
+          p: 2,
+          bgcolor: 'background.paper',
+          borderRadius: 1,
           border: '1px solid',
           borderColor: 'divider'
         }}>
@@ -259,9 +259,9 @@ const FundingModal: React.FC<FundingModalProps> = ({
       <PaymentMethodSelector
         paymentMethods={paymentMethods}
         selectedMethodId={contributionData.payment_method_id}
-        onMethodSelect={(methodId) => setContributionData(prev => ({ 
-          ...prev, 
-          payment_method_id: methodId 
+        onMethodSelect={(methodId) => setContributionData(prev => ({
+          ...prev,
+          payment_method_id: methodId
         }))}
         currency={contributionData.currency}
       />
@@ -288,7 +288,7 @@ const FundingModal: React.FC<FundingModalProps> = ({
             <Button onClick={handleClose} disabled={loading}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleNextStep}
               variant="contained"
               disabled={loading || contributionData.amount <= 0}
@@ -303,7 +303,7 @@ const FundingModal: React.FC<FundingModalProps> = ({
             <Button onClick={handlePreviousStep} disabled={loading}>
               Back
             </Button>
-            <Button 
+            <Button
               onClick={handleSubmitContribution}
               variant="contained"
               disabled={loading || !contributionData.payment_method_id}
@@ -320,10 +320,10 @@ const FundingModal: React.FC<FundingModalProps> = ({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={loading ? undefined : handleClose} 
-      maxWidth="sm" 
+    <Dialog
+      open={open}
+      onClose={loading ? undefined : handleClose}
+      maxWidth="sm"
       fullWidth
       PaperProps={{
         sx: { borderRadius: 2 }
@@ -332,19 +332,19 @@ const FundingModal: React.FC<FundingModalProps> = ({
       <DialogTitle sx={{ fontWeight: 600 }}>
         Fund {fundingData.title}
       </DialogTitle>
-      
+
       <DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
-        
+
         {step === 'amount' && renderAmountStep()}
         {step === 'payment' && renderPaymentStep()}
         {step === 'processing' && renderProcessingStep()}
       </DialogContent>
-      
+
       {getDialogActions() && (
         <DialogActions sx={{ px: 3, pb: 2 }}>
           {getDialogActions()}

@@ -53,42 +53,50 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
       sx={{
         display: 'flex',
         alignItems: 'flex-start',
-        gap: 2,
-        p: 2,
-        borderRadius: 2,
+        gap: 1.5,
+        p: 1.5,
+        borderRadius: 1.5,
         cursor: 'pointer',
         transition: 'all 0.2s ease-in-out',
+        height: '100%',
+        border: '1px solid',
+        borderColor: 'transparent',
         '&:hover': {
-          bgcolor: (theme) => 
-            theme.palette.mode === 'dark' 
+          bgcolor: (theme) =>
+            theme.palette.mode === 'dark'
               ? alpha(theme.palette.common.white, 0.05)
               : alpha(theme.palette.common.black, 0.03),
+          borderColor: 'divider',
           transform: 'translateX(4px)'
         }
       }}
     >
-      <Avatar 
-        src={channel.logoUrl} 
-        sx={{ 
-          width: 56, 
-          height: 56,
-          borderRadius: 2,
+      <Avatar
+        src={channel.logoUrl}
+        sx={{
+          width: 48,
+          height: 48,
+          borderRadius: 1.5,
           bgcolor: 'primary.main'
         }}
       />
 
-      <Box sx={{ flex: 1 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           mb: 0.5
         }}>
-          <Typography 
-            variant="subtitle1" 
-            sx={{ 
+          <Typography
+            variant="body1"
+            sx={{
               fontWeight: 600,
-              color: 'text.primary'
+              color: 'text.primary',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              fontSize: '0.9rem'
             }}
           >
             {channel.name}
@@ -100,64 +108,68 @@ const ChannelItem: React.FC<ChannelItemProps> = ({
               color="primary"
               onDelete={handleJoin}
               size="small"
+              sx={{ height: 24 }}
             />
           ) : (
             <IconButton
               size="small"
               onClick={handleJoin}
-              sx={{ 
+              sx={{
                 bgcolor: 'primary.main',
                 color: 'white',
+                width: 32,
+                height: 32,
                 '&:hover': {
                   bgcolor: 'primary.dark',
                 }
               }}
             >
-              <WorkspacePremiumIcon />
+              <WorkspacePremiumIcon sx={{ fontSize: 18 }} />
             </IconButton>
           )}
         </Box>
 
-        <Typography 
-          variant="body2" 
+        <Typography
+          variant="body2"
           color="text.secondary"
           sx={{
-            mb: 1,
+            mb: 0.5,
             display: '-webkit-box',
-            WebkitLineClamp: 2,
+            WebkitLineClamp: 1,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
-            textOverflow: 'ellipsis'
+            textOverflow: 'ellipsis',
+            fontSize: '0.8rem'
           }}
         >
           {channel.description}
         </Typography>
 
-        <Stack 
-          direction="row" 
+        <Stack
+          direction="row"
           spacing={2}
-          sx={{ 
+          sx={{
             color: 'text.secondary',
-            fontSize: '0.875rem'
+            fontSize: '0.75rem'
           }}
         >
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: 0.5
           }}>
-            <PeopleIcon sx={{ fontSize: 16 }} />
-            {channel.stats?.activeSubscriptionCount?.toLocaleString('en-US', { 
+            <PeopleIcon sx={{ fontSize: 14 }} />
+            {channel.stats?.activeSubscriptionCount?.toLocaleString('en-US', {
               notation: 'compact',
-              maximumFractionDigits: 1 
+              maximumFractionDigits: 1
             })}
           </Box>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: 0.5
           }}>
-            <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
+            <WorkspacePremiumIcon sx={{ fontSize: 14 }} />
             {channel.stats?.tierCount || 0} Tiers
           </Box>
         </Stack>

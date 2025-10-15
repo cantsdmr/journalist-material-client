@@ -28,7 +28,7 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async getPaymentMethods() {
-    return this._get<{ data: PaymentMethod[], pagination: any }>(`${API_PATH}/payment-methods`);
+    return this._list<{ data: PaymentMethod[], pagination: any }>(`${API_PATH}/payment-methods`);
   }
 
   public async getPaymentMethod(paymentMethodId: string) {

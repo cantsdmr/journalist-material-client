@@ -91,18 +91,18 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
   };
 
   return (
-    <Box sx={{ mb: 4 }}>
-      <Box 
+    <Box sx={{ mb: 2.5 }}>
+      <Box
         component={RouterLink}
         to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', news.channel.id)}
-        sx={{ 
+        sx={{
           display: 'inline-flex',
           alignItems: 'center',
           color: 'text.primary',
           textDecoration: 'none',
-          mb: 1.5,
+          mb: 1,
           px: 0.5,
-          '&:hover': { 
+          '&:hover': {
             color: 'primary.main',
             '& .channel-name': { color: 'primary.main' }
           }
@@ -112,22 +112,23 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
           src={news.channel.logoUrl}
           alt={news.channel.name}
           variant="rounded"
-          sx={{ 
-            width: 28, 
-            height: 28, 
-            mr: 1.5,
+          sx={{
+            width: 24,
+            height: 24,
+            mr: 1,
             bgcolor: 'grey.200',
-            borderRadius: 1.5
+            borderRadius: 1
           }}
         >
-          <AccountCircleIcon fontSize="small" />
+          <AccountCircleIcon sx={{ fontSize: 16 }} />
         </Avatar>
-        <Typography 
-          variant="body2" 
+        <Typography
+          variant="body2"
           className="channel-name"
           fontWeight={500}
-          sx={{ 
-            transition: 'color 0.2s'
+          sx={{
+            transition: 'color 0.2s',
+            fontSize: '0.8rem'
           }}
         >
           {news.channel.name}
@@ -141,11 +142,12 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
           flexDirection: 'column',
           cursor: 'pointer',
           bgcolor: 'background.paper',
-          borderRadius: 2,
+          borderRadius: 1.5,
           overflow: 'hidden',
           boxShadow: 'none',
           border: '1px solid',
           borderColor: 'divider',
+          height: '100%',
           '&:hover': {
             '& .news-thumbnail': { transform: 'scale(1.05)' },
             '& .news-title': { color: 'primary.main' },
@@ -221,7 +223,7 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
 
         <Box
           sx={{
-            p: 2.5,
+            p: 1.5,
             flex: 1,
             display: 'flex',
             flexDirection: 'column'
@@ -238,8 +240,8 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
               overflow: 'hidden',
               lineHeight: 1.3,
               transition: 'color 0.2s',
-              mb: 1,
-              fontSize: '1rem'
+              mb: 0.5,
+              fontSize: '0.9rem'
             }}
           >
             {news.title}
@@ -253,43 +255,44 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              mb: 2,
-              lineHeight: 1.5,
-              fontSize: '0.875rem'
+              mb: 1.5,
+              lineHeight: 1.4,
+              fontSize: '0.8rem'
             }}
           >
             {news.content}
           </Typography>
 
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             mt: 'auto'
           }}>
-            <Typography 
-              variant="caption" 
+            <Typography
+              variant="caption"
               color="text.secondary"
-              sx={{ fontWeight: 500 }}
+              sx={{ fontWeight: 500, fontSize: '0.7rem' }}
             >
               {new Date(news.publishedAt).toLocaleDateString()}
             </Typography>
 
-            <Stack direction="row" spacing={1.5}>
+            <Stack direction="row" spacing={0.5}>
               <Tooltip title="Like">
-                <IconButton 
+                <IconButton
                   className="action-button"
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
                     // Handle like
                   }}
-                  sx={{ 
+                  sx={{
                     color: 'text.secondary',
+                    padding: '4px',
                     '&:hover': { color: 'error.main' }
                   }}
                 >
-                  <FavoriteIcon fontSize="small" />
+                  <FavoriteIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
               

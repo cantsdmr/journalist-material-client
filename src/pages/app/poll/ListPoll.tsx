@@ -111,7 +111,7 @@ const ListPoll: React.FC = () => {
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           Community Polls
         </Typography>
@@ -120,7 +120,7 @@ const ListPoll: React.FC = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3, maxWidth: 800, mx: 'auto' }}>
         <Tabs
           value={activeTab}
           onChange={(_, newValue) => setActiveTab(newValue)}
@@ -133,7 +133,7 @@ const ListPoll: React.FC = () => {
       </Box>
 
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
@@ -149,68 +149,70 @@ const ListPoll: React.FC = () => {
           description="There are no polls available in this category at the moment."
         />
       ) : (
-        <InfiniteScroll
-          dataLength={polls.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={
-            <Stack spacing={2} sx={{ mt: 2 }}>
-              {[...Array(2)].map((_, index) => (
+        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+          <InfiniteScroll
+            dataLength={polls.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={
+              <Stack spacing={2} sx={{ mt: 2 }}>
+                {[...Array(2)].map((_, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? alpha(theme.palette.common.white, 0.05)
+                          : alpha(theme.palette.common.black, 0.03)
+                    }}
+                  >
+                    <Box sx={{ height: 24, width: '40%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
+                    <Stack spacing={2}>
+                      {[...Array(4)].map((_, i) => (
+                        <Box
+                          key={i}
+                          sx={{
+                            height: 40,
+                            borderRadius: 1,
+                            bgcolor: (theme) =>
+                              theme.palette.mode === 'dark'
+                                ? alpha(theme.palette.common.white, 0.1)
+                                : alpha(theme.palette.common.black, 0.1)
+                          }}
+                        />
+                      ))}
+                    </Stack>
+                  </Box>
+                ))}
+              </Stack>
+            }
+            endMessage={
+              <Box sx={{
+                textAlign: 'center',
+                mt: 4,
+                color: 'text.secondary',
+                fontSize: '0.875rem'
+              }}>
+                No more polls to display
+              </Box>
+            }
+          >
+            <Stack spacing={2.5}>
+              {polls.map((poll) => (
                 <Box
-                  key={index}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? alpha(theme.palette.common.white, 0.05)
-                        : alpha(theme.palette.common.black, 0.03)
-                  }}
+                  key={poll.id}
+                  component={RouterLink}
+                  to={PATHS.APP_POLL_VIEW.replace(':id', poll.id)}
+                  sx={{ textDecoration: 'none' }}
                 >
-                  <Box sx={{ height: 24, width: '40%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
-                  <Stack spacing={2}>
-                    {[...Array(4)].map((_, i) => (
-                      <Box
-                        key={i}
-                        sx={{
-                          height: 40,
-                          borderRadius: 1,
-                          bgcolor: (theme) =>
-                            theme.palette.mode === 'dark'
-                              ? alpha(theme.palette.common.white, 0.1)
-                              : alpha(theme.palette.common.black, 0.1)
-                        }}
-                      />
-                    ))}
-                  </Stack>
+                  <PollCard poll={poll} />
                 </Box>
               ))}
             </Stack>
-          }
-          endMessage={
-            <Box sx={{
-              textAlign: 'center',
-              mt: 4,
-              color: 'text.secondary',
-              fontSize: '0.875rem'
-            }}>
-              No more polls to display
-            </Box>
-          }
-        >
-          <Stack spacing={3}>
-            {polls.map((poll) => (
-              <Box
-                key={poll.id}
-                component={RouterLink}
-                to={PATHS.APP_POLL_VIEW.replace(':id', poll.id)}
-                sx={{ textDecoration: 'none' }}
-              >
-                <PollCard poll={poll} />
-              </Box>
-            ))}
-          </Stack>
-        </InfiniteScroll>
+          </InfiniteScroll>
+        </Box>
       )}
     </Box>
   );

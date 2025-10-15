@@ -132,7 +132,7 @@ const Account: React.FC = () => {
   const [showRightArrow, setShowRightArrow] = useState(false);
 
   const menuItems = [
-    { id: 'profile' as SettingSection, icon: <AccountCircle />, label: 'Public profile', divider: false },
+    { id: 'profile' as SettingSection, icon: <AccountCircle />, label: 'Profile', divider: false },
     { id: 'payment' as SettingSection, icon: <Payment />, label: 'Payment Methods', divider: false },
     { id: 'subscriptions' as SettingSection, icon: <SubscriptionsIcon />, label: 'Subscriptions', divider: true },
     { id: 'appearance' as SettingSection, icon: <Palette />, label: 'Appearance', divider: false },
@@ -211,7 +211,7 @@ const Account: React.FC = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            {user?.displayName || 'User'}
+            {user?.displayName || 'Account'}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             ({user?.email || 'user'})

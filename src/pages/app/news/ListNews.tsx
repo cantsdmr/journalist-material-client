@@ -277,14 +277,25 @@ const ListNews: React.FC<ListNewsProps> = ({
             </Box>
           }
         >
-          <Stack spacing={3}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)'
+              },
+              gap: 3,
+              rowGap: 4
+            }}
+          >
             {news.map((item) => (
               <NewsEntry
                 key={item.id}
                 news={item}
               />
             ))}
-          </Stack>
+          </Box>
         </InfiniteScroll>
       )}
     </Box>

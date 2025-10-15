@@ -14,25 +14,13 @@ import {
   DialogActions,
   Chip,
   IconButton,
-  Grid,
-  Paper,
-  Collapse,
   Avatar,
-  CardActionArea,
   useTheme,
   Divider
 } from '@mui/material';
-import { 
-  Add, 
-  Delete, 
-  Star, 
-  CreditCard, 
-  ExpandLess,
-  CheckCircle,
-  RadioButtonUnchecked,
-  Security,
-  Speed,
-  Verified
+import {
+  Delete,
+  CreditCard
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PaymentMethod, PaymentMethodTypeEnum } from '@/types/index';
@@ -43,15 +31,15 @@ import IyzicoPaymentTokens from './IyzicoPaymentTokens';
 const PaymentMethodsTab: React.FC = () => {
   const theme = useTheme();
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [availablePaymentTypes, setAvailablePaymentTypes] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [addSectionOpen, setAddSectionOpen] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [showPayPalDialog, setShowPayPalDialog] = useState(false);
   const [showIyzicoDialog, setShowIyzicoDialog] = useState(false);
-  
+
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
@@ -62,22 +50,33 @@ const PaymentMethodsTab: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    
-    const methodsResult = await execute(
-      () => api.accountApi.getPaymentMethods(),
-      { showErrorToast: true }
-    );
-    
+
+    // Fetch payment methods and available payment types in parallel
+    const [methodsResult, availableTypesResult] = await Promise.all([
+      execute(
+        () => api.accountApi.getPaymentMethods(),
+        { showErrorToast: true }
+      ),
+      execute(
+        () => api.accountApi.getAvailablePaymentMethods(),
+        { showErrorToast: false }
+      )
+    ]);
+
     if (methodsResult) {
-      setPaymentMethods(methodsResult.data ?? []);
+      setPaymentMethods(methodsResult.items ?? []);
     }
-    
+
+    if (availableTypesResult) {
+      setAvailablePaymentTypes(availableTypesResult);
+    }
+
     setLoading(false);
   };
 
   const handleSetDefault = async (paymentMethod: PaymentMethod) => {
     setError(null);
-    
+
     const result = await execute(
       () => api.accountApi.setDefaultPaymentMethod(paymentMethod.id),
       {
@@ -85,7 +84,7 @@ const PaymentMethodsTab: React.FC = () => {
         successMessage: 'Default payment method updated'
       }
     );
-    
+
     if (result) {
       await fetchData();
     }
@@ -93,9 +92,9 @@ const PaymentMethodsTab: React.FC = () => {
 
   const handleDelete = async () => {
     if (!selectedPaymentMethod) return;
-    
+
     setError(null);
-    
+
     const result = await execute(
       () => api.accountApi.deletePaymentMethod(selectedPaymentMethod.id),
       {
@@ -103,7 +102,7 @@ const PaymentMethodsTab: React.FC = () => {
         successMessage: 'Payment method deleted successfully'
       }
     );
-    
+
     if (result) {
       await fetchData();
       setDeleteDialogOpen(false);
@@ -121,24 +120,25 @@ const PaymentMethodsTab: React.FC = () => {
     setSelectedPaymentMethod(null);
   };
 
-  const toggleAddSection = () => {
-    setAddSectionOpen(!addSectionOpen);
-  };
-
-  const handlePaymentMethodAdded = () => {
-    fetchData();
+  const handlePaymentMethodAdded = async () => {
+    await fetchData();
     setSuccess('Payment method added successfully');
-    setAddSectionOpen(false);
   };
 
   const handlePayPalConnect = () => {
     setShowPayPalDialog(true);
   };
 
-  const handlePayPalSuccess = () => {
-    setShowPayPalDialog(false);
-    handlePaymentMethodAdded();
-    setSuccess('PayPal account connected successfully!');
+  const handlePayPalSuccess = async () => {
+    try {
+      setShowPayPalDialog(false);
+      setSuccess('Connecting PayPal account...');
+      await fetchData(); // Direct fetch to ensure data is refreshed
+      setSuccess('PayPal account connected successfully!');
+    } catch (error) {
+      console.error('Error refreshing payment methods:', error);
+      setSuccess('PayPal account connected successfully!');
+    }
   };
 
   const handlePayPalError = (error: string) => {
@@ -150,9 +150,9 @@ const PaymentMethodsTab: React.FC = () => {
     setShowIyzicoDialog(true);
   };
 
-  const handleIyzicoSuccess = () => {
+  const handleIyzicoSuccess = async () => {
     setShowIyzicoDialog(false);
-    handlePaymentMethodAdded();
+    await handlePaymentMethodAdded();
     setSuccess('Iyzico card added successfully!');
   };
 
@@ -165,10 +165,10 @@ const PaymentMethodsTab: React.FC = () => {
     switch (typeId) {
       case PaymentMethodTypeEnum.PAYPAL:
         return (
-          <Avatar 
-            sx={{ 
-              bgcolor: '#0070ba', 
-              width: 40, 
+          <Avatar
+            sx={{
+              bgcolor: '#0070ba',
+              width: 40,
               height: 40,
               fontSize: '12px',
               fontWeight: 'bold',
@@ -180,10 +180,10 @@ const PaymentMethodsTab: React.FC = () => {
         );
       case PaymentMethodTypeEnum.IYZICO:
         return (
-          <Avatar 
-            sx={{ 
-              bgcolor: '#00a650', 
-              width: 40, 
+          <Avatar
+            sx={{
+              bgcolor: '#00a650',
+              width: 40,
               height: 40,
               fontSize: '11px',
               fontWeight: 'bold',
@@ -215,6 +215,11 @@ const PaymentMethodsTab: React.FC = () => {
       default:
         return 'Payment method';
     }
+  };
+
+  // Check if a payment type is available in the region
+  const isPaymentTypeAvailable = (typeId: number) => {
+    return availablePaymentTypes.includes(typeId);
   };
 
   if (loading) {
@@ -255,122 +260,164 @@ const PaymentMethodsTab: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* PayPal Row */}
+        {/* Available Payment Providers */}
         <Stack spacing={0} divider={<Divider />} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
-          <Box
-            sx={{
-              p: 2.5,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2.5,
-              transition: 'background-color 0.2s',
-              '&:hover': {
-                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'
-              }
-            }}
-          >
-            {/* PayPal Logo */}
-            <Box sx={{ flexShrink: 0 }}>
-              <Avatar
-                sx={{
-                  bgcolor: '#0070ba',
-                  width: 40,
-                  height: 40,
-                  fontSize: '12px',
-                  fontWeight: 'bold',
-                  color: 'white'
-                }}
-              >
-                PayPal
-              </Avatar>
-            </Box>
+          {/* PayPal Row - Only show if available */}
+          {isPaymentTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && (
+            <Box
+              sx={{
+                p: 2.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2.5,
+                transition: 'background-color 0.2s',
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'
+                }
+              }}
+            >
+              {/* PayPal Logo */}
+              <Box sx={{ flexShrink: 0 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: '#0070ba',
+                    width: 40,
+                    height: 40,
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    color: 'white'
+                  }}
+                >
+                  PayPal
+                </Avatar>
+              </Box>
 
-            {/* Details */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                PayPal
+              {/* Details */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    PayPal
+                  </Typography>
+                  {paymentMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) && (
+                    <Chip
+                      label="Connected"
+                      size="small"
+                      color="success"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.7rem',
+                        fontWeight: 600
+                      }}
+                    />
+                  )}
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  Connect your PayPal account securely
+                </Typography>
+              </Box>
+
+              {/* Action */}
+              <Box sx={{ flexShrink: 0, width: 100 }}>
+                <Button
+                  onClick={handlePayPalConnect}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    borderRadius: 1.5,
+                    textTransform: 'none',
+                    fontSize: '0.8rem',
+                    fontWeight: 500
+                  }}
+                >
+                  {paymentMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) ? 'Add Another' : 'Connect'}
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          {/* Iyzico Row - Only show if available */}
+          {isPaymentTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
+            <Box
+              sx={{
+                p: 2.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2.5,
+                transition: 'background-color 0.2s',
+                '&:hover': {
+                  bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'
+                }
+              }}
+            >
+              {/* Iyzico Logo */}
+              <Box sx={{ flexShrink: 0 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: '#00a650',
+                    width: 40,
+                    height: 40,
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    color: 'white'
+                  }}
+                >
+                  iyzico
+                </Avatar>
+              </Box>
+
+              {/* Details */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    Credit/Debit Card
+                  </Typography>
+                  {paymentMethods.some(m => m.typeId === PaymentMethodTypeEnum.IYZICO) && (
+                    <Chip
+                      label={`${paymentMethods.filter(m => m.typeId === PaymentMethodTypeEnum.IYZICO).length} Card(s)`}
+                      size="small"
+                      color="success"
+                      sx={{
+                        height: 20,
+                        fontSize: '0.7rem',
+                        fontWeight: 600
+                      }}
+                    />
+                  )}
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                  Güvenli kart ödeme sistemi
+                </Typography>
+              </Box>
+
+              {/* Action */}
+              <Box sx={{ flexShrink: 0, width: 100 }}>
+                <Button
+                  onClick={handleIyzicoConnect}
+                  size="small"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    borderRadius: 1.5,
+                    textTransform: 'none',
+                    fontSize: '0.8rem',
+                    fontWeight: 500
+                  }}
+                >
+                  Add Card
+                </Button>
+              </Box>
+            </Box>
+          )}
+
+          {/* Show message if no payment methods are available */}
+          {!isPaymentTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && !isPaymentTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                No payment methods are currently available in your region.
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                Connect your PayPal account securely
-              </Typography>
             </Box>
-
-            {/* Action */}
-            <Box sx={{ flexShrink: 0, width: 100 }}>
-              <Button
-                onClick={handlePayPalConnect}
-                size="small"
-                variant="outlined"
-                fullWidth
-                sx={{
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: 500
-                }}
-              >
-                Connect
-              </Button>
-            </Box>
-          </Box>
-
-          {/* Iyzico Row */}
-          <Box
-            sx={{
-              p: 2.5,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2.5,
-              transition: 'background-color 0.2s',
-              '&:hover': {
-                bgcolor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)'
-              }
-            }}
-          >
-            {/* Iyzico Logo */}
-            <Box sx={{ flexShrink: 0 }}>
-              <Avatar
-                sx={{
-                  bgcolor: '#00a650',
-                  width: 40,
-                  height: 40,
-                  fontSize: '11px',
-                  fontWeight: 'bold',
-                  color: 'white'
-                }}
-              >
-                iyzico
-              </Avatar>
-            </Box>
-
-            {/* Details */}
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body1" sx={{ fontWeight: 600, mb: 0.5 }}>
-                Credit/Debit Card
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
-                Güvenli kart ödeme sistemi
-              </Typography>
-            </Box>
-
-            {/* Action */}
-            <Box sx={{ flexShrink: 0, width: 100 }}>
-              <Button
-                onClick={handleIyzicoConnect}
-                size="small"
-                variant="outlined"
-                fullWidth
-                sx={{
-                  borderRadius: 1.5,
-                  textTransform: 'none',
-                  fontSize: '0.8rem',
-                  fontWeight: 500
-                }}
-              >
-                Add Card
-              </Button>
-            </Box>
-          </Box>
+          )}
         </Stack>
 
         {/* Connected Payment Methods */}
@@ -513,10 +560,10 @@ const PaymentMethodsTab: React.FC = () => {
       </Dialog>
 
       {/* PayPal Connection Dialog */}
-      <Dialog 
-        open={showPayPalDialog} 
+      <Dialog
+        open={showPayPalDialog}
         onClose={() => setShowPayPalDialog(false)}
-        maxWidth="sm" 
+        maxWidth="sm"
         fullWidth
       >
         <DialogTitle>Connect PayPal Account</DialogTitle>
@@ -535,10 +582,10 @@ const PaymentMethodsTab: React.FC = () => {
       </Dialog>
 
       {/* Iyzico Connection Dialog */}
-      <Dialog 
-        open={showIyzicoDialog} 
+      <Dialog
+        open={showIyzicoDialog}
         onClose={() => setShowIyzicoDialog(false)}
-        maxWidth="sm" 
+        maxWidth="sm"
         fullWidth
       >
         <DialogTitle>Kart Ekleme</DialogTitle>
@@ -559,4 +606,4 @@ const PaymentMethodsTab: React.FC = () => {
   );
 };
 
-export default PaymentMethodsTab; 
+export default PaymentMethodsTab;

@@ -104,7 +104,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
   return (
     <Card sx={{
       maxWidth: '100%',
-      borderRadius: 2,
+      borderRadius: 1.5,
       boxShadow: 'none',
       border: '1px solid',
       borderColor: 'divider',
@@ -113,31 +113,32 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
         transition: 'box-shadow 0.2s ease'
       }
     }}>
-      <CardContent sx={{ p: 2.5 }}>
+      <CardContent sx={{ p: 1.5 }}>
         {/* Poll Creator Info */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
           <Avatar
             sx={{
-              mr: 1.5,
+              mr: 1,
               bgcolor: theme.palette.primary.main,
-              width: 32,
-              height: 32
+              width: 28,
+              height: 28,
+              fontSize: '0.875rem'
             }}
           >
             {poll.creator?.displayName?.charAt(0).toUpperCase()}
           </Avatar>
           <Box>
-            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.875rem' }}>
+            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.8rem' }}>
               {poll.creator?.displayName}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
               {formatDistanceToNow(new Date(poll.createdAt), { addSuffix: true })}
             </Typography>
           </Box>
         </Box>
 
         {/* Poll Title and Description */}
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: '1rem', mb: 1 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: '0.9rem', mb: 0.5 }}>
           {poll.title}
         </Typography>
         {poll.description && (
@@ -146,9 +147,9 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
             color="text.secondary"
             paragraph
             sx={{
-              mb: 2,
-              lineHeight: 1.5,
-              fontSize: '0.875rem'
+              mb: 1.5,
+              lineHeight: 1.4,
+              fontSize: '0.8rem'
             }}
           >
             {poll.description}

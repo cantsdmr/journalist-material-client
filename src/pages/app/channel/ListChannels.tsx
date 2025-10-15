@@ -178,70 +178,83 @@ const ListChannels: React.FC = () => {
         />
       </Box>
 
-      <InfiniteScroll
-        dataLength={channels.length}
-        next={fetchMoreData}
-        hasMore={hasMore}
-        loader={
-          <Stack spacing={2} sx={{ mt: 2 }}>
-            {[...Array(2)].map((_, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: 'flex',
-                  gap: 2,
-                  p: 2,
-                  borderRadius: 2,
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? alpha(theme.palette.common.white, 0.05)
-                      : alpha(theme.palette.common.black, 0.03)
-                }}
-              >
+      <Box sx={{ overflowX: 'hidden' }}>
+        <InfiniteScroll
+          dataLength={channels.length}
+          next={fetchMoreData}
+          hasMore={hasMore}
+          loader={
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {[...Array(2)].map((_, index) => (
                 <Box
+                  key={index}
                   sx={{
-                    width: 56,
-                    height: 56,
+                    display: 'flex',
+                    gap: 2,
+                    p: 2,
                     borderRadius: 2,
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? alpha(theme.palette.common.white, 0.1)
-                        : alpha(theme.palette.common.black, 0.1)
+                        ? alpha(theme.palette.common.white, 0.05)
+                        : alpha(theme.palette.common.black, 0.03)
                   }}
-                />
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ height: 24, width: '40%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.300' }} />
-                  <Box sx={{ height: 16, width: '80%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.200' }} />
-                  <Box sx={{ height: 16, width: '30%', borderRadius: 0.5, bgcolor: 'grey.200' }} />
+                >
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: 2,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? alpha(theme.palette.common.white, 0.1)
+                          : alpha(theme.palette.common.black, 0.1)
+                    }}
+                  />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ height: 24, width: '40%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.300' }} />
+                    <Box sx={{ height: 16, width: '80%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.200' }} />
+                    <Box sx={{ height: 16, width: '30%', borderRadius: 0.5, bgcolor: 'grey.200' }} />
+                  </Box>
                 </Box>
-              </Box>
+              ))}
+            </Stack>
+          }
+          endMessage={
+            <Box sx={{
+              textAlign: 'center',
+              mt: 4,
+              color: 'text.secondary',
+              fontSize: '0.875rem'
+            }}>
+              No more channels to display
+            </Box>
+          }
+        >
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: 'repeat(2, 1fr)',
+                lg: 'repeat(3, 1fr)'
+              },
+              gap: 3,
+              rowGap: 4
+            }}
+          >
+            {channels.map((channel) => (
+              <ChannelItem
+                key={channel.id}
+                channel={channel}
+                hasSubscription={channelRelations.hasSubscription(channel.id)}
+                subscriptionTier={channelRelations.getSubscriptionTier(channel.id)}
+                onJoin={handleJoin}
+                onCancel={handleCancel}
+              />
             ))}
-          </Stack>
-        }
-        endMessage={
-          <Box sx={{
-            textAlign: 'center',
-            mt: 4,
-            color: 'text.secondary',
-            fontSize: '0.875rem'
-          }}>
-            No more channels to display
           </Box>
-        }
-      >
-        <Stack spacing={2}>
-          {channels.map((channel) => (
-            <ChannelItem
-              key={channel.id}
-              channel={channel}
-              hasSubscription={channelRelations.hasSubscription(channel.id)}
-              subscriptionTier={channelRelations.getSubscriptionTier(channel.id)}
-              onJoin={handleJoin}
-              onCancel={handleCancel}
-            />
-          ))}
-        </Stack>
-      </InfiniteScroll>
+        </InfiniteScroll>
+      </Box>
     </Box>
   );
 };
