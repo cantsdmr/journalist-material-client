@@ -518,8 +518,7 @@ const PaymentMethodsTab: React.FC = () => {
                         color: 'text.secondary',
                         '&:hover': {
                           color: 'error.main',
-                          bgcolor: 'error.main',
-                          color: 'white'
+                          bgcolor: 'error.main'
                         }
                       }}
                     >

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Container, 
-  Typography, 
+import {
+  Typography,
   Stack,
   Box,
 } from '@mui/material';
@@ -38,17 +37,17 @@ const ListNewsSkeleton = () => (
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Box 
-            sx={{ 
-              width: 32, 
-              height: 32, 
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
               borderRadius: 1,
               bgcolor: (theme) =>
                 theme.palette.mode === 'dark'
                   ? alpha(theme.palette.common.white, 0.1)
                   : alpha(theme.palette.common.black, 0.1),
               mr: 1
-            }} 
+            }}
           />
           <Box sx={{ height: 20, width: '30%', borderRadius: 0.5, bgcolor: 'grey.300' }} />
         </Box>
@@ -70,7 +69,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: 'Follow some journalists to see their latest news here'
     };
   }
-  
+
   if (filters.trending) {
     return {
       title: 'Trending News',
@@ -79,7 +78,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: 'There are no trending news articles at the moment'
     };
   }
-  
+
   if (filters.subscribed) {
     return {
       title: 'Subscribed Channels',
@@ -88,7 +87,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: 'Subscribe to channels to see their latest news here'
     };
   }
-  
+
   if (filters.premium) {
     return {
       title: 'Premium News',
@@ -97,7 +96,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: 'No premium news articles available at the moment'
     };
   }
-  
+
   if (filters.channel) {
     return {
       title: 'Channel News',
@@ -106,7 +105,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: 'This channel has not published any news yet'
     };
   }
-  
+
   if (filters.creator) {
     return {
       title: 'Creator News',
@@ -115,7 +114,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: 'This creator has not published any news yet'
     };
   }
-  
+
   if (filters.tags && filters.tags.length > 0) {
     const tagText = filters.tags.length === 1 ? 'tag' : 'tags';
     return {
@@ -125,7 +124,7 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
       emptyDescription: `No news articles found with the selected ${tagText}`
     };
   }
-  
+
   // Default fallback
   return {
     title: 'All News',
@@ -135,8 +134,8 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
   };
 };
 
-const ListNews: React.FC<ListNewsProps> = ({ 
-  filters = {}, 
+const ListNews: React.FC<ListNewsProps> = ({
+  filters = {},
   title: customTitle,
   description: customDescription,
   emptyTitle: customEmptyTitle,
@@ -156,7 +155,7 @@ const ListNews: React.FC<ListNewsProps> = ({
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tagsParam = searchParams.get('tags');
-    
+
     if (tagsParam) {
       const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
       setSelectedTags(urlTags);
@@ -166,7 +165,7 @@ const ListNews: React.FC<ListNewsProps> = ({
   }, [location.search, filters.tags]);
 
   const ITEMS_PER_PAGE = 12;
-  
+
   // Get default content based on filters, but allow custom overrides
   const defaultContent = getDefaultContent(filters);
   const displayTitle = customTitle || defaultContent.title;
@@ -182,11 +181,11 @@ const ListNews: React.FC<ListNewsProps> = ({
 
   const fetchNews = async (_page: number = page) => {
     setLoading(true);
-    
+
     const response = await execute(
       () => api?.newsApi.getNews(
         effectiveFilters,
-        { 
+        {
           page: _page,
           limit: ITEMS_PER_PAGE
         }
@@ -203,7 +202,7 @@ const ListNews: React.FC<ListNewsProps> = ({
       setHasMore(response.metadata.hasNext);
       setPage(response.metadata.currentPage);
     }
-    
+
     setLoading(false);
   };
 
@@ -220,7 +219,7 @@ const ListNews: React.FC<ListNewsProps> = ({
 
   const handleTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
-    
+
     // Update URL with selected tags
     const searchParams = new URLSearchParams(location.search);
     if (tags.length > 0) {
@@ -228,7 +227,7 @@ const ListNews: React.FC<ListNewsProps> = ({
     } else {
       searchParams.delete('tags');
     }
-    
+
     const newPath = `${location.pathname}?${searchParams.toString()}`;
     navigate(newPath, { replace: true });
   };

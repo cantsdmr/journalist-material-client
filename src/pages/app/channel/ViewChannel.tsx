@@ -20,7 +20,7 @@ import {
     Tabs,
     Tab,
     IconButton,
-    Link
+    // Link
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Channel } from '@/types/index';
@@ -33,8 +33,8 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import InfoIcon from '@mui/icons-material/Info';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import LanguageIcon from '@mui/icons-material/Language';
+// import TwitterIcon from '@mui/icons-material/Twitter';
+// import LanguageIcon from '@mui/icons-material/Language';
 import EmailIcon from '@mui/icons-material/Email';
 
 const ViewChannel: React.FC = () => {
@@ -132,16 +132,16 @@ const ViewChannel: React.FC = () => {
     useEffect(() => {
         const fetchChannel = async () => {
             if (!id) return;
-            
+
             const result = await execute(
                 () => api?.channelApi.getChannel(id),
                 { showErrorToast: true }
             );
-            
+
             if (result) {
                 setChannel(result);
             }
-            
+
             setLoading(false);
         };
 
@@ -150,7 +150,7 @@ const ViewChannel: React.FC = () => {
 
     const handleJoin = async (tierId?: string) => {
         if (!channel || !tierId) return;
-        
+
         const tier = channel.tiers?.find(t => t.id === tierId);
         if (!tier) return;
 
@@ -187,7 +187,7 @@ const ViewChannel: React.FC = () => {
                     'paypal_payment',
                     'width=600,height=700,scrollbars=yes,resizable=yes'
                 );
-                
+
                 if (!paymentWindow) {
                     alert('Popup blocked! Please allow popups and try again.');
                     setPendingSubscription(null);
@@ -223,15 +223,15 @@ const ViewChannel: React.FC = () => {
 
             // Check if error is due to missing payment method
             const errorMessage = error?.response?.data?.message || error?.message || '';
-            if (errorMessage.includes('PAYMENT_METHOD_REQUIRED') || 
+            if (errorMessage.includes('PAYMENT_METHOD_REQUIRED') ||
                 errorMessage.includes('PayPal payment method') ||
                 errorMessage.includes('No PayPal payment method found')) {
-                
+
                 // Show confirmation dialog to redirect to payment method setup
                 const shouldRedirect = window.confirm(
                     'You need to add a PayPal payment method to subscribe to paid tiers. Would you like to add one now?'
                 );
-                
+
                 if (shouldRedirect) {
                     navigate('/app/account/payment-methods');
                 }
@@ -241,7 +241,7 @@ const ViewChannel: React.FC = () => {
 
     const handleUpdateMembership = async (tierId: string) => {
         if (!channel) return;
-        
+
         const tier = channel.tiers?.find(t => t.id === tierId);
         if (!tier) return;
 
@@ -261,7 +261,7 @@ const ViewChannel: React.FC = () => {
 
     const handleCancelMembership = async () => {
         if (!channel) return;
-        
+
         // Always use legacy API for cancellation (for now)
         const result = await execute(
             () => api?.channelApi.unsubscribeFromChannel(channel.id),
@@ -270,7 +270,7 @@ const ViewChannel: React.FC = () => {
                 successMessage: 'Membership cancelled successfully!'
             }
         );
-        
+
         if (result) {
             console.log('Cancellation successful, refreshing profile...');
             await refreshProfile();
@@ -637,7 +637,7 @@ const ViewChannel: React.FC = () => {
                                     Connect with us
                                 </Typography>
                                 <Stack spacing={2}>
-                                    {channel.websiteUrl && (
+                                    {/* {channel.websiteUrl && (
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                             <IconButton color="primary" size="small">
                                                 <LanguageIcon />
@@ -666,7 +666,7 @@ const ViewChannel: React.FC = () => {
                                                 @{channel.twitterHandle}
                                             </Link>
                                         </Box>
-                                    )}
+                                    )} */}
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <IconButton color="primary" size="small">
                                             <EmailIcon />
@@ -740,172 +740,172 @@ const ViewChannel: React.FC = () => {
 
                 {/* Membership Tiers Section - Only show in Contribute tab */}
                 {activeTab === 0 && (
-                <Box sx={{ mb: 6 }}>
-                    <Typography
-                        variant="h4"
-                        gutterBottom
-                        sx={{
-                            fontSize: { xs: '1.75rem', md: '2rem' },
-                            fontWeight: 700,
-                            mb: 4,
-                            textAlign: 'center',
-                        }}
-                    >
-                        Membership Tiers
-                    </Typography>
+                    <Box sx={{ mb: 6 }}>
+                        <Typography
+                            variant="h4"
+                            gutterBottom
+                            sx={{
+                                fontSize: { xs: '1.75rem', md: '2rem' },
+                                fontWeight: 700,
+                                mb: 4,
+                                textAlign: 'center',
+                            }}
+                        >
+                            Membership Tiers
+                        </Typography>
 
-                    <Grid container spacing={3}>
-                        {channel.tiers?.map((tier) => (
-                            <Grid item xs={12} md={4} key={tier.id}>
-                                <Card
-                                    elevation={currentTierId === tier.id ? 8 : 2}
-                                    sx={{
-                                        height: '100%',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        borderRadius: 3,
-                                        overflow: 'hidden',
-                                        transition: 'all 0.3s ease',
-                                        border: currentTierId === tier.id ? '2px solid #0b6cff' : '1px solid #e0e0e0',
-                                        '&:hover': {
-                                            transform: 'translateY(-8px)',
-                                            boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
-                                        }
-                                    }}
-                                >
-                                    {/* Tier Header with Gradient */}
-                                    <Box
+                        <Grid container spacing={3}>
+                            {channel.tiers?.map((tier) => (
+                                <Grid item xs={12} md={4} key={tier.id}>
+                                    <Card
+                                        elevation={currentTierId === tier.id ? 8 : 2}
                                         sx={{
-                                            height: 120,
-                                            background: currentTierId === tier.id
-                                                ? 'linear-gradient(135deg, #0b6cff 0%, #589aff 100%)'
-                                                : 'linear-gradient(135deg, #589aff 0%, #7bb0ff 100%)',
-                                            position: 'relative',
+                                            height: '100%',
                                             display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            p: 3,
+                                            flexDirection: 'column',
+                                            borderRadius: 3,
+                                            overflow: 'hidden',
+                                            transition: 'all 0.3s ease',
+                                            border: currentTierId === tier.id ? '2px solid #0b6cff' : '1px solid #e0e0e0',
+                                            '&:hover': {
+                                                transform: 'translateY(-8px)',
+                                                boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
+                                            }
                                         }}
                                     >
-                                        {currentTierId === tier.id && (
-                                            <Chip
-                                                label="CURRENT PLAN"
-                                                size="small"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: 12,
-                                                    right: 12,
-                                                    bgcolor: 'white',
-                                                    color: '#0b6cff',
-                                                    fontWeight: 700,
-                                                    fontSize: '0.7rem',
-                                                }}
-                                            />
-                                        )}
-                                        {!currentTierId && tier.isDefault && (
-                                            <Chip
-                                                label="POPULAR"
-                                                size="small"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: 12,
-                                                    right: 12,
-                                                    bgcolor: 'white',
-                                                    color: '#589aff',
-                                                    fontWeight: 700,
-                                                    fontSize: '0.7rem',
-                                                }}
-                                            />
-                                        )}
-                                        <Typography
-                                            variant="h5"
+                                        {/* Tier Header with Gradient */}
+                                        <Box
                                             sx={{
-                                                color: 'white',
-                                                fontWeight: 700,
-                                                textAlign: 'center',
+                                                height: 120,
+                                                background: currentTierId === tier.id
+                                                    ? 'linear-gradient(135deg, #0b6cff 0%, #589aff 100%)'
+                                                    : 'linear-gradient(135deg, #589aff 0%, #7bb0ff 100%)',
+                                                position: 'relative',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                p: 3,
                                             }}
                                         >
-                                            {tier.name}
-                                        </Typography>
-                                    </Box>
-
-                                    <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
-                                        {/* Price */}
-                                        <Box sx={{ mb: 3, textAlign: 'center' }}>
+                                            {currentTierId === tier.id && (
+                                                <Chip
+                                                    label="CURRENT PLAN"
+                                                    size="small"
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: 12,
+                                                        right: 12,
+                                                        bgcolor: 'white',
+                                                        color: '#0b6cff',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.7rem',
+                                                    }}
+                                                />
+                                            )}
+                                            {!currentTierId && tier.isDefault && (
+                                                <Chip
+                                                    label="POPULAR"
+                                                    size="small"
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: 12,
+                                                        right: 12,
+                                                        bgcolor: 'white',
+                                                        color: '#589aff',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.7rem',
+                                                    }}
+                                                />
+                                            )}
                                             <Typography
-                                                variant="h3"
+                                                variant="h5"
                                                 sx={{
+                                                    color: 'white',
                                                     fontWeight: 700,
-                                                    color: 'text.primary',
-                                                    display: 'flex',
-                                                    alignItems: 'baseline',
-                                                    justifyContent: 'center',
-                                                    gap: 0.5,
+                                                    textAlign: 'center',
                                                 }}
                                             >
-                                                <Typography component="span" sx={{ fontSize: '1.5rem', fontWeight: 500 }}>
-                                                    $
-                                                </Typography>
-                                                {tier.price}
-                                                <Typography
-                                                    component="span"
-                                                    sx={{
-                                                        fontSize: '1rem',
-                                                        fontWeight: 400,
-                                                        color: 'text.secondary',
-                                                    }}
-                                                >
-                                                    /month
-                                                </Typography>
+                                                {tier.name}
                                             </Typography>
                                         </Box>
 
-                                        <Divider sx={{ mb: 3 }} />
+                                        <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+                                            {/* Price */}
+                                            <Box sx={{ mb: 3, textAlign: 'center' }}>
+                                                <Typography
+                                                    variant="h3"
+                                                    sx={{
+                                                        fontWeight: 700,
+                                                        color: 'text.primary',
+                                                        display: 'flex',
+                                                        alignItems: 'baseline',
+                                                        justifyContent: 'center',
+                                                        gap: 0.5,
+                                                    }}
+                                                >
+                                                    <Typography component="span" sx={{ fontSize: '1.5rem', fontWeight: 500 }}>
+                                                        $
+                                                    </Typography>
+                                                    {tier.price}
+                                                    <Typography
+                                                        component="span"
+                                                        sx={{
+                                                            fontSize: '1rem',
+                                                            fontWeight: 400,
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    >
+                                                        /month
+                                                    </Typography>
+                                                </Typography>
+                                            </Box>
 
-                                        {/* Description */}
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                mb: 3,
-                                                color: 'text.secondary',
-                                                minHeight: 60,
-                                                lineHeight: 1.7,
-                                                flexGrow: 1,
-                                            }}
-                                        >
-                                            {tier.description}
-                                        </Typography>
+                                            <Divider sx={{ mb: 3 }} />
 
-                                        {/* Action Button */}
-                                        <Button
-                                            variant={currentTierId === tier.id ? "outlined" : "contained"}
-                                            fullWidth
-                                            size="large"
-                                            onClick={() => isMember ? handleUpdateMembership(tier.id) : handleJoin(tier.id)}
-                                            disabled={currentTierId === tier.id || subscriptionLoading}
-                                            sx={{
-                                                py: 1.5,
-                                                borderRadius: 50,
-                                                textTransform: 'none',
-                                                fontWeight: 600,
-                                                fontSize: '1rem',
-                                                boxShadow: currentTierId === tier.id ? 'none' : '0 4px 12px rgba(11, 108, 255, 0.3)',
-                                                '&:hover': {
-                                                    boxShadow: currentTierId === tier.id ? 'none' : '0 6px 16px rgba(11, 108, 255, 0.4)',
-                                                }
-                                            }}
-                                            startIcon={subscriptionLoading && <CircularProgress size={20} color="inherit" />}
-                                        >
-                                            {subscriptionLoading ? 'Processing...' :
-                                                currentTierId === tier.id ? 'Current Plan' :
-                                                    isMember ? 'Switch to This Plan' : 'Contribute'}
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                </Box>
+                                            {/* Description */}
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    mb: 3,
+                                                    color: 'text.secondary',
+                                                    minHeight: 60,
+                                                    lineHeight: 1.7,
+                                                    flexGrow: 1,
+                                                }}
+                                            >
+                                                {tier.description}
+                                            </Typography>
+
+                                            {/* Action Button */}
+                                            <Button
+                                                variant={currentTierId === tier.id ? "outlined" : "contained"}
+                                                fullWidth
+                                                size="large"
+                                                onClick={() => isMember ? handleUpdateMembership(tier.id) : handleJoin(tier.id)}
+                                                disabled={currentTierId === tier.id || subscriptionLoading}
+                                                sx={{
+                                                    py: 1.5,
+                                                    borderRadius: 50,
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    fontSize: '1rem',
+                                                    boxShadow: currentTierId === tier.id ? 'none' : '0 4px 12px rgba(11, 108, 255, 0.3)',
+                                                    '&:hover': {
+                                                        boxShadow: currentTierId === tier.id ? 'none' : '0 6px 16px rgba(11, 108, 255, 0.4)',
+                                                    }
+                                                }}
+                                                startIcon={subscriptionLoading && <CircularProgress size={20} color="inherit" />}
+                                            >
+                                                {subscriptionLoading ? 'Processing...' :
+                                                    currentTierId === tier.id ? 'Current Plan' :
+                                                        isMember ? 'Switch to This Plan' : 'Contribute'}
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
                 )}
             </Container>
         </Box>

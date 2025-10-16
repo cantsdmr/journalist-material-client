@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Chip,
-  Typography,
   Skeleton,
   IconButton
 } from '@mui/material';
@@ -98,7 +97,6 @@ const TagFilter: React.FC<TagFilterProps> = ({
   onTagsChange,
   contentType,
   maxTags = 10,
-  showCounts = false,
   className
 }) => {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
@@ -113,9 +111,9 @@ const TagFilter: React.FC<TagFilterProps> = ({
   useEffect(() => {
     const fetchTags = async () => {
       if (!api?.tagApi) return;
-      
+
       setLoading(true);
-      
+
       try {
         // Fetch all tags, trending tags, and popular tags for the content type
         const [allResponse, trendingResponse, popularResponse] = await Promise.all([
@@ -126,7 +124,7 @@ const TagFilter: React.FC<TagFilterProps> = ({
 
         // Combine and deduplicate tags
         const tags = new Map<string, Tag>();
-        
+
         // Add all tags
         if (allResponse?.items) {
           allResponse.items.forEach((tag: Tag) => {

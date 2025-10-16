@@ -8,23 +8,14 @@ import {
   Box,
   useTheme as useMuiTheme,
   useMediaQuery,
-  Drawer,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider
+  Drawer
 } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
 import Sidebar from '@/components/navigation/Sidebar';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import { PATHS } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 import SearchBar from '@/components/search/SearchBar';
@@ -33,10 +24,8 @@ import { VERSION } from '@/constants/values';
 const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-  const { isDarkMode, toggleTheme } = useAppTheme();
   const muiTheme = useMuiTheme();
   const { isLoading } = useApp();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -50,19 +39,6 @@ const MainLayout: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleNavigate = (path: string) => {
-    navigate(path);
-    handleMenuClose();
-  };
-
   const handleSearch = (query: string) => {
     navigate(`${PATHS.APP_SEARCH}?q=${encodeURIComponent(query)}`);
     setMobileSearchOpen(false);
@@ -71,38 +47,6 @@ const MainLayout: React.FC = () => {
   const handleMobileSearchToggle = () => {
     setMobileSearchOpen(!mobileSearchOpen);
   };
-
-
-  const profileMenuItems = [
-    {
-      path: PATHS.STUDIO_ROOT,
-      icon: <DashboardIcon fontSize="small" />,
-      label: 'Creator Studio',
-      divider: false
-    },
-  ];
-
-  const renderProfileMenu = () => (
-    <Menu
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={handleMenuClose}
-      PaperProps={{
-        sx: { width: 220 }
-      }}
-    >
-      {profileMenuItems.map((item) => [
-        <MenuItem
-          key={item.path}
-          onClick={() => handleNavigate(item.path)}
-        >
-          <ListItemIcon>{item.icon}</ListItemIcon>
-          <ListItemText>{item.label}</ListItemText>
-        </MenuItem>,
-        item.divider && <Divider key={`${item.path}-divider`} />
-      ]).flat().filter(Boolean)}
-    </Menu>
-  );
 
   if (isLoading) {
     return null;
@@ -137,7 +81,6 @@ const MainLayout: React.FC = () => {
                   onSearch={handleSearch}
                   placeholder="Search"
                   className="app-search-bar"
-                  autoFocus
                 />
               </Box>
             </Box>

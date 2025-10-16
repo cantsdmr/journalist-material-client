@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { 
+import {
   Stack,
   Box,
-  Container,
   Typography,
 } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -31,7 +30,7 @@ const ListChannels: React.FC = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tagsParam = searchParams.get('tags');
-    
+
     if (tagsParam) {
       const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
       setSelectedTags(urlTags);
@@ -44,7 +43,7 @@ const ListChannels: React.FC = () => {
 
   const getChannels = async (_page: number = page) => {
     const filters = selectedTags.length > 0 ? { tags: selectedTags } : {};
-    
+
     const result = await execute(
       () => api?.channelApi.getChannels(
         filters, // Apply tag filters
@@ -55,14 +54,14 @@ const ListChannels: React.FC = () => {
       ),
       { showErrorToast: true }
     );
-    
+
     if (result) {
       if (_page === 1) {
         setChannels(result.items ?? []);
       } else {
         setChannels(prev => [...prev, ...(result.items ?? [])]);
       }
-      
+
       setPage(result.metadata.currentPage ?? 1);
       setLimit(result.metadata.limit ?? 10);
       setHasMore(result.metadata.hasNext === true);
@@ -76,11 +75,11 @@ const ListChannels: React.FC = () => {
 
   const handleJoin = async (channelId: string, tierId?: string) => {
     if (!tierId) return;
-    
+
     // Find the channel and tier to determine if it's paid
     const channel = channels.find(c => c.id === channelId);
     const tier = channel?.tiers?.find(t => t.id === tierId);
-    
+
     if (!tier) return;
 
     try {
@@ -94,11 +93,11 @@ const ListChannels: React.FC = () => {
       if (result?.approvalUrl) {
         // Open PayPal approval URL for paid subscriptions
         const paymentWindow = window.open(
-          result.approvalUrl, 
+          result.approvalUrl,
           'paypal_payment',
           'width=600,height=700,scrollbars=yes,resizable=yes'
         );
-        
+
         if (!paymentWindow) {
           alert('Popup blocked! Please allow popups and try again.');
         }
@@ -108,21 +107,21 @@ const ListChannels: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Subscription failed:', error);
-      
+
       // Check if error is due to missing payment method
       const errorMessage = error?.response?.data?.message || error?.message || '';
-      if (errorMessage.includes('PAYMENT_METHOD_REQUIRED') || 
-          errorMessage.includes('PayPal payment method') ||
-          errorMessage.includes('No PayPal payment method found')) {
-          
-          // Show confirmation dialog to redirect to payment method setup
-          const shouldRedirect = window.confirm(
-              'You need to add a PayPal payment method to subscribe to paid tiers. Would you like to add one now?'
-          );
-          
-          if (shouldRedirect) {
-              navigate('/app/account/payment-methods');
-          }
+      if (errorMessage.includes('PAYMENT_METHOD_REQUIRED') ||
+        errorMessage.includes('PayPal payment method') ||
+        errorMessage.includes('No PayPal payment method found')) {
+
+        // Show confirmation dialog to redirect to payment method setup
+        const shouldRedirect = window.confirm(
+          'You need to add a PayPal payment method to subscribe to paid tiers. Would you like to add one now?'
+        );
+
+        if (shouldRedirect) {
+          navigate('/app/account/payment-methods');
+        }
       }
     }
   };
@@ -135,7 +134,7 @@ const ListChannels: React.FC = () => {
         successMessage: 'Membership cancelled successfully!'
       }
     );
-    
+
     if (result) {
       await actions.refreshProfile();
     }
@@ -143,7 +142,7 @@ const ListChannels: React.FC = () => {
 
   const handleTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
-    
+
     // Update URL with selected tags
     const searchParams = new URLSearchParams(location.search);
     if (tags.length > 0) {
@@ -151,7 +150,7 @@ const ListChannels: React.FC = () => {
     } else {
       searchParams.delete('tags');
     }
-    
+
     const newPath = `${location.pathname}?${searchParams.toString()}`;
     navigate(newPath, { replace: true });
   };

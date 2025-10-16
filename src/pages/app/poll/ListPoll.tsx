@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Box, Tabs, Tab, Stack } from '@mui/material';
+import { Typography, Box, Tabs, Tab, Stack } from '@mui/material';
 import PollCard from '@/components/poll/PollCard';
 import { Poll } from '@/types/index';
 import LoadingScreen from '@/components/common/LoadingScreen';
@@ -35,7 +35,7 @@ const ListPoll: React.FC = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tagsParam = searchParams.get('tags');
-    
+
     if (tagsParam) {
       const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
       setSelectedTags(urlTags);
@@ -44,7 +44,7 @@ const ListPoll: React.FC = () => {
 
   const fetchPolls = async (_page: number = page) => {
     const filters: any = {};
-    
+
     // Apply tab-based filters
     switch (activeTab) {
       case PollTab.TRENDING:
@@ -56,7 +56,7 @@ const ListPoll: React.FC = () => {
       default:
         break; // All polls
     }
-    
+
     // Apply tag filters
     if (selectedTags.length > 0) {
       filters.tags = selectedTags;
@@ -73,7 +73,7 @@ const ListPoll: React.FC = () => {
       } else {
         setPolls(prev => [...prev, ...response.items]);
       }
-      
+
       setPage(response.metadata.currentPage);
       setHasMore(response.metadata.hasNext === true);
     }
@@ -92,7 +92,7 @@ const ListPoll: React.FC = () => {
 
   const handleTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
-    
+
     // Update URL with selected tags
     const searchParams = new URLSearchParams(location.search);
     if (tags.length > 0) {
@@ -100,7 +100,7 @@ const ListPoll: React.FC = () => {
     } else {
       searchParams.delete('tags');
     }
-    
+
     const newPath = `${location.pathname}?${searchParams.toString()}`;
     navigate(newPath, { replace: true });
   };

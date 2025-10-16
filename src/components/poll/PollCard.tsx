@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardActions, 
-  Typography, 
-  LinearProgress, 
-  Button, 
-  Box, 
-  Chip, 
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  LinearProgress,
+  Box,
+  Chip,
   Avatar,
   IconButton,
   Stack,
@@ -34,7 +33,7 @@ interface PollCardProps {
   disabled?: boolean;
 }
 
-const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVote, showResults = false, disabled = false }) => {
+const PollCard: React.FC<PollCardProps> = ({ poll, onVote, userVote, showResults = false, disabled = false }) => {
   const theme = useTheme();
   const { api } = useApiContext();
   const [hoveredOption, setHoveredOption] = useState<string | null>(null);
@@ -220,7 +219,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
             const votePercentage = totalVotes > 0 ? (voteCount / totalVotes) * 100 : 0;
             const isSelected = userVote === option.id;
             const isHovered = hoveredOption === option.id;
-            
+
             return (
               <Box
                 key={option.id}
@@ -246,20 +245,20 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                 onMouseEnter={() => handleOptionHover(option.id)}
                 onMouseLeave={() => handleOptionHover(null)}
               >
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
                   mb: 0.5,
                   px: 2,
                   py: 1.5,
                   border: '1px solid',
-                  borderColor: isSelected 
+                  borderColor: isSelected
                     ? 'primary.main'
-                    : isHovered 
+                    : isHovered
                       ? alpha(theme.palette.primary.main, 0.5)
                       : 'divider',
                   borderRadius: 1,
-                  bgcolor: isSelected 
+                  bgcolor: isSelected
                     ? alpha(theme.palette.primary.main, 0.05)
                     : 'transparent',
                   transition: 'all 0.2s ease',
@@ -268,14 +267,14 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.15)}`
                   }
                 }}>
-                  <Box sx={{ 
-                    width: 24, 
-                    height: 24, 
+                  <Box sx={{
+                    width: 24,
+                    height: 24,
                     borderRadius: '50%',
                     border: '2px solid',
-                    borderColor: isSelected 
+                    borderColor: isSelected
                       ? 'primary.main'
-                      : isHovered 
+                      : isHovered
                         ? alpha(theme.palette.primary.main, 0.5)
                         : 'divider',
                     mr: 2,
@@ -285,17 +284,17 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     transition: 'all 0.2s ease'
                   }}>
                     {isSelected && (
-                      <Box sx={{ 
-                        width: 12, 
-                        height: 12, 
+                      <Box sx={{
+                        width: 12,
+                        height: 12,
                         borderRadius: '50%',
                         bgcolor: 'primary.main'
                       }} />
                     )}
                   </Box>
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
+                  <Typography
+                    variant="body1"
+                    sx={{
                       flexGrow: 1,
                       fontWeight: isSelected ? 600 : 400,
                       color: isSelected ? 'primary.main' : 'text.primary'
@@ -304,16 +303,16 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     {option.text}
                   </Typography>
                   {showResults && (
-                    <Box sx={{ 
-                      display: 'flex', 
+                    <Box sx={{
+                      display: 'flex',
                       alignItems: 'center',
                       ml: 2,
                       minWidth: 80,
                       justifyContent: 'flex-end'
                     }}>
-                      <Typography 
-                        variant="body2" 
-                        sx={{ 
+                      <Typography
+                        variant="body2"
+                        sx={{
                           fontWeight: 600,
                           color: isSelected ? 'primary.main' : 'text.secondary',
                           mr: 1
@@ -321,8 +320,8 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                       >
                         {votePercentage.toFixed(1)}%
                       </Typography>
-                      <Typography 
-                        variant="caption" 
+                      <Typography
+                        variant="caption"
                         color="text.secondary"
                       >
                         ({voteCount})
@@ -330,12 +329,12 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, onViewResults, userVo
                     </Box>
                   )}
                   {isSelected && !showResults && (
-                    <CheckCircleIcon 
-                      sx={{ 
+                    <CheckCircleIcon
+                      sx={{
                         ml: 1,
                         color: 'primary.main',
                         fontSize: '1.2rem'
-                      }} 
+                      }}
                     />
                   )}
                 </Box>

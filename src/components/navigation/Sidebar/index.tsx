@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  List, ListItem, ListItemIcon, ListItemText, Typography, Box, Avatar, Button, Divider, Chip
+  List, ListItem, ListItemIcon, ListItemText, Typography, Box, Avatar, Divider
 } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ExploreIcon from '@mui/icons-material/Explore';
 import HomeIcon from '@mui/icons-material/Home';
-import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
-import RssFeedIcon from '@mui/icons-material/RssFeed';
 import PollIcon from '@mui/icons-material/Poll';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LoginIcon from '@mui/icons-material/Login';
 import { PATHS } from '@/constants/paths';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import { Channel } from '@/types/index';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+// import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -199,7 +195,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             }}
           >
             <Avatar
-              src={channel.profilePictureUrl}
+              src={channel.logoUrl}
               sx={{ width: 32, height: 32, mr: 1.5 }}
             >
               {channel.name.charAt(0).toUpperCase()}
@@ -218,9 +214,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                 >
                   {channel.name}
                 </Typography>
-                {channel.isVerified && (
+                {/* {channel.isVerified && (
                   <CheckCircleIcon sx={{ fontSize: 14, color: 'primary.main' }} />
-                )}
+                )} */}
               </Box>
             </Box>
           </ListItem>
