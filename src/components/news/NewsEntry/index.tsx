@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Card, 
-  Typography, 
-  Box, 
+import React from 'react';
+import {
+  Card,
+  Typography,
+  Box,
   Stack,
   alpha,
   IconButton,
@@ -17,8 +17,6 @@ import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { PATHS } from '@/constants/paths';
-import { FundingButton } from '@/components/funding';
-import { useApiContext } from '@/contexts/ApiContext';
 
 interface NewsEntryProps {
   news: News;
@@ -26,68 +24,12 @@ interface NewsEntryProps {
 
 const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
   const navigate = useNavigate();
-  const { api } = useApiContext();
   const coverMedia = news.media?.find(m => m.type === NEWS_MEDIA_TYPE.COVER);
-  const [fundingData, setFundingData] = useState<{
-    currentAmount: number;
-    goalAmount?: number;
-    contributorCount: number;
-    currency: string;
-  }>({
-    currentAmount: 0,
-    goalAmount: undefined,
-    contributorCount: 0,
-    currency: 'USD'
-  });
-
-  // Load funding data
-  useEffect(() => {
-    const loadFundingData = async () => {
-      try {
-        const fund = await api.fundingApi.getFund('news', news.id);
-        if (fund) {
-          const summary = await api.fundingApi.getFundSummary('news', news.id);
-          setFundingData({
-            currentAmount: fund.currentAmount / 100, // Convert from cents
-            goalAmount: fund.goalAmount ? fund.goalAmount / 100 : undefined,
-            contributorCount: summary?.totalContributors || 0,
-            currency: fund.currency
-          });
-        }
-      } catch (error) {
-        // Fund doesn't exist yet - use default values
-        console.debug('No funding data for news:', news.id);
-      }
-    };
-
-    loadFundingData();
-  }, [news.id, api.fundingApi]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (!(e.target as HTMLElement).closest('.action-button')) {
       navigate(PATHS.APP_NEWS_VIEW.replace(':id', news.id));
     }
-  };
-
-  const handleFundingSuccess = () => {
-    // Reload funding data after successful contribution
-    const loadFundingData = async () => {
-      try {
-        const fund = await api.fundingApi.getFund('news', news.id);
-        if (fund) {
-          const summary = await api.fundingApi.getFundSummary('news', news.id);
-          setFundingData({
-            currentAmount: fund.currentAmount / 100,
-            goalAmount: fund.goalAmount ? fund.goalAmount / 100 : undefined,
-            contributorCount: summary?.totalContributors || 0,
-            currency: fund.currency
-          });
-        }
-      } catch (error) {
-        console.error('Error reloading funding data:', error);
-      }
-    };
-    loadFundingData();
   };
 
   return (
@@ -295,34 +237,22 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
                   <FavoriteIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
-              
-              <Box className="action-button" onClick={(e) => e.stopPropagation()}>
-                <FundingButton
-                  contentType="news"
-                  contentId={news.id}
-                  contentTitle={news.title}
-                  fundingData={fundingData}
-                  onContributionSuccess={handleFundingSuccess}
-                  variant="icon"
-                  icon="heart"
-                  size="small"
-                />
-              </Box>
-              
+
               <Tooltip title="Share">
-                <IconButton 
+                <IconButton
                   className="action-button"
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
                     // Handle share
                   }}
-                  sx={{ 
+                  sx={{
                     color: 'text.secondary',
+                    padding: '4px',
                     '&:hover': { color: 'primary.main' }
                   }}
                 >
-                  <ShareIcon fontSize="small" />
+                  <ShareIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </Tooltip>
             </Stack>

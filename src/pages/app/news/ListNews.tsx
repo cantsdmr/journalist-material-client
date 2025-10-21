@@ -3,7 +3,12 @@ import {
   Typography,
   Stack,
   Box,
+  TextField,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { News, NewsFilters } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import NewsEntry from '@/components/news/NewsEntry';
@@ -20,6 +25,7 @@ interface ListNewsProps {
   description?: string;
   emptyTitle?: string;
   emptyDescription?: string;
+  showSearch?: boolean;
 }
 
 const ListNewsSkeleton = () => (
@@ -139,7 +145,8 @@ const ListNews: React.FC<ListNewsProps> = ({
   title: customTitle,
   description: customDescription,
   emptyTitle: customEmptyTitle,
-  emptyDescription: customEmptyDescription
+  emptyDescription: customEmptyDescription,
+  showSearch = false
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -148,19 +155,28 @@ const ListNews: React.FC<ListNewsProps> = ({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const { api } = useApiContext();
   const { execute } = useApiCall();
 
-  // Extract tags from URL parameters on component mount
+  // Extract tags and query from URL parameters on component mount
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const tagsParam = searchParams.get('tags');
+    const queryParam = searchParams.get('q');
 
     if (tagsParam) {
       const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
       setSelectedTags(urlTags);
     } else if (filters.tags) {
       setSelectedTags(filters.tags);
+    }
+
+    if (queryParam) {
+      const decodedQuery = decodeURIComponent(queryParam);
+      setSearchQuery(decodedQuery);
+      setSearchInput(decodedQuery);
     }
   }, [location.search, filters.tags]);
 
@@ -173,10 +189,11 @@ const ListNews: React.FC<ListNewsProps> = ({
   const displayEmptyTitle = customEmptyTitle || defaultContent.emptyTitle;
   const displayEmptyDescription = customEmptyDescription || defaultContent.emptyDescription;
 
-  // Combine filters with selected tags
+  // Combine filters with selected tags and search query
   const effectiveFilters = {
     ...filters,
-    tags: selectedTags.length > 0 ? selectedTags : filters.tags
+    tags: selectedTags.length > 0 ? selectedTags : filters.tags,
+    query: searchQuery || undefined
   };
 
   const fetchNews = async (_page: number = page) => {
@@ -209,7 +226,7 @@ const ListNews: React.FC<ListNewsProps> = ({
   useEffect(() => {
     setPage(1);
     fetchNews(1);
-  }, [JSON.stringify(effectiveFilters)]); // Watch for filter changes including tags
+  }, [JSON.stringify(effectiveFilters)]); // Watch for filter changes including tags and query
 
   const fetchMoreData = () => {
     if (!loading && hasMore) {
@@ -232,9 +249,38 @@ const ListNews: React.FC<ListNewsProps> = ({
     navigate(newPath, { replace: true });
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedQuery = searchInput.trim();
+    setSearchQuery(trimmedQuery);
+
+    // Update URL with search query
+    const searchParams = new URLSearchParams(location.search);
+    if (trimmedQuery) {
+      searchParams.set('q', encodeURIComponent(trimmedQuery));
+    } else {
+      searchParams.delete('q');
+    }
+
+    const newPath = `${location.pathname}?${searchParams.toString()}`;
+    navigate(newPath, { replace: true });
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchQuery('');
+
+    // Remove query from URL
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('q');
+
+    const newPath = `${location.pathname}?${searchParams.toString()}`;
+    navigate(newPath, { replace: true });
+  };
+
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           {displayTitle}
         </Typography>
@@ -243,8 +289,46 @@ const ListNews: React.FC<ListNewsProps> = ({
         </Typography>
       </Box>
 
+      {/* Search Bar - Only show if enabled */}
+      {showSearch && (
+        <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
+          <form onSubmit={handleSearchSubmit}>
+            <TextField
+              fullWidth
+              placeholder="Search news by title or content..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchInput && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={handleClearSearch}
+                      edge="end"
+                    >
+                      <ClearIcon />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  bgcolor: 'background.paper',
+                }
+              }}
+            />
+          </form>
+        </Box>
+      )}
+
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
@@ -260,42 +344,33 @@ const ListNews: React.FC<ListNewsProps> = ({
           description={displayEmptyDescription}
         />
       ) : (
-        <InfiniteScroll
-          dataLength={news.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={<ListNewsSkeleton />}
-          endMessage={
-            <Box sx={{
-              textAlign: 'center',
-              mt: 4,
-              color: 'text.secondary',
-              fontSize: '0.875rem'
-            }}>
-              No more news to display
-            </Box>
-          }
-        >
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                lg: 'repeat(3, 1fr)'
-              },
-              gap: 3,
-              rowGap: 4
-            }}
+        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+          <InfiniteScroll
+            dataLength={news.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={<ListNewsSkeleton />}
+            endMessage={
+              <Box sx={{
+                textAlign: 'center',
+                mt: 4,
+                color: 'text.secondary',
+                fontSize: '0.875rem'
+              }}>
+                No more news to display
+              </Box>
+            }
           >
-            {news.map((item) => (
-              <NewsEntry
-                key={item.id}
-                news={item}
-              />
-            ))}
-          </Box>
-        </InfiniteScroll>
+            <Stack spacing={2.5}>
+              {news.map((item) => (
+                <NewsEntry
+                  key={item.id}
+                  news={item}
+                />
+              ))}
+            </Stack>
+          </InfiniteScroll>
+        </Box>
       )}
     </Box>
   );

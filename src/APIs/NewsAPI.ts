@@ -27,7 +27,7 @@ export class NewsAPI extends HTTPApi {
         pagination: PaginationObject = DEFAULT_PAGINATION
     ): Promise<PaginatedResponse<News>> {
         const params: any = { ...pagination };
-        
+
         // Add filter parameters
         if (filters.feed) params.feed = 'true';
         if (filters.trending) params.trending = 'true';
@@ -37,6 +37,7 @@ export class NewsAPI extends HTTPApi {
         if (filters.status) params.status = filters.status;
         if (filters.premium !== undefined) params.premium = filters.premium.toString();
         if (filters.tags && filters.tags.length > 0) params.tags = filters.tags.join(',');
+        if (filters.query) params.query = filters.query;
 
         return this._list<News>(API_PATH, params);
     }

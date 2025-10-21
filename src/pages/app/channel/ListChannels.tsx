@@ -157,7 +157,7 @@ const ListChannels: React.FC = () => {
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           Discover Channels
         </Typography>
@@ -167,7 +167,7 @@ const ListChannels: React.FC = () => {
       </Box>
 
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
@@ -177,7 +177,7 @@ const ListChannels: React.FC = () => {
         />
       </Box>
 
-      <Box sx={{ overflowX: 'hidden' }}>
+      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
         <InfiniteScroll
           dataLength={channels.length}
           next={fetchMoreData}
@@ -229,18 +229,7 @@ const ListChannels: React.FC = () => {
             </Box>
           }
         >
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: {
-                xs: '1fr',
-                sm: 'repeat(2, 1fr)',
-                lg: 'repeat(3, 1fr)'
-              },
-              gap: 3,
-              rowGap: 4
-            }}
-          >
+          <Stack spacing={2.5}>
             {channels.map((channel) => (
               <ChannelItem
                 key={channel.id}
@@ -251,7 +240,7 @@ const ListChannels: React.FC = () => {
                 onCancel={handleCancel}
               />
             ))}
-          </Box>
+          </Stack>
         </InfiniteScroll>
       </Box>
     </Box>

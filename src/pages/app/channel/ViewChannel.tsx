@@ -33,14 +33,29 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import InfoIcon from '@mui/icons-material/Info';
+import ArticleIcon from '@mui/icons-material/Article';
+import PollIcon from '@mui/icons-material/Poll';
 // import TwitterIcon from '@mui/icons-material/Twitter';
 // import LanguageIcon from '@mui/icons-material/Language';
 import EmailIcon from '@mui/icons-material/Email';
+import ListNews from '@/pages/app/news/ListNews';
+import PollCard from '@/components/poll/PollCard';
+import { Poll } from '@/types/index';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { EmptyState } from '@/components/common/EmptyState';
+import { Link as RouterLink } from 'react-router-dom';
+import { PATHS } from '@/constants/paths';
+import TagFilter from '@/components/filters/TagFilter';
 
 const ViewChannel: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
     const [loading, setLoading] = useState(true);
     const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+    const [polls, setPolls] = useState<Poll[]>([]);
+    const [pollsLoading, setPollsLoading] = useState(false);
+    const [pollPage, setPollPage] = useState(1);
+    const [pollHasMore, setPollHasMore] = useState(true);
+    const [selectedPollTags, setSelectedPollTags] = useState<string[]>([]);
     const [pendingSubscription, setPendingSubscription] = useState<{
         subscriptionId: string;
         approvalUrl: string;
@@ -147,6 +162,52 @@ const ViewChannel: React.FC = () => {
 
         fetchChannel();
     }, [id, execute, api?.channelApi]);
+
+    // Fetch polls when on Polls tab
+    const fetchPolls = useCallback(async (_page: number = pollPage) => {
+        if (!channel?.id) return;
+
+        setPollsLoading(true);
+
+        const filters: any = { channel: channel.id };
+        if (selectedPollTags.length > 0) {
+            filters.tags = selectedPollTags;
+        }
+
+        const response = await execute(
+            () => api?.pollApi.getPolls(filters, { page: _page, limit: 10 }),
+            { showErrorToast: true }
+        );
+
+        if (response) {
+            if (_page === 1) {
+                setPolls(response.items);
+            } else {
+                setPolls(prev => [...prev, ...response.items]);
+            }
+            setPollPage(response.metadata.currentPage);
+            setPollHasMore(response.metadata.hasNext === true);
+        }
+
+        setPollsLoading(false);
+    }, [channel?.id, selectedPollTags, pollPage, execute, api?.pollApi]);
+
+    useEffect(() => {
+        if (activeTab === 1 && channel?.id) {
+            setPollPage(1);
+            fetchPolls(1);
+        }
+    }, [activeTab, channel?.id, selectedPollTags, fetchPolls]);
+
+    const fetchMorePolls = () => {
+        if (!pollsLoading && pollHasMore) {
+            fetchPolls(pollPage + 1);
+        }
+    };
+
+    const handlePollTagsChange = (tags: string[]) => {
+        setSelectedPollTags(tags);
+    };
 
     const handleJoin = async (tierId?: string) => {
         if (!channel || !tierId) return;
@@ -560,16 +621,6 @@ const ViewChannel: React.FC = () => {
                             </Box>
                         </Alert>
                     )}
-
-                    {/* Debug info - remove in production */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <Box sx={{ mt: 3, p: 2, backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: 2 }}>
-                            <Typography variant="caption" display="block">
-                                Debug: isMember={isMember.toString()}, currentTierId={currentTierId || 'none'},
-                                subscriptions={profile?.subscriptions?.length || 0}
-                            </Typography>
-                        </Box>
-                    )}
                 </Paper>
 
                 {/* Navigation Tabs */}
@@ -586,6 +637,8 @@ const ViewChannel: React.FC = () => {
                     <Tabs
                         value={activeTab}
                         onChange={(_, newValue) => setActiveTab(newValue)}
+                        variant="scrollable"
+                        scrollButtons="auto"
                         sx={{
                             borderBottom: 1,
                             borderColor: 'divider',
@@ -597,6 +650,16 @@ const ViewChannel: React.FC = () => {
                             }
                         }}
                     >
+                        <Tab
+                            icon={<ArticleIcon />}
+                            iconPosition="start"
+                            label="News"
+                        />
+                        <Tab
+                            icon={<PollIcon />}
+                            iconPosition="start"
+                            label="Polls"
+                        />
                         <Tab
                             icon={<VolunteerActivismIcon />}
                             iconPosition="start"
@@ -621,8 +684,152 @@ const ViewChannel: React.FC = () => {
 
                     {/* Tab Panels */}
                     <Box sx={{ p: 4 }}>
-                        {/* Contribute Tab */}
+                        {/* News Tab */}
                         {activeTab === 0 && (
+                            <Box>
+                                <ListNews
+                                    filters={{ channel: channel?.id }}
+                                    title="Channel News"
+                                    description="Latest news from this channel"
+                                    emptyTitle="No news published yet"
+                                    emptyDescription="This channel hasn't published any news articles yet"
+                                    showSearch={true}
+                                />
+                            </Box>
+                        )}
+
+                        {/* Polls Tab */}
+                        {activeTab === 1 && (
+                            <Box>
+                                <Box sx={{ maxWidth: 800, mx: 'auto', mb: 3 }}>
+                                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+                                        Channel Polls
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                                        Vote on polls from this channel
+                                    </Typography>
+
+                                    {/* Tag Filter */}
+                                    <TagFilter
+                                        selectedTags={selectedPollTags}
+                                        onTagsChange={handlePollTagsChange}
+                                        contentType="polls"
+                                        maxTags={4}
+                                        showCounts={false}
+                                    />
+                                </Box>
+
+                                {pollsLoading && polls.length === 0 ? (
+                                    <Stack spacing={2} sx={{ mt: 2, maxWidth: 800, mx: 'auto' }}>
+                                        {[...Array(2)].map((_, index) => (
+                                            <Box
+                                                key={index}
+                                                sx={{
+                                                    p: 2,
+                                                    borderRadius: 2,
+                                                    bgcolor: (theme) =>
+                                                        theme.palette.mode === 'dark'
+                                                            ? alpha(theme.palette.common.white, 0.05)
+                                                            : alpha(theme.palette.common.black, 0.03)
+                                                }}
+                                            >
+                                                <Box sx={{ height: 24, width: '40%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
+                                                <Stack spacing={2}>
+                                                    {[...Array(4)].map((_, i) => (
+                                                        <Box
+                                                            key={i}
+                                                            sx={{
+                                                                height: 40,
+                                                                borderRadius: 1,
+                                                                bgcolor: (theme) =>
+                                                                    theme.palette.mode === 'dark'
+                                                                        ? alpha(theme.palette.common.white, 0.1)
+                                                                        : alpha(theme.palette.common.black, 0.1)
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </Stack>
+                                            </Box>
+                                        ))}
+                                    </Stack>
+                                ) : polls.length === 0 ? (
+                                    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+                                        <EmptyState
+                                            title="No polls found"
+                                            description="This channel hasn't created any polls yet"
+                                        />
+                                    </Box>
+                                ) : (
+                                    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+                                        <InfiniteScroll
+                                            dataLength={polls.length}
+                                            next={fetchMorePolls}
+                                            hasMore={pollHasMore}
+                                            loader={
+                                                <Stack spacing={2} sx={{ mt: 2 }}>
+                                                    {[...Array(2)].map((_, index) => (
+                                                        <Box
+                                                            key={index}
+                                                            sx={{
+                                                                p: 2,
+                                                                borderRadius: 2,
+                                                                bgcolor: (theme) =>
+                                                                    theme.palette.mode === 'dark'
+                                                                        ? alpha(theme.palette.common.white, 0.05)
+                                                                        : alpha(theme.palette.common.black, 0.03)
+                                                            }}
+                                                        >
+                                                            <Box sx={{ height: 24, width: '40%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
+                                                            <Stack spacing={2}>
+                                                                {[...Array(4)].map((_, i) => (
+                                                                    <Box
+                                                                        key={i}
+                                                                        sx={{
+                                                                            height: 40,
+                                                                            borderRadius: 1,
+                                                                            bgcolor: (theme) =>
+                                                                                theme.palette.mode === 'dark'
+                                                                                    ? alpha(theme.palette.common.white, 0.1)
+                                                                                    : alpha(theme.palette.common.black, 0.1)
+                                                                        }}
+                                                                    />
+                                                                ))}
+                                                            </Stack>
+                                                        </Box>
+                                                    ))}
+                                                </Stack>
+                                            }
+                                            endMessage={
+                                                <Box sx={{
+                                                    textAlign: 'center',
+                                                    mt: 4,
+                                                    color: 'text.secondary',
+                                                    fontSize: '0.875rem'
+                                                }}>
+                                                    No more polls to display
+                                                </Box>
+                                            }
+                                        >
+                                            <Stack spacing={2.5}>
+                                                {polls.map((poll) => (
+                                                    <Box
+                                                        key={poll.id}
+                                                        component={RouterLink}
+                                                        to={PATHS.APP_POLL_VIEW.replace(':id', poll.id)}
+                                                        sx={{ textDecoration: 'none' }}
+                                                    >
+                                                        <PollCard poll={poll} />
+                                                    </Box>
+                                                ))}
+                                            </Stack>
+                                        </InfiniteScroll>
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
+
+                        {/* Contribute Tab */}
+                        {activeTab === 2 && (
                             <Box>
                                 <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
                                     Become a financial contributor
@@ -631,7 +838,7 @@ const ViewChannel: React.FC = () => {
                         )}
 
                         {/* Connect Tab */}
-                        {activeTab === 1 && (
+                        {activeTab === 3 && (
                             <Box>
                                 <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
                                     Connect with us
@@ -678,7 +885,7 @@ const ViewChannel: React.FC = () => {
                         )}
 
                         {/* Budget Tab */}
-                        {activeTab === 2 && (
+                        {activeTab === 4 && (
                             <Box>
                                 <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
                                     Budget
@@ -690,7 +897,7 @@ const ViewChannel: React.FC = () => {
                         )}
 
                         {/* About Tab */}
-                        {activeTab === 3 && (
+                        {activeTab === 5 && (
                             <Box>
                                 <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
                                     About
@@ -739,7 +946,7 @@ const ViewChannel: React.FC = () => {
                 </Paper>
 
                 {/* Membership Tiers Section - Only show in Contribute tab */}
-                {activeTab === 0 && (
+                {activeTab === 2 && (
                     <Box sx={{ mb: 6 }}>
                         <Typography
                             variant="h4"

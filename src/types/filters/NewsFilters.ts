@@ -7,4 +7,5 @@ export type NewsFilters = {
     status?: string;
     premium?: boolean;
     tags?: string[];
+    query?: string;
 }; 
