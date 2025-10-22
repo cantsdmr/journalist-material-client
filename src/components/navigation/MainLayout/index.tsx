@@ -8,16 +8,25 @@ import {
   Box,
   useTheme as useMuiTheme,
   useMediaQuery,
-  Drawer
+  Drawer,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Sidebar from '@/components/navigation/Sidebar';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonIcon from '@mui/icons-material/Person';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import SearchBar from '@/components/search/SearchBar';
 import { VERSION } from '@/constants/values';
 
@@ -27,7 +36,9 @@ const MainLayout: React.FC = () => {
   const muiTheme = useMuiTheme();
   const { isLoading } = useApp();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const auth = useAuth();
 
   useEffect(() => {
     if (isMobile) {
@@ -46,6 +57,34 @@ const MainLayout: React.FC = () => {
 
   const handleMobileSearchToggle = () => {
     setMobileSearchOpen(!mobileSearchOpen);
+  };
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileMenuAnchor(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchor(null);
+  };
+
+  const handleProfileClick = () => {
+    handleProfileMenuClose();
+    navigate(PATHS.APP_ACCOUNT);
+  };
+
+  const handleCreatorStudioClick = () => {
+    handleProfileMenuClose();
+    navigate(PATHS.STUDIO_ROOT);
+  };
+
+  const handleLogout = async () => {
+    handleProfileMenuClose();
+    try {
+      await auth?.signOut();
+      navigate(PATHS.LOGIN);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   if (isLoading) {
@@ -174,11 +213,14 @@ const MainLayout: React.FC = () => {
                 <SearchIcon />
               </IconButton>
 
-              {/* Account Button */}
+              {/* Account Button with Dropdown */}
               <IconButton
-                onClick={() => navigate(PATHS.APP_ACCOUNT)}
+                onClick={handleProfileMenuOpen}
                 color="inherit"
                 sx={{ ml: 1 }}
+                aria-controls={profileMenuAnchor ? 'profile-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={profileMenuAnchor ? 'true' : undefined}
               >
                 <AccountCircleIcon />
               </IconButton>
@@ -186,6 +228,55 @@ const MainLayout: React.FC = () => {
           )}
         </Toolbar>
       </AppBar>
+
+      {/* Profile Dropdown Menu */}
+      <Menu
+        id="profile-menu"
+        anchorEl={profileMenuAnchor}
+        open={Boolean(profileMenuAnchor)}
+        onClose={handleProfileMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        PaperProps={{
+          elevation: 3,
+          sx: {
+            mt: 1.5,
+            minWidth: 200,
+            borderRadius: 2,
+            overflow: 'visible',
+            '& .MuiMenuItem-root': {
+              py: 1.5,
+              px: 2,
+            }
+          }
+        }}
+      >
+        <MenuItem onClick={handleProfileClick}>
+          <ListItemIcon>
+            <PersonIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Profile</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleCreatorStudioClick}>
+          <ListItemIcon>
+            <VideoLibraryIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Creator Studio</ListItemText>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Logout</ListItemText>
+        </MenuItem>
+      </Menu>
 
       {isMobile ? (
         <Drawer

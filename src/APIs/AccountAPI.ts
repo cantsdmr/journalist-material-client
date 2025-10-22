@@ -59,8 +59,6 @@ export class AccountAPI extends HTTPApi {
     return this._get<PaymentMethodType[]>(`${API_PATH}/payment-methods/available`);
   }
 
-
-
   public async getSubscriptions() {
     return this._list<Subscription>(`${API_PATH}/subscriptions`);
   }

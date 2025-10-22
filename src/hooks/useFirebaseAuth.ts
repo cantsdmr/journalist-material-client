@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { 
-  Auth, 
-  AuthProvider, 
+import { useState, useEffect, useRef } from 'react';
+import {
+  Auth,
+  AuthProvider,
   User as FirebaseUser,
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signInWithPopup, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as signOutFromFirebase,
   onAuthStateChanged
 } from 'firebase/auth';
@@ -14,21 +14,28 @@ export interface AuthState {
   user: FirebaseUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  getToken: () => Promise<string | null>;
+  getToken: (forceRefresh?: boolean) => Promise<string | null>;
   signIn: (email: string, password: string) => Promise<string | null>;
   signInWithProvider: (provider: AuthProvider) => Promise<string | null>;
   signUp: (email: string, password: string) => Promise<FirebaseUser | null>;
   signOut: () => Promise<void>;
 }
 
+// Firebase tokens expire after 1 hour
+const TOKEN_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
+const TOKEN_REFRESH_INTERVAL = 50 * 60 * 1000; // Refresh 10 minutes before expiry (50 minutes)
+
 export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const tokenRefreshInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
+      } else {
+        setUser(null);
       }
       setIsLoading(false);
     });
@@ -36,8 +43,49 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
     return () => unsubscribe();
   }, [firebaseAuth]);
 
-  const getToken = async (): Promise<string | null> => {
-    return user ? user.getIdToken() : null;
+  // Set up automatic token refresh
+  useEffect(() => {
+    // Clear existing interval
+    if (tokenRefreshInterval.current) {
+      clearInterval(tokenRefreshInterval.current);
+      tokenRefreshInterval.current = null;
+    }
+
+    if (user) {
+      // Immediately refresh token to ensure it's valid
+      user.getIdToken(true).catch(err => {
+        console.error('Error refreshing token on mount:', err);
+      });
+
+      // Set up periodic refresh (every 50 minutes)
+      tokenRefreshInterval.current = setInterval(async () => {
+        try {
+          await user.getIdToken(true); // Force refresh
+          console.log('Token refreshed automatically');
+        } catch (error) {
+          console.error('Error during automatic token refresh:', error);
+        }
+      }, TOKEN_REFRESH_INTERVAL);
+    }
+
+    return () => {
+      if (tokenRefreshInterval.current) {
+        clearInterval(tokenRefreshInterval.current);
+        tokenRefreshInterval.current = null;
+      }
+    };
+  }, [user]);
+
+  const getToken = async (forceRefresh = false): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      // Force refresh if requested or if token might be expired
+      return await user.getIdToken(forceRefresh);
+    } catch (error) {
+      console.error('Error getting token:', error);
+      return null;
+    }
   };
 
   const signIn = async (email: string, password: string): Promise<string | null> => {
