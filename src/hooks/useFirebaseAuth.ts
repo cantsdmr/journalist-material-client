@@ -22,7 +22,6 @@ export interface AuthState {
 }
 
 // Firebase tokens expire after 1 hour
-const TOKEN_EXPIRY_TIME = 60 * 60 * 1000; // 1 hour in milliseconds
 const TOKEN_REFRESH_INTERVAL = 50 * 60 * 1000; // Refresh 10 minutes before expiry (50 minutes)
 
 export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
