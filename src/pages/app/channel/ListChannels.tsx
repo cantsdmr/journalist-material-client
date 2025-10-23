@@ -4,13 +4,15 @@ import { useProfile } from '@/contexts/ProfileContext';
 import TagFilter from '@/components/filters/TagFilter';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ChannelsList from '@/components/channel/ChannelsList';
+import { useApiContext } from '@/contexts/ApiContext';
 
 const ListChannels: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const { actions, channelRelations, api } = useProfile();
-
+  const { actions, channelRelations } = useProfile();
+  const { api } = useApiContext();
+  
   // Extract tags from URL parameters on component mount
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
