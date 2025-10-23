@@ -1,30 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Stack,
-  Box,
-  Typography,
-} from '@mui/material';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { Channel } from '@/types/index';
-import { useApiContext } from '@/contexts/ApiContext';
-import ChannelItem from '@/components/channel/ChannelItem/index';
-import { alpha } from '@mui/material/styles';
+import { Box, Typography } from '@mui/material';
 import { useProfile } from '@/contexts/ProfileContext';
-import { useApiCall } from '@/hooks/useApiCall';
 import TagFilter from '@/components/filters/TagFilter';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ChannelsList from '@/components/channel/ChannelsList';
 
 const ListChannels: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [page, setPage] = useState<number>(1);
-  const [limit, setLimit] = useState<number>(10);
-  const [hasMore, setHasMore] = useState<boolean>(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const { api } = useApiContext();
-  const { actions, channelRelations } = useProfile();
-  const { execute } = useApiCall();
+  const { actions, channelRelations, api } = useProfile();
 
   // Extract tags from URL parameters on component mount
   useEffect(() => {
@@ -37,57 +22,15 @@ const ListChannels: React.FC = () => {
     }
   }, [location.search]);
 
-  const fetchMoreData = () => {
-    getChannels(page + 1);
-  };
-
-  const getChannels = async (_page: number = page) => {
-    const filters = selectedTags.length > 0 ? { tags: selectedTags } : {};
-
-    const result = await execute(
-      () => api?.channelApi.getChannels(
-        filters, // Apply tag filters
-        {
-          page: _page,
-          limit
-        }
-      ),
-      { showErrorToast: true }
-    );
-
-    if (result) {
-      if (_page === 1) {
-        setChannels(result.items ?? []);
-      } else {
-        setChannels(prev => [...prev, ...(result.items ?? [])]);
-      }
-
-      setPage(result.metadata.currentPage ?? 1);
-      setLimit(result.metadata.limit ?? 10);
-      setHasMore(result.metadata.hasNext === true);
-    }
-  };
-
-  useEffect(() => {
-    setPage(1);
-    getChannels(1);
-  }, [selectedTags]); // Refetch when tags change
-
   const handleJoin = async (channelId: string, tierId?: string) => {
     if (!tierId) return;
-
-    // Find the channel and tier to determine if it's paid
-    const channel = channels.find(c => c.id === channelId);
-    const tier = channel?.tiers?.find(t => t.id === tierId);
-
-    if (!tier) return;
 
     try {
       // Use direct subscription API for all tiers
       const result = await api?.subscriptionApi?.createDirectSubscription(channelId, {
         tierId,
         notificationLevel: 1,
-        paymentMethodId: tier.price > 0 ? 'paypal_default' : undefined
+        paymentMethodId: 'paypal_default' // Will be used for paid subscriptions
       });
 
       if (result?.approvalUrl) {
@@ -127,16 +70,11 @@ const ListChannels: React.FC = () => {
   };
 
   const handleCancel = async (channelId: string) => {
-    const result = await execute(
-      () => api?.channelApi.unsubscribeFromChannel(channelId),
-      {
-        showSuccessMessage: true,
-        successMessage: 'Membership cancelled successfully!'
-      }
-    );
-
-    if (result) {
+    try {
+      await api?.channelApi.unsubscribeFromChannel(channelId);
       await actions.refreshProfile();
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
     }
   };
 
@@ -177,71 +115,17 @@ const ListChannels: React.FC = () => {
         />
       </Box>
 
+      {/* Channels List */}
       <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-        <InfiniteScroll
-          dataLength={channels.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={
-            <Stack spacing={2} sx={{ mt: 2 }}>
-              {[...Array(2)].map((_, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    display: 'flex',
-                    gap: 2,
-                    p: 2,
-                    borderRadius: 2,
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? alpha(theme.palette.common.white, 0.05)
-                        : alpha(theme.palette.common.black, 0.03)
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 56,
-                      height: 56,
-                      borderRadius: 2,
-                      bgcolor: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? alpha(theme.palette.common.white, 0.1)
-                          : alpha(theme.palette.common.black, 0.1)
-                    }}
-                  />
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Box sx={{ height: 24, width: '40%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.300' }} />
-                    <Box sx={{ height: 16, width: '80%', mb: 1, borderRadius: 0.5, bgcolor: 'grey.200' }} />
-                    <Box sx={{ height: 16, width: '30%', borderRadius: 0.5, bgcolor: 'grey.200' }} />
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
-          }
-          endMessage={
-            <Box sx={{
-              textAlign: 'center',
-              mt: 4,
-              color: 'text.secondary',
-              fontSize: '0.875rem'
-            }}>
-              No more channels to display
-            </Box>
-          }
-        >
-          <Stack spacing={2.5}>
-            {channels.map((channel) => (
-              <ChannelItem
-                key={channel.id}
-                channel={channel}
-                hasSubscription={channelRelations.hasSubscription(channel.id)}
-                subscriptionTier={channelRelations.getSubscriptionTier(channel.id)}
-                onJoin={handleJoin}
-                onCancel={handleCancel}
-              />
-            ))}
-          </Stack>
-        </InfiniteScroll>
+        <ChannelsList
+          filters={selectedTags.length > 0 ? { tags: selectedTags } : {}}
+          emptyTitle="No channels found"
+          emptyDescription="No channels available at the moment"
+          hasSubscription={channelRelations.hasSubscription}
+          getSubscriptionTier={channelRelations.getSubscriptionTier}
+          onJoin={handleJoin}
+          onCancel={handleCancel}
+        />
       </Box>
     </Box>
   );

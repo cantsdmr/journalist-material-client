@@ -1,16 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Box, Tabs, Tab, Stack } from '@mui/material';
-import PollCard from '@/components/poll/PollCard';
-import { Poll } from '@/types/index';
-import LoadingScreen from '@/components/common/LoadingScreen';
-import { EmptyState } from '@/components/common/EmptyState';
-import { useApiContext } from '@/contexts/ApiContext';
-import { useApiCall } from '@/hooks/useApiCall';
-import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { alpha } from '@mui/material/styles';
-import { PATHS } from '@/constants/paths';
+import { Typography, Box, Tabs, Tab } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TagFilter from '@/components/filters/TagFilter';
+import PollsList from '@/components/poll/PollsList';
 
 enum PollTab {
   ALL = 'all',
@@ -22,14 +14,7 @@ const ListPoll: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<PollTab>(PollTab.ALL);
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(10);
-  const [hasMore, setHasMore] = useState<boolean>(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const { api } = useApiContext();
-  const { execute } = useApiCall();
 
   // Extract tags from URL parameters on component mount
   useEffect(() => {
@@ -42,7 +27,8 @@ const ListPoll: React.FC = () => {
     }
   }, [location.search]);
 
-  const fetchPolls = async (_page: number = page) => {
+  // Build filters based on active tab and tags
+  const getFilters = () => {
     const filters: any = {};
 
     // Apply tab-based filters
@@ -62,32 +48,7 @@ const ListPoll: React.FC = () => {
       filters.tags = selectedTags;
     }
 
-    const response = await execute(
-      () => api.pollApi.getPolls(filters, { page: _page, limit }),
-      { showErrorToast: true }
-    );
-
-    if (response) {
-      if (_page === 1) {
-        setPolls(response.items);
-      } else {
-        setPolls(prev => [...prev, ...response.items]);
-      }
-
-      setPage(response.metadata.currentPage);
-      setHasMore(response.metadata.hasNext === true);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    setPage(1);
-    fetchPolls(1);
-  }, [activeTab, selectedTags]); // Refetch when tab or tags change
-
-  const fetchMoreData = () => {
-    fetchPolls(page + 1);
+    return filters;
   };
 
   const handleTagsChange = (tags: string[]) => {
@@ -104,10 +65,6 @@ const ListPoll: React.FC = () => {
     const newPath = `${location.pathname}?${searchParams.toString()}`;
     navigate(newPath, { replace: true });
   };
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
@@ -143,77 +100,14 @@ const ListPoll: React.FC = () => {
         />
       </Box>
 
-      {polls.length === 0 ? (
-        <EmptyState
-          title="No polls found"
-          description="There are no polls available in this category at the moment."
+      {/* Polls List */}
+      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+        <PollsList
+          filters={getFilters()}
+          emptyTitle="No polls found"
+          emptyDescription="There are no polls available in this category at the moment."
         />
-      ) : (
-        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-          <InfiniteScroll
-            dataLength={polls.length}
-            next={fetchMoreData}
-            hasMore={hasMore}
-            loader={
-              <Stack spacing={2} sx={{ mt: 2 }}>
-                {[...Array(2)].map((_, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      bgcolor: (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? alpha(theme.palette.common.white, 0.05)
-                          : alpha(theme.palette.common.black, 0.03)
-                    }}
-                  >
-                    <Box sx={{ height: 24, width: '40%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
-                    <Stack spacing={2}>
-                      {[...Array(4)].map((_, i) => (
-                        <Box
-                          key={i}
-                          sx={{
-                            height: 40,
-                            borderRadius: 1,
-                            bgcolor: (theme) =>
-                              theme.palette.mode === 'dark'
-                                ? alpha(theme.palette.common.white, 0.1)
-                                : alpha(theme.palette.common.black, 0.1)
-                          }}
-                        />
-                      ))}
-                    </Stack>
-                  </Box>
-                ))}
-              </Stack>
-            }
-            endMessage={
-              <Box sx={{
-                textAlign: 'center',
-                mt: 4,
-                color: 'text.secondary',
-                fontSize: '0.875rem'
-              }}>
-                No more polls to display
-              </Box>
-            }
-          >
-            <Stack spacing={2.5}>
-              {polls.map((poll) => (
-                <Box
-                  key={poll.id}
-                  component={RouterLink}
-                  to={PATHS.APP_POLL_VIEW.replace(':id', poll.id)}
-                  sx={{ textDecoration: 'none' }}
-                >
-                  <PollCard poll={poll} />
-                </Box>
-              ))}
-            </Stack>
-          </InfiniteScroll>
-        </Box>
-      )}
+      </Box>
     </Box>
   );
 };

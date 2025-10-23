@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Typography,
-  Stack,
   Box,
   TextField,
   InputAdornment,
@@ -9,15 +8,10 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import { News, NewsFilters } from '@/types/index';
-import { useApiContext } from '@/contexts/ApiContext';
-import NewsEntry from '@/components/news/NewsEntry';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { EmptyState } from '@/components/common/EmptyState';
-import { alpha } from '@mui/material/styles';
-import { useApiCall } from '@/hooks/useApiCall';
+import { NewsFilters } from '@/types/index';
 import TagFilter from '@/components/filters/TagFilter';
 import { useLocation, useNavigate } from 'react-router-dom';
+import NewsList from '@/components/news/NewsList';
 
 interface ListNewsProps {
   filters?: NewsFilters;
@@ -27,43 +21,6 @@ interface ListNewsProps {
   emptyDescription?: string;
   showSearch?: boolean;
 }
-
-const ListNewsSkeleton = () => (
-  <Stack spacing={2} sx={{ mt: 2 }}>
-    {[...Array(2)].map((_, index) => (
-      <Box
-        key={index}
-        sx={{
-          p: 2,
-          borderRadius: 2,
-          bgcolor: (theme) =>
-            theme.palette.mode === 'dark'
-              ? alpha(theme.palette.common.white, 0.05)
-              : alpha(theme.palette.common.black, 0.03)
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: 1,
-              bgcolor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? alpha(theme.palette.common.white, 0.1)
-                  : alpha(theme.palette.common.black, 0.1),
-              mr: 1
-            }}
-          />
-          <Box sx={{ height: 20, width: '30%', borderRadius: 0.5, bgcolor: 'grey.300' }} />
-        </Box>
-        <Box sx={{ height: 24, width: '60%', mb: 2, borderRadius: 0.5, bgcolor: 'grey.300' }} />
-        <Box sx={{ height: 100, width: '100%', borderRadius: 1, bgcolor: 'grey.200', mb: 2 }} />
-        <Box sx={{ height: 16, width: '40%', borderRadius: 0.5, bgcolor: 'grey.200' }} />
-      </Box>
-    ))}
-  </Stack>
-);
 
 // Helper function to generate default content based on filters
 const getDefaultContent = (filters: NewsFilters = {}) => {
@@ -150,15 +107,9 @@ const ListNews: React.FC<ListNewsProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [news, setNews] = useState<News[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
-  const { api } = useApiContext();
-  const { execute } = useApiCall();
 
   // Extract tags and query from URL parameters on component mount
   useEffect(() => {
@@ -180,8 +131,6 @@ const ListNews: React.FC<ListNewsProps> = ({
     }
   }, [location.search, filters.tags]);
 
-  const ITEMS_PER_PAGE = 12;
-
   // Get default content based on filters, but allow custom overrides
   const defaultContent = getDefaultContent(filters);
   const displayTitle = customTitle || defaultContent.title;
@@ -194,44 +143,6 @@ const ListNews: React.FC<ListNewsProps> = ({
     ...filters,
     tags: selectedTags.length > 0 ? selectedTags : filters.tags,
     query: searchQuery || undefined
-  };
-
-  const fetchNews = async (_page: number = page) => {
-    setLoading(true);
-
-    const response = await execute(
-      () => api?.newsApi.getNews(
-        effectiveFilters,
-        {
-          page: _page,
-          limit: ITEMS_PER_PAGE
-        }
-      ),
-      { showErrorToast: true }
-    );
-
-    if (response) {
-      if (_page === 1) {
-        setNews(response.items);
-      } else {
-        setNews(prev => [...prev, ...response.items]);
-      }
-      setHasMore(response.metadata.hasNext);
-      setPage(response.metadata.currentPage);
-    }
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    setPage(1);
-    fetchNews(1);
-  }, [JSON.stringify(effectiveFilters)]); // Watch for filter changes including tags and query
-
-  const fetchMoreData = () => {
-    if (!loading && hasMore) {
-      fetchNews(page + 1);
-    }
   };
 
   const handleTagsChange = (tags: string[]) => {
@@ -338,40 +249,14 @@ const ListNews: React.FC<ListNewsProps> = ({
         />
       </Box>
 
-      {news.length === 0 && !loading ? (
-        <EmptyState
-          title={displayEmptyTitle}
-          description={displayEmptyDescription}
+      {/* News List */}
+      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+        <NewsList
+          filters={effectiveFilters}
+          emptyTitle={displayEmptyTitle}
+          emptyDescription={displayEmptyDescription}
         />
-      ) : (
-        <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-          <InfiniteScroll
-            dataLength={news.length}
-            next={fetchMoreData}
-            hasMore={hasMore}
-            loader={<ListNewsSkeleton />}
-            endMessage={
-              <Box sx={{
-                textAlign: 'center',
-                mt: 4,
-                color: 'text.secondary',
-                fontSize: '0.875rem'
-              }}>
-                No more news to display
-              </Box>
-            }
-          >
-            <Stack spacing={2.5}>
-              {news.map((item) => (
-                <NewsEntry
-                  key={item.id}
-                  news={item}
-                />
-              ))}
-            </Stack>
-          </InfiniteScroll>
-        </Box>
-      )}
+      </Box>
     </Box>
   );
 };
