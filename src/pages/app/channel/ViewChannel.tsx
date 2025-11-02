@@ -20,6 +20,8 @@ import {
     Tabs,
     Tab,
     IconButton,
+    TextField,
+    InputAdornment,
     // Link
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -35,6 +37,8 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import InfoIcon from '@mui/icons-material/Info';
 import ArticleIcon from '@mui/icons-material/Article';
 import PollIcon from '@mui/icons-material/Poll';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 // import TwitterIcon from '@mui/icons-material/Twitter';
 // import LanguageIcon from '@mui/icons-material/Language';
 import EmailIcon from '@mui/icons-material/Email';
@@ -46,7 +50,10 @@ const ViewChannel: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
     const [loading, setLoading] = useState(true);
     const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+    const [selectedNewsTags, setSelectedNewsTags] = useState<string[]>([]);
     const [selectedPollTags, setSelectedPollTags] = useState<string[]>([]);
+    const [pollSearchQuery, setPollSearchQuery] = useState('');
+    const [pollSearchInput, setPollSearchInput] = useState('');
     const [pendingSubscription, setPendingSubscription] = useState<{
         subscriptionId: string;
         approvalUrl: string;
@@ -154,8 +161,22 @@ const ViewChannel: React.FC = () => {
         fetchChannel();
     }, [id, execute, api?.channelApi]);
 
+    const handleNewsTagsChange = (tags: string[]) => {
+        setSelectedNewsTags(tags);
+    };
+
     const handlePollTagsChange = (tags: string[]) => {
         setSelectedPollTags(tags);
+    };
+
+    const handlePollSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setPollSearchQuery(pollSearchInput.trim());
+    };
+
+    const handleClearPollSearch = () => {
+        setPollSearchInput('');
+        setPollSearchQuery('');
     };
 
     const handleJoin = async (tierId?: string) => {
@@ -322,20 +343,20 @@ const ViewChannel: React.FC = () => {
 
                     <Paper elevation={0} sx={{ mb: 4, p: 4, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
                         <Box sx={{ textAlign: 'center', pt: 3 }}>
-                            <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 2, fontSize: '2.5rem' }} />
+                            <Skeleton variant="text" width="40%" sx={{ mb: 2, fontSize: '2.5rem' }} />
                             <Stack direction="row" spacing={2} justifyContent="center" sx={{ mb: 3 }}>
                                 <Skeleton variant="rounded" width={150} height={32} />
                                 <Skeleton variant="rounded" width={100} height={32} />
                             </Stack>
-                            <Skeleton variant="text" width="70%" sx={{ mx: 'auto', mb: 1 }} />
-                            <Skeleton variant="text" width="60%" sx={{ mx: 'auto', mb: 4 }} />
-                            <Skeleton variant="rounded" width={180} height={48} sx={{ mx: 'auto', borderRadius: 50 }} />
+                            <Skeleton variant="text" width="70%" sx={{ mb: 1 }} />
+                            <Skeleton variant="text" width="60%" sx={{ mb: 4 }} />
+                            <Skeleton variant="rounded" width={180} height={48} sx={{ borderRadius: 50 }} />
                         </Box>
                     </Paper>
 
                     {/* Tiers Skeleton */}
                     <Box sx={{ mb: 6 }}>
-                        <Skeleton variant="text" width="40%" sx={{ mx: 'auto', mb: 4, fontSize: '2rem' }} />
+                        <Skeleton variant="text" width="40%" sx={{ mb: 4, fontSize: '2rem' }} />
                         <Grid container spacing={3}>
                             {[...Array(3)].map((_, index) => (
                                 <Grid item xs={12} md={4} key={index}>
@@ -497,7 +518,6 @@ const ViewChannel: React.FC = () => {
                             sx={{
                                 mb: 4,
                                 maxWidth: 800,
-                                mx: 'auto',
                                 color: 'text.secondary',
                                 lineHeight: 1.8,
                                 fontSize: '1.1rem',
@@ -636,13 +656,34 @@ const ViewChannel: React.FC = () => {
                         {/* News Tab */}
                         {activeTab === 0 && (
                             <Box>
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+                                        Channel News
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                                        Latest news from this channel
+                                    </Typography>
+
+                                    {/* Tag Filter */}
+                                    <TagFilter
+                                        selectedTags={selectedNewsTags}
+                                        onTagsChange={handleNewsTagsChange}
+                                        contentType="news"
+                                        maxTags={5}
+                                        showCounts={false}
+                                        horizontal={true}
+                                    />
+                                </Box>
+
                                 <ListNews
-                                    filters={{ channel: channel?.id }}
-                                    title="Channel News"
-                                    description="Latest news from this channel"
+                                    filters={{
+                                        channel: channel?.id,
+                                        ...(selectedNewsTags.length > 0 && { tags: selectedNewsTags })
+                                    }}
                                     emptyTitle="No news published yet"
                                     emptyDescription="This channel hasn't published any news articles yet"
                                     showSearch={true}
+                                    mode="grid"
                                 />
                             </Box>
                         )}
@@ -650,7 +691,7 @@ const ViewChannel: React.FC = () => {
                         {/* Polls Tab */}
                         {activeTab === 1 && (
                             <Box>
-                                <Box sx={{ maxWidth: 800, mx: 'auto', mb: 3 }}>
+                                <Box sx={{ mb: 3 }}>
                                     <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
                                         Channel Polls
                                     </Typography>
@@ -658,24 +699,63 @@ const ViewChannel: React.FC = () => {
                                         Vote on polls from this channel
                                     </Typography>
 
+                                    {/* Search Bar */}
+                                    <Box sx={{ mb: 3 }}>
+                                        <form onSubmit={handlePollSearchSubmit}>
+                                            <TextField
+                                                fullWidth
+                                                placeholder="Search polls by question or content..."
+                                                value={pollSearchInput}
+                                                onChange={(e) => setPollSearchInput(e.target.value)}
+                                                InputProps={{
+                                                    startAdornment: (
+                                                        <InputAdornment position="start">
+                                                            <SearchIcon color="action" />
+                                                        </InputAdornment>
+                                                    ),
+                                                    endAdornment: pollSearchInput && (
+                                                        <InputAdornment position="end">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={handleClearPollSearch}
+                                                                edge="end"
+                                                            >
+                                                                <ClearIcon />
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 2,
+                                                        bgcolor: 'background.paper',
+                                                    }
+                                                }}
+                                            />
+                                        </form>
+                                    </Box>
+
                                     {/* Tag Filter */}
                                     <TagFilter
                                         selectedTags={selectedPollTags}
                                         onTagsChange={handlePollTagsChange}
                                         contentType="polls"
-                                        maxTags={4}
+                                        maxTags={5}
                                         showCounts={false}
+                                        horizontal={true}
                                     />
                                 </Box>
 
-                                <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+                                <Box>
                                     <PollsList
                                         filters={{
                                             channel: channel?.id,
-                                            ...(selectedPollTags.length > 0 && { tags: selectedPollTags })
+                                            ...(selectedPollTags.length > 0 && { tags: selectedPollTags }),
+                                            ...(pollSearchQuery && { query: pollSearchQuery })
                                         }}
                                         emptyTitle="No polls found"
                                         emptyDescription="This channel hasn't created any polls yet"
+                                        mode="grid"
                                     />
                                 </Box>
                             </Box>

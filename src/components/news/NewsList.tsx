@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, Box, alpha } from '@mui/material';
+import { Stack, Box, alpha, Grid, IconButton, Typography, Chip, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { News, NewsFilters } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import NewsEntry from '@/components/news/NewsEntry';
 import { EmptyState } from '@/components/common/EmptyState';
+import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
+import ShareIcon from '@mui/icons-material/Share';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 interface NewsListProps {
   filters?: NewsFilters;
   emptyTitle?: string;
   emptyDescription?: string;
   itemsPerPage?: number;
+  mode?: 'grid' | 'scroll'; // grid: traditional grid layout, scroll: TikTok-style vertical scroll
 }
 
 const NewsSkeleton = ({ count = 2 }: { count?: number }) => (
@@ -55,7 +60,8 @@ const NewsList: React.FC<NewsListProps> = ({
   filters = {},
   emptyTitle = 'No news found',
   emptyDescription = 'No news articles available at the moment',
-  itemsPerPage = 12
+  itemsPerPage = 12,
+  mode = 'scroll' // default to TikTok-style scroll
 }) => {
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +69,7 @@ const NewsList: React.FC<NewsListProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
   const { execute } = useApiCall();
+  const theme = useTheme();
 
   const fetchNews = async (_page: number = page) => {
     try {
@@ -114,37 +121,268 @@ const NewsList: React.FC<NewsListProps> = ({
     );
   }
 
+  // Grid mode - traditional grid layout
+  if (mode === 'grid') {
+    return (
+      <Box sx={{ width: '100%' }}>
+        {loading && news.length === 0 ? (
+          <NewsSkeleton />
+        ) : (
+          <InfiniteScroll
+            dataLength={news.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={<Box />}
+            endMessage={
+              <Box sx={{
+                textAlign: 'center',
+                py: 4,
+                color: 'text.secondary',
+                fontSize: '0.875rem'
+              }}>
+                No more news to display
+              </Box>
+            }
+          >
+            <Grid container spacing={3}>
+              {news.map((item) => (
+                <Grid item xs={12} sm={6} md={4} key={item.id}>
+                  <NewsEntry news={item} mode="grid" />
+                </Grid>
+              ))}
+            </Grid>
+          </InfiniteScroll>
+        )}
+      </Box>
+    );
+  }
+
+  // Scroll mode - TikTok-style vertical scroll (default)
   return (
-    <Box sx={{ width: '100%' }}>
-      {loading && news.length === 0 ? (
-        <NewsSkeleton />
-      ) : (
-        <InfiniteScroll
-          dataLength={news.length}
-          next={fetchMoreData}
-          hasMore={hasMore}
-          loader={<Box />}
-          endMessage={
-            <Box sx={{
-              textAlign: 'center',
-              mt: 4,
-              color: 'text.secondary',
-              fontSize: '0.875rem'
-            }}>
-              No more news to display
-            </Box>
-          }
-        >
-          <Stack spacing={2.5}>
+    <Box
+      sx={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        overflowY: 'scroll',
+        scrollSnapType: 'y mandatory',
+        scrollBehavior: 'smooth',
+        '&::-webkit-scrollbar': {
+          display: 'none'
+        },
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none',
+        px: { xs: 2, sm: 0 }
+      }}
+    >
+      <Box sx={{ width: '100%', maxWidth: 480 }}>
+        {loading && news.length === 0 ? (
+          <NewsSkeleton />
+        ) : (
+          <InfiniteScroll
+            dataLength={news.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={<Box />}
+            endMessage={
+              <Box sx={{
+                textAlign: 'center',
+                py: 4,
+                color: 'text.secondary',
+                fontSize: '0.875rem',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                No more news to display
+              </Box>
+            }
+            style={{ overflow: 'visible', paddingBottom: '64px' }}
+          >
             {news.map((item) => (
-              <NewsEntry
+              <Box
                 key={item.id}
-                news={item}
-              />
+                sx={{
+                  position: 'relative',
+                  scrollSnapAlign: 'start',
+                  scrollSnapStop: 'always',
+                  height: 'calc(100vh - 64px)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <NewsEntry news={item} />
+
+                {/* Right Side Action Bar - Outside the card on desktop, inside on mobile */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    right: { xs: 8, sm: -60 },
+                    bottom: '5vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 2.5,
+                    zIndex: 10
+                  }}
+                >
+                  {/* Quality Score Badge */}
+                  {item.qualityMetrics?.overallQualityScore && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <Chip
+                        icon={<VerifiedIcon sx={{ fontSize: '0.875rem' }} />}
+                        label={item.qualityMetrics.overallQualityScore.toFixed(1)}
+                        size="small"
+                        sx={{
+                          height: 28,
+                          bgcolor: alpha(theme.palette.success.main, 0.9),
+                          color: 'white',
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          backdropFilter: 'blur(10px)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                        }}
+                      />
+                    </Box>
+                  )}
+
+                  {/* Favorite Button */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <IconButton
+                      className="action-button"
+                      size="medium"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle like
+                      }}
+                      sx={{
+                        bgcolor: theme.palette.mode === 'dark'
+                          ? alpha('#fff', 0.2)
+                          : alpha('#000', 0.6),
+                        backdropFilter: 'blur(10px)',
+                        color: 'white',
+                        boxShadow: theme.palette.mode === 'dark'
+                          ? '0 2px 8px rgba(0,0,0,0.3)'
+                          : '0 2px 8px rgba(0,0,0,0.5)',
+                        '&:hover': {
+                          bgcolor: alpha(theme.palette.error.main, 0.8),
+                          transform: 'scale(1.1)'
+                        },
+                        transition: 'all 0.2s ease',
+                        width: 48,
+                        height: 48
+                      }}
+                    >
+                      <FavoriteIcon sx={{ fontSize: '1.5rem' }} />
+                    </IconButton>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        mt: 0.5,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                      }}
+                    >
+                      {/* Like count would go here */}
+                    </Typography>
+                  </Box>
+
+                  {/* Share Button */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <IconButton
+                      className="action-button"
+                      size="medium"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle share
+                      }}
+                      sx={{
+                        bgcolor: theme.palette.mode === 'dark'
+                          ? alpha('#fff', 0.2)
+                          : alpha('#000', 0.6),
+                        backdropFilter: 'blur(10px)',
+                        color: 'white',
+                        boxShadow: theme.palette.mode === 'dark'
+                          ? '0 2px 8px rgba(0,0,0,0.3)'
+                          : '0 2px 8px rgba(0,0,0,0.5)',
+                        '&:hover': {
+                          bgcolor: theme.palette.mode === 'dark'
+                            ? alpha('#fff', 0.3)
+                            : alpha('#000', 0.7),
+                          transform: 'scale(1.1)'
+                        },
+                        transition: 'all 0.2s ease',
+                        width: 48,
+                        height: 48
+                      }}
+                    >
+                      <ShareIcon sx={{ fontSize: '1.5rem' }} />
+                    </IconButton>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        mt: 0.5,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                      }}
+                    >
+                      {/* Share count would go here */}
+                    </Typography>
+                  </Box>
+
+                  {/* View Count */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        bgcolor: theme.palette.mode === 'dark'
+                          ? alpha('#fff', 0.2)
+                          : alpha('#000', 0.6),
+                        backdropFilter: 'blur(10px)',
+                        borderRadius: '50%',
+                        width: 48,
+                        height: 48,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: theme.palette.mode === 'dark'
+                          ? '0 2px 8px rgba(0,0,0,0.3)'
+                          : '0 2px 8px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      <VisibilityIcon
+                        sx={{
+                          fontSize: '1.5rem',
+                          color: 'white',
+                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))'
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: 'white',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        mt: 0.5,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                      }}
+                    >
+                      12K
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
             ))}
-          </Stack>
-        </InfiniteScroll>
-      )}
+          </InfiniteScroll>
+        )}
+      </Box>
     </Box>
   );
 };

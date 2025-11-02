@@ -4,9 +4,19 @@ export type Poll = {
     description?: string;
     channelId: string;
     creatorId: string;
+    statusId: number;
     createdAt: string;
     updatedAt: string;
+    deletedAt?: string | null;
     endDate?: string;
+    claimedBy?: string;
+    claimedAt?: string | null;
+    isTrending: boolean;
+    isConverted: boolean;
+    fundingAmount: number;
+    fundingGoal?: number;
+    voteCount: number;
+    viewCount: number;
     options: PollOption[];
     media: PollMedia[];
     channel: {
@@ -24,10 +34,17 @@ export type Poll = {
         price: number;
         order: number;
     };
+    status?: {
+        id: number;
+        name: string;
+    };
     stats: PollStatistics;
-    voteCount: number;
     tags: PollTag[];
-    isTrending: boolean;
+    funding?: PollFunding;
+    journalist?: {
+        id: string;
+        displayName: string;
+    };
 };
 
 export type PollOption = {

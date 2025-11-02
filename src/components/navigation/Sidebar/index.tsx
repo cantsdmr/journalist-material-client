@@ -5,6 +5,7 @@ import {
 import { Link, useLocation } from 'react-router-dom';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ExploreIcon from '@mui/icons-material/Explore';
+import RssFeedIcon from '@mui/icons-material/RssFeed';
 import HomeIcon from '@mui/icons-material/Home';
 import PollIcon from '@mui/icons-material/Poll';
 import { PATHS } from '@/constants/paths';
@@ -26,12 +27,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
   const menuItems = [
     { path: `${PATHS.APP_NEWS_MY_FEED}`, icon: <HomeIcon />, label: 'For you' },
-    { path: `${PATHS.APP_CHANNELS}`, icon: <ExploreIcon />, label: 'Explore' },
+    { path: `${PATHS.APP_NEWS_DISCOVER}`, icon: <ExploreIcon />, label: 'Discover' },
+    { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' },
+    { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' },
   ];
 
   const exploreCategories = [
     { path: `${PATHS.APP_NEWS_TRENDING}`, icon: <TrendingUpIcon />, label: 'Trending' },
-    { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' },
   ];
 
   useEffect(() => {
@@ -129,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
             letterSpacing: '0.5px'
           }}
         >
-          Explore categories
+          Categories
         </Typography>
       </Box>
       <List sx={{ pt: 0, pb: 1 }}>

@@ -97,7 +97,7 @@ const ListChannels: React.FC = () => {
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
+      <Box sx={{ mb: 3 }}>
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           Discover Channels
         </Typography>
@@ -107,18 +107,19 @@ const ListChannels: React.FC = () => {
       </Box>
 
       {/* Tag Filter Component */}
-      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
+      <Box sx={{ mb: 3 }}>
         <TagFilter
           selectedTags={selectedTags}
           onTagsChange={handleTagsChange}
           contentType="channels"
           maxTags={3}
           showCounts={false}
+          horizontal={true}
         />
       </Box>
 
       {/* Channels List */}
-      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      <Box>
         <ChannelsList
           filters={selectedTags.length > 0 ? { tags: selectedTags } : {}}
           emptyTitle="No channels found"

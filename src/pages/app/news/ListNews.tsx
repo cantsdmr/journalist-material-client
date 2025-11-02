@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Typography,
   Box,
   TextField,
   InputAdornment,
@@ -9,7 +8,6 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { NewsFilters } from '@/types/index';
-import TagFilter from '@/components/filters/TagFilter';
 import { useLocation, useNavigate } from 'react-router-dom';
 import NewsList from '@/components/news/NewsList';
 
@@ -20,6 +18,7 @@ interface ListNewsProps {
   emptyTitle?: string;
   emptyDescription?: string;
   showSearch?: boolean;
+  mode?: 'grid' | 'scroll';
 }
 
 // Helper function to generate default content based on filters
@@ -99,65 +98,37 @@ const getDefaultContent = (filters: NewsFilters = {}) => {
 
 const ListNews: React.FC<ListNewsProps> = ({
   filters = {},
-  title: customTitle,
-  description: customDescription,
   emptyTitle: customEmptyTitle,
   emptyDescription: customEmptyDescription,
-  showSearch = false
+  showSearch = false,
+  mode = 'scroll'
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
 
-  // Extract tags and query from URL parameters on component mount
+  // Extract query from URL parameters on component mount
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
-    const tagsParam = searchParams.get('tags');
     const queryParam = searchParams.get('q');
-
-    if (tagsParam) {
-      const urlTags = tagsParam.split(',').map(tag => decodeURIComponent(tag.trim()));
-      setSelectedTags(urlTags);
-    } else if (filters.tags) {
-      setSelectedTags(filters.tags);
-    }
 
     if (queryParam) {
       const decodedQuery = decodeURIComponent(queryParam);
       setSearchQuery(decodedQuery);
       setSearchInput(decodedQuery);
     }
-  }, [location.search, filters.tags]);
+  }, [location.search]);
 
   // Get default content based on filters, but allow custom overrides
   const defaultContent = getDefaultContent(filters);
-  const displayTitle = customTitle || defaultContent.title;
-  const displayDescription = customDescription || defaultContent.description;
   const displayEmptyTitle = customEmptyTitle || defaultContent.emptyTitle;
   const displayEmptyDescription = customEmptyDescription || defaultContent.emptyDescription;
 
-  // Combine filters with selected tags and search query
+  // Combine filters with search query
   const effectiveFilters = {
     ...filters,
-    tags: selectedTags.length > 0 ? selectedTags : filters.tags,
     query: searchQuery || undefined
-  };
-
-  const handleTagsChange = (tags: string[]) => {
-    setSelectedTags(tags);
-
-    // Update URL with selected tags
-    const searchParams = new URLSearchParams(location.search);
-    if (tags.length > 0) {
-      searchParams.set('tags', tags.map(tag => encodeURIComponent(tag)).join(','));
-    } else {
-      searchParams.delete('tags');
-    }
-
-    const newPath = `${location.pathname}?${searchParams.toString()}`;
-    navigate(newPath, { replace: true });
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -190,19 +161,26 @@ const ListNews: React.FC<ListNewsProps> = ({
   };
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-          {displayTitle}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {displayDescription}
-        </Typography>
-      </Box>
-
+    <Box sx={{
+      width: '100%',
+      height: '100vh',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      ...(mode === 'scroll' && {
+        position: 'fixed',
+        top: 64,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        zIndex: 1
+      })
+    }}>
       {/* Search Bar - Only show if enabled */}
-      {showSearch && (
-        <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
+      {showSearch && mode === 'grid' && (
+        <Box sx={{ flexShrink: 0, mb: 2 }}>
           <form onSubmit={handleSearchSubmit}>
             <TextField
               fullWidth
@@ -238,23 +216,13 @@ const ListNews: React.FC<ListNewsProps> = ({
         </Box>
       )}
 
-      {/* Tag Filter Component */}
-      <Box sx={{ mb: 3, maxWidth: 800, mx: 'auto' }}>
-        <TagFilter
-          selectedTags={selectedTags}
-          onTagsChange={handleTagsChange}
-          contentType="news"
-          maxTags={5}
-          showCounts={false}
-        />
-      </Box>
-
       {/* News List */}
-      <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      <Box sx={{ flex: 1, overflow: 'hidden' }}>
         <NewsList
           filters={effectiveFilters}
           emptyTitle={displayEmptyTitle}
           emptyDescription={displayEmptyDescription}
+          mode={mode}
         />
       </Box>
     </Box>

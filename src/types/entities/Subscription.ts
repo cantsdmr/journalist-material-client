@@ -34,10 +34,25 @@ export type Subscription = {
 
 export type AdminSubscription = {
   id: string;
+  userId: string;
+  channelId: string;
+  tierId: string;
+  statusId: number;
+  notificationLevelId: number;
+  subscribedAt: string;
+  expiresAt?: string;
+  renewalDate?: string;
+  paymentReference?: string;
+  totalContributions: number;
+  monthlyContribution: number;
+  autoContribute: boolean;
+  contributionLimit?: number;
+  createdAt: string;
+  updatedAt: string;
   user: {
     id: string;
     email: string;
-    display_name: string;
+    displayName: string;
   };
   channel: {
     id: string;
@@ -49,11 +64,6 @@ export type AdminSubscription = {
     price: number;
     currency: string;
   };
-  statusId: number;
-  startedAt: string;
-  expiresAt?: string;
-  createdAt: string;
-  updatedAt: string;
 };
 
 export type SubscriptionAnalytics = {

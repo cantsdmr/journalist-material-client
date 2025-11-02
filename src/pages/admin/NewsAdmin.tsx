@@ -30,6 +30,7 @@ import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { News } from '@/types/entities/News';
 import { NEWS_STATUS } from '@/enums/NewsEnums';
 import { PaginatedResponse } from '@/utils/http';
+import { PATHS } from '@/constants/paths';
 
 const NewsAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -190,7 +191,7 @@ const NewsAdmin: React.FC = () => {
       ),
     },
     {
-      id: 'created_at',
+      id: 'createdAt',
       label: 'Created',
       minWidth: 120,
       sortable: true,
@@ -201,7 +202,7 @@ const NewsAdmin: React.FC = () => {
       ),
     },
     {
-      id: 'updated_at',
+      id: 'updatedAt',
       label: 'Updated',
       minWidth: 120,
       sortable: true,
@@ -255,7 +256,7 @@ const NewsAdmin: React.FC = () => {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            window.open(`/news/${row.id}`, '_blank');
+            window.open(PATHS.APP_NEWS_VIEW.replace(':id', row.id), '_blank');
           }}
         >
           <ViewIcon fontSize="small" />

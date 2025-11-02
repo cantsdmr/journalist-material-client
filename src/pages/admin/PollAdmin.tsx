@@ -34,6 +34,7 @@ import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Poll } from '@/types/entities/Poll';
 import { PaginatedResponse } from '@/utils/http';
 import { POLL_STATUS } from '@/enums/PollEnums';
+import { PATHS } from '@/constants/paths';
 
 const PollAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -54,7 +55,7 @@ const PollAdmin: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [trendingFilter, setTrendingFilter] = useState<string>('');
   const [fundedFilter, setFundedFilter] = useState<string>('');
-  const [sortColumn, setSortColumn] = useState('created_at');
+  const [sortColumn, setSortColumn] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const fetchPolls = useCallback(async () => {
@@ -235,7 +236,7 @@ const PollAdmin: React.FC = () => {
       ),
     },
     {
-      id: 'created_at',
+      id: 'createdAt',
       label: 'Created',
       minWidth: 120,
       sortable: true,
@@ -305,7 +306,7 @@ const PollAdmin: React.FC = () => {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            window.open(`/polls/${row.id}`, '_blank');
+            window.open(PATHS.APP_POLL_VIEW.replace(':id', row.id), '_blank');
           }}
         >
           <ViewIcon fontSize="small" />

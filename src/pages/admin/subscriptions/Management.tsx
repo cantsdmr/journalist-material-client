@@ -378,7 +378,7 @@ const SubscriptionManagement: React.FC = () => {
                     <TableCell>
                       <Box>
                         <Typography variant="body2" fontWeight="medium">
-                          {subscription.user.display_name}
+                          {subscription.user.displayName}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           {subscription.user.email}
@@ -409,7 +409,7 @@ const SubscriptionManagement: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">
-                        {formatDate(subscription.startedAt)}
+                        {formatDate(subscription.subscribedAt)}
                       </Typography>
                     </TableCell>
                     <TableCell>

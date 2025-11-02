@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, Box, alpha } from '@mui/material';
+import { Stack, Box, alpha, Grid } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -137,18 +137,19 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
             </Box>
           }
         >
-          <Stack spacing={2.5}>
+          <Grid container spacing={3}>
             {channels.map((channel) => (
-              <ChannelItem
-                key={channel.id}
-                channel={channel}
-                hasSubscription={hasSubscription?.(channel.id) ?? false}
-                subscriptionTier={getSubscriptionTier?.(channel.id)}
-                onJoin={onJoin}
-                onCancel={onCancel}
-              />
+              <Grid item xs={12} sm={6} md={4} key={channel.id}>
+                <ChannelItem
+                  channel={channel}
+                  hasSubscription={hasSubscription?.(channel.id) ?? false}
+                  subscriptionTier={getSubscriptionTier?.(channel.id)}
+                  onJoin={onJoin}
+                  onCancel={onCancel}
+                />
+              </Grid>
             ))}
-          </Stack>
+          </Grid>
         </InfiniteScroll>
       )}
     </Box>

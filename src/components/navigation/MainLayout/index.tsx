@@ -125,7 +125,13 @@ const MainLayout: React.FC = () => {
             </Box>
           ) : (
             <>
-              <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 200 }}>
+              {/* Left Section - Menu + Logo */}
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                position: 'absolute',
+                left: 0
+              }}>
                 <IconButton
                   color="inherit"
                   aria-label="toggle sidebar"
@@ -190,10 +196,12 @@ const MainLayout: React.FC = () => {
                 </Box>
               </Box>
 
+              {/* Center Section - Expandable Search Bar aligned with news cards */}
               <Box sx={{
-                flexGrow: 1,
-                display: { xs: 'none', md: 'flex' },
-                justifyContent: 'center'
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: { xs: 'none', md: 'flex' }
               }}>
                 <SearchBar
                   onSearch={handleSearch}
@@ -202,28 +210,31 @@ const MainLayout: React.FC = () => {
                 />
               </Box>
 
-              <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }} />
+              {/* Spacer */}
+              <Box sx={{ flexGrow: 1 }} />
 
-              {/* Search Icon for Mobile */}
-              <IconButton
-                onClick={handleMobileSearchToggle}
-                color="inherit"
-                sx={{ display: { xs: 'flex', md: 'none' } }}
-              >
-                <SearchIcon />
-              </IconButton>
+              {/* Right Section - Search Icon (Mobile) + Account Button */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {/* Search Icon for Mobile */}
+                <IconButton
+                  onClick={handleMobileSearchToggle}
+                  color="inherit"
+                  sx={{ display: { xs: 'flex', md: 'none' } }}
+                >
+                  <SearchIcon />
+                </IconButton>
 
-              {/* Account Button with Dropdown */}
-              <IconButton
-                onClick={handleProfileMenuOpen}
-                color="inherit"
-                sx={{ ml: 1 }}
-                aria-controls={profileMenuAnchor ? 'profile-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={profileMenuAnchor ? 'true' : undefined}
-              >
-                <AccountCircleIcon />
-              </IconButton>
+                {/* Account Button with Dropdown */}
+                <IconButton
+                  onClick={handleProfileMenuOpen}
+                  color="inherit"
+                  aria-controls={profileMenuAnchor ? 'profile-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={profileMenuAnchor ? 'true' : undefined}
+                >
+                  <AccountCircleIcon />
+                </IconButton>
+              </Box>
             </>
           )}
         </Toolbar>
@@ -351,7 +362,7 @@ const MainLayout: React.FC = () => {
           flexDirection: 'column',
           bgcolor: 'background.default',
           overflow: 'hidden',
-          maxWidth: '100%'
+          width: '100%'
         }}
       >
         <Box
@@ -361,7 +372,9 @@ const MainLayout: React.FC = () => {
             px: { xs: 2, sm: 3 },
             overflowY: 'auto',
             overflowX: 'hidden',
-            maxWidth: '100%'
+            width: '100%',
+            marginLeft: 0,
+            marginRight: 'auto'
           }}
         >
           <Outlet />

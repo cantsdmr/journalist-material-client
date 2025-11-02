@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Chip,
@@ -25,58 +25,56 @@ import {
 import {
   Visibility as ViewIcon,
   Payment as PaymentIcon,
-  TrendingUp as StatsIcon,
+  Replay as RetryIcon,
+  Cancel as CancelIcon,
   Receipt as ReceiptIcon,
-  PlayArrow as ProcessIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
+import { useApiContext } from '@/contexts/ApiContext';
+import { useApiCall } from '@/hooks/useApiCall';
 
-// Define types for payout data based on the backend DTOs
+// Payout interface matching backend PayoutDto
 interface PayoutData {
   id: string;
-  fund_id: string;
-  channel_id: string;
-  channel_name: string;
-  content_type: 'news' | 'poll';
-  content_id: string;
-  content_title: string;
-  amount: number;
+  expenseOrderId: string;
+  journalistId: string;
+  channelId: string;
+  grossAmount: number;
+  platformFeeAmount: number;
+  netAmount: number;
   currency: string;
-  recipient_id: string;
-  recipient_name: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  transaction_id?: string;
-  created_at: string;
-  processed_at?: string;
-  error_message?: string;
+  paymentMethodId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  paymentReference?: string;
+  processedBy?: string;
+  processedAt?: string;
+  retryCount: number;
+  maxRetries: number;
+  nextRetryAt?: string;
+  errorMessage?: string;
+  errorCategory?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Related data
+  expenseOrder?: {
+    id: string;
+    title: string;
+    description: string;
+    type: { name: string };
+  };
+  journalist?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  channel?: {
+    id: string;
+    name: string;
+  };
 }
-
-// Mock data for demonstration
-const generateMockPayouts = (): PayoutData[] => {
-  const statuses: PayoutData['status'][] = ['pending', 'processing', 'completed', 'failed'];
-  const contentTypes: ('news' | 'poll')[] = ['news', 'poll'];
-  const currencies = ['USD', 'EUR', 'GBP'];
-  
-  return Array.from({ length: 25 }, (_, i) => ({
-    id: `payout_${i + 1}`,
-    fund_id: `fund_${i + 1}`,
-    channel_id: `channel_${i + 1}`,
-    channel_name: `Channel ${i + 1}`,
-    content_type: contentTypes[Math.floor(Math.random() * contentTypes.length)],
-    content_id: `content_${i + 1}`,
-    content_title: `Content Title ${i + 1}`,
-    amount: Math.floor(Math.random() * 10000) + 100,
-    currency: currencies[Math.floor(Math.random() * currencies.length)],
-    recipient_id: `user_${i + 1}`,
-    recipient_name: `Creator ${i + 1}`,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    transaction_id: Math.random() > 0.5 ? `txn_${Date.now()}_${i}` : undefined,
-    created_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    processed_at: Math.random() > 0.5 ? new Date(Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000).toISOString() : undefined,
-    error_message: Math.random() > 0.8 ? 'Payment method verification failed' : undefined
-  }));
-};
 
 const PayoutAdmin: React.FC = () => {
   const [payouts, setPayouts] = useState<PayoutData[]>([]);
@@ -86,71 +84,56 @@ const PayoutAdmin: React.FC = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [processDialogOpen, setProcessDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [selectedPayout, setSelectedPayout] = useState<PayoutData | null>(null);
-  const [processingNotes, setProcessingNotes] = useState('');
-  
+  const [cancelReason, setCancelReason] = useState('');
+
   // Filters and pagination
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  const [contentTypeFilter, setContentTypeFilter] = useState<string>('');
-  const [sortColumn, setSortColumn] = useState('created_at');
+  const [sortColumn, setSortColumn] = useState('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const fetchPayouts = async () => {
+  const { api } = useApiContext();
+  const { execute } = useApiCall();
+
+  const fetchPayouts = useCallback(async () => {
+    if (!api?.payoutApi) return;
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      // For now, using mock data since there's no specific payout API endpoint
-      // In a real implementation, this would call something like:
-      // const result = await execute(() => api.fundingApi.getPayouts(...))
-      
-      const mockData = generateMockPayouts();
-      let filteredData = mockData;
-      
-      // Apply filters
-      if (searchQuery) {
-        filteredData = filteredData.filter(p => 
-          p.channel_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.content_title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.recipient_name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
+      const params: any = {
+        limit: rowsPerPage,
+        offset: page * rowsPerPage,
+      };
+
       if (statusFilter) {
-        filteredData = filteredData.filter(p => p.status === statusFilter);
+        params.status = statusFilter;
       }
-      
-      if (contentTypeFilter) {
-        filteredData = filteredData.filter(p => p.content_type === contentTypeFilter);
+
+      const response = await execute(() => api.payoutApi.getPayouts(params));
+
+      if (response) {
+        setPayouts(response.items || []);
+        setTotalCount(response.total || 0);
       }
-      
-      // Apply sorting
-      filteredData.sort((a, b) => {
-        const aVal = a[sortColumn as keyof PayoutData] || '';
-        const bVal = b[sortColumn as keyof PayoutData] || '';
-        const comparison = aVal > bVal ? 1 : -1;
-        return sortDirection === 'asc' ? comparison : -comparison;
-      });
-      
-      // Apply pagination
-      const startIndex = page * rowsPerPage;
-      const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
-      
-      setPayouts(paginatedData);
-      setTotalCount(filteredData.length);
     } catch (err) {
+      console.error('Failed to fetch payouts:', err);
       setError('Failed to fetch payouts');
+      setPayouts([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }
-  };
+  }, [api, execute, page, rowsPerPage, statusFilter]);
 
   useEffect(() => {
     fetchPayouts();
-  }, [page, rowsPerPage, searchQuery, statusFilter, contentTypeFilter, sortColumn, sortDirection]);
+  }, [fetchPayouts]);
 
   const handleView = (payout: PayoutData) => {
     setSelectedPayout(payout);
@@ -160,29 +143,51 @@ const PayoutAdmin: React.FC = () => {
   const handleProcessPayout = (payout: PayoutData) => {
     setSelectedPayout(payout);
     setProcessDialogOpen(true);
-    setProcessingNotes('');
   };
 
   const handleProcessSubmit = async () => {
-    if (!selectedPayout) return;
+    if (!selectedPayout || !api?.payoutApi) return;
 
     try {
-      // In a real implementation, this would call:
-      // await execute(() => api.fundingApi.processPayout(selectedPayout.content_type, selectedPayout.content_id, {
-      //   recipient_id: selectedPayout.recipient_id,
-      //   amount: selectedPayout.amount,
-      //   description: processingNotes
-      // }));
-      
-      // Mock processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await execute(() => api.payoutApi.processPayout(selectedPayout.id));
+
       setProcessDialogOpen(false);
       setSelectedPayout(null);
-      setProcessingNotes('');
       fetchPayouts();
     } catch (err) {
       setError('Failed to process payout');
+    }
+  };
+
+  const handleRetryPayout = async (payout: PayoutData) => {
+    if (!api?.payoutApi) return;
+
+    try {
+      await execute(() => api.payoutApi.retryPayout(payout.id));
+      fetchPayouts();
+    } catch (err) {
+      setError('Failed to retry payout');
+    }
+  };
+
+  const handleCancelPayout = (payout: PayoutData) => {
+    setSelectedPayout(payout);
+    setCancelReason('');
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancelSubmit = async () => {
+    if (!selectedPayout || !api?.payoutApi) return;
+
+    try {
+      await execute(() => api.payoutApi.cancelPayout(selectedPayout.id, { reason: cancelReason }));
+
+      setCancelDialogOpen(false);
+      setSelectedPayout(null);
+      setCancelReason('');
+      fetchPayouts();
+    } catch (err) {
+      setError('Failed to cancel payout');
     }
   };
 
@@ -192,6 +197,7 @@ const PayoutAdmin: React.FC = () => {
       case 'processing': return 'info';
       case 'completed': return 'success';
       case 'failed': return 'error';
+      case 'cancelled': return 'default';
       default: return 'default';
     }
   };
@@ -200,68 +206,96 @@ const PayoutAdmin: React.FC = () => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency || 'USD',
-    }).format(amount / 100); // Assuming amounts are stored in cents
+    }).format(amount / 100); // Amount is stored in cents
+  };
+
+  const formatJournalistName = (journalist?: PayoutData['journalist']) => {
+    if (!journalist) return 'Unknown';
+    return `${journalist.firstName} ${journalist.lastName}`;
   };
 
   const columns: Column[] = [
     {
-      id: 'content_title',
-      label: 'Content',
+      id: 'expenseOrder',
+      label: 'Expense Order',
       minWidth: 200,
       sortable: true,
-      format: (value, row) => (
+      format: (_value, row) => (
         <Box>
           <Typography variant="body2" fontWeight="medium" noWrap>
-            {value}
+            {row.expenseOrder?.title || 'N/A'}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Chip
-              label={row.content_type}
+              label={row.expenseOrder?.type?.name || 'Unknown'}
               size="small"
               variant="outlined"
               sx={{ height: 16, '& .MuiChip-label': { fontSize: '0.6rem', px: 0.5 } }}
             />
             <Typography variant="caption" color="text.secondary">
-              ID: {row.id}
+              #{row.id.slice(0, 8)}
             </Typography>
           </Stack>
         </Box>
       ),
     },
     {
-      id: 'channel_name',
+      id: 'channel',
       label: 'Channel',
       minWidth: 120,
-      format: (value) => (
+      format: (_value, row) => (
         <Typography variant="body2" noWrap>
-          {value}
+          {row.channel?.name || 'N/A'}
         </Typography>
       ),
     },
     {
-      id: 'recipient_name',
-      label: 'Recipient',
-      minWidth: 120,
-      format: (value) => (
+      id: 'journalist',
+      label: 'Journalist',
+      minWidth: 140,
+      format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 24, height: 24 }}>
-            {value?.[0]}
+            {row.journalist?.firstName?.[0] || 'U'}
           </Avatar>
           <Typography variant="body2" noWrap>
-            {value}
+            {formatJournalistName(row.journalist)}
           </Typography>
         </Box>
       ),
     },
     {
-      id: 'amount',
-      label: 'Amount',
+      id: 'grossAmount',
+      label: 'Gross',
+      minWidth: 90,
+      align: 'right',
+      sortable: true,
+      format: (_value, row) => (
+        <Typography variant="body2">
+          {formatCurrency(row.grossAmount, row.currency)}
+        </Typography>
+      ),
+    },
+    {
+      id: 'platformFeeAmount',
+      label: 'Fee',
+      minWidth: 80,
+      align: 'right',
+      format: (_value, row) => (
+        <Typography variant="body2" color="text.secondary">
+          -{formatCurrency(row.platformFeeAmount, row.currency)}
+        </Typography>
+      ),
+    },
+    {
+      id: 'netAmount',
+      label: 'Net Payout',
       minWidth: 100,
       align: 'right',
       sortable: true,
-      format: (value, row) => (
-        <Typography variant="body2" fontWeight="medium">
-          {formatCurrency(value, row.currency)}
+      format: (_value, row) => (
+        <Typography variant="body2" fontWeight="medium" color="primary">
+          {formatCurrency(row.netAmount, row.currency)}
         </Typography>
       ),
     },
@@ -278,43 +312,37 @@ const PayoutAdmin: React.FC = () => {
             size="small"
             sx={{ textTransform: 'capitalize' }}
           />
-          {row.error_message && (
-            <Tooltip title={row.error_message}>
+          {row.errorMessage && (
+            <Tooltip title={row.errorMessage}>
               <WarningIcon color="error" sx={{ fontSize: 16 }} />
             </Tooltip>
+          )}
+          {row.retryCount > 0 && (
+            <Typography variant="caption" color="text.secondary">
+              Retry {row.retryCount}/{row.maxRetries}
+            </Typography>
           )}
         </Stack>
       ),
     },
     {
-      id: 'transaction_id',
-      label: 'Transaction ID',
-      minWidth: 150,
+      id: 'paymentReference',
+      label: 'Payment Ref',
+      minWidth: 120,
       format: (value) => (
-        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-          {value || '-'}
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
+          {value ? value.slice(0, 12) + '...' : '-'}
         </Typography>
       ),
     },
     {
-      id: 'created_at',
+      id: 'createdAt',
       label: 'Created',
-      minWidth: 120,
+      minWidth: 110,
       sortable: true,
       format: (value) => (
         <Typography variant="body2">
           {new Date(value).toLocaleDateString()}
-        </Typography>
-      ),
-    },
-    {
-      id: 'processed_at',
-      label: 'Processed',
-      minWidth: 120,
-      sortable: true,
-      format: (value) => (
-        <Typography variant="body2">
-          {value ? new Date(value).toLocaleDateString() : '-'}
         </Typography>
       ),
     },
@@ -324,17 +352,13 @@ const PayoutAdmin: React.FC = () => {
     { value: 'pending', label: 'Pending' },
     { value: 'processing', label: 'Processing' },
     { value: 'completed', label: 'Completed' },
-    { value: 'failed', label: 'Failed' }
-  ];
-
-  const contentTypeOptions = [
-    { value: 'news', label: 'News' },
-    { value: 'poll', label: 'Poll' }
+    { value: 'failed', label: 'Failed' },
+    { value: 'cancelled', label: 'Cancelled' }
   ];
 
   const filters = (
     <Stack direction="row" spacing={1}>
-      <FormControl size="small" sx={{ minWidth: 120 }}>
+      <FormControl size="small" sx={{ minWidth: 140 }}>
         <InputLabel>Status</InputLabel>
         <Select
           value={statusFilter}
@@ -343,22 +367,6 @@ const PayoutAdmin: React.FC = () => {
         >
           <MenuItem value="">All Status</MenuItem>
           {statusOptions.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      <FormControl size="small" sx={{ minWidth: 120 }}>
-        <InputLabel>Content Type</InputLabel>
-        <Select
-          value={contentTypeFilter}
-          label="Content Type"
-          onChange={(e) => setContentTypeFilter(e.target.value)}
-        >
-          <MenuItem value="">All Types</MenuItem>
-          {contentTypeOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>
@@ -391,18 +399,46 @@ const PayoutAdmin: React.FC = () => {
               handleProcessPayout(row);
             }}
           >
-            <ProcessIcon fontSize="small" color="primary" />
+            <PaymentIcon fontSize="small" color="primary" />
           </IconButton>
         </Tooltip>
       )}
 
-      {row.transaction_id && (
-        <Tooltip title="View Transaction">
+      {row.status === 'failed' && row.retryCount < row.maxRetries && (
+        <Tooltip title="Retry Payout">
           <IconButton
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              // Open transaction details in new tab
+              handleRetryPayout(row);
+            }}
+          >
+            <RetryIcon fontSize="small" color="warning" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {(row.status === 'pending' || row.status === 'failed') && (
+        <Tooltip title="Cancel Payout">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCancelPayout(row);
+            }}
+          >
+            <CancelIcon fontSize="small" color="error" />
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {row.paymentReference && (
+        <Tooltip title="View Payment Details">
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Could open payment provider's transaction page
             }}
           >
             <ReceiptIcon fontSize="small" />
@@ -438,22 +474,11 @@ const PayoutAdmin: React.FC = () => {
         sortDirection={sortDirection}
         filters={filters}
         rowActions={rowActions}
-        actions={
-          <Button
-            variant="outlined"
-            startIcon={<StatsIcon />}
-            onClick={() => {
-              // Open payout statistics dialog
-            }}
-          >
-            Statistics
-          </Button>
-        }
       />
 
       {/* View Dialog */}
-      <Dialog 
-        open={viewDialogOpen} 
+      <Dialog
+        open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
         maxWidth="md"
         fullWidth
@@ -462,44 +487,65 @@ const PayoutAdmin: React.FC = () => {
         <DialogContent>
           {selectedPayout && (
             <Stack spacing={3} sx={{ pt: 1 }}>
+              {/* Expense Order Info */}
               <Card variant="outlined">
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>Content Information</Typography>
+                  <Typography variant="h6" gutterBottom>Expense Order Information</Typography>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12}>
                       <Typography variant="subtitle2" color="text.secondary">Title</Typography>
-                      <Typography variant="body2">{selectedPayout.content_title}</Typography>
+                      <Typography variant="body2">{selectedPayout.expenseOrder?.title || 'N/A'}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" color="text.secondary">Description</Typography>
+                      <Typography variant="body2">{selectedPayout.expenseOrder?.description || 'N/A'}</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Type</Typography>
-                      <Chip label={selectedPayout.content_type} size="small" />
+                      <Chip label={selectedPayout.expenseOrder?.type?.name || 'Unknown'} size="small" />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Channel</Typography>
-                      <Typography variant="body2">{selectedPayout.channel_name}</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Content ID</Typography>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                        {selectedPayout.content_id}
+                      <Typography variant="subtitle2" color="text.secondary">Expense Order ID</Typography>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                        {selectedPayout.expenseOrderId}
                       </Typography>
                     </Grid>
                   </Grid>
                 </CardContent>
               </Card>
 
+              {/* Payout Info */}
               <Card variant="outlined">
                 <CardContent>
                   <Typography variant="h6" gutterBottom>Payout Information</Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Recipient</Typography>
-                      <Typography variant="body2">{selectedPayout.recipient_name}</Typography>
+                      <Typography variant="subtitle2" color="text.secondary">Journalist</Typography>
+                      <Typography variant="body2">{formatJournalistName(selectedPayout.journalist)}</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {selectedPayout.journalist?.email}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Amount</Typography>
-                      <Typography variant="body2" fontWeight="medium">
-                        {formatCurrency(selectedPayout.amount, selectedPayout.currency)}
+                      <Typography variant="subtitle2" color="text.secondary">Channel</Typography>
+                      <Typography variant="body2">{selectedPayout.channel?.name || 'N/A'}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Gross Amount</Typography>
+                      <Typography variant="body2">
+                        {formatCurrency(selectedPayout.grossAmount, selectedPayout.currency)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Platform Fee</Typography>
+                      <Typography variant="body2" color="error">
+                        -{formatCurrency(selectedPayout.platformFeeAmount, selectedPayout.currency)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={4}>
+                      <Typography variant="subtitle2" color="text.secondary">Net Payout</Typography>
+                      <Typography variant="body2" fontWeight="medium" color="primary">
+                        {formatCurrency(selectedPayout.netAmount, selectedPayout.currency)}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -512,21 +558,55 @@ const PayoutAdmin: React.FC = () => {
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Transaction ID</Typography>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                        {selectedPayout.transaction_id || 'Not processed'}
+                      <Typography variant="subtitle2" color="text.secondary">Payment Reference</Typography>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                        {selectedPayout.paymentReference || 'Not processed'}
                       </Typography>
                     </Grid>
                   </Grid>
                 </CardContent>
               </Card>
 
-              {selectedPayout.error_message && (
+              {/* Retry Info */}
+              {selectedPayout.status === 'failed' && (
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>Retry Information</Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Retry Count</Typography>
+                        <Typography variant="body2">
+                          {selectedPayout.retryCount} / {selectedPayout.maxRetries}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="subtitle2" color="text.secondary">Next Retry</Typography>
+                        <Typography variant="body2">
+                          {selectedPayout.nextRetryAt
+                            ? new Date(selectedPayout.nextRetryAt).toLocaleString()
+                            : 'No retry scheduled'
+                          }
+                        </Typography>
+                      </Grid>
+                      {selectedPayout.errorCategory && (
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="subtitle2" color="text.secondary">Error Category</Typography>
+                          <Chip label={selectedPayout.errorCategory} size="small" color="error" />
+                        </Grid>
+                      )}
+                    </Grid>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Error Message */}
+              {selectedPayout.errorMessage && (
                 <Alert severity="error">
-                  <Typography variant="body2">{selectedPayout.error_message}</Typography>
+                  <Typography variant="body2">{selectedPayout.errorMessage}</Typography>
                 </Alert>
               )}
 
+              {/* Timeline */}
               <Card variant="outlined">
                 <CardContent>
                   <Typography variant="h6" gutterBottom>Timeline</Typography>
@@ -534,18 +614,24 @@ const PayoutAdmin: React.FC = () => {
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Created</Typography>
                       <Typography variant="body2">
-                        {new Date(selectedPayout.created_at).toLocaleString()}
+                        {new Date(selectedPayout.createdAt).toLocaleString()}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Processed</Typography>
                       <Typography variant="body2">
-                        {selectedPayout.processed_at 
-                          ? new Date(selectedPayout.processed_at).toLocaleString()
+                        {selectedPayout.processedAt
+                          ? new Date(selectedPayout.processedAt).toLocaleString()
                           : 'Not processed'
                         }
                       </Typography>
                     </Grid>
+                    {selectedPayout.processedBy && (
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" color="text.secondary">Processed By</Typography>
+                        <Typography variant="body2">{selectedPayout.processedBy}</Typography>
+                      </Grid>
+                    )}
                   </Grid>
                 </CardContent>
               </Card>
@@ -563,30 +649,68 @@ const PayoutAdmin: React.FC = () => {
         <DialogContent>
           <Stack spacing={2} sx={{ pt: 1 }}>
             {selectedPayout && (
-              <Alert severity="info">
-                Processing payout of {formatCurrency(selectedPayout.amount, selectedPayout.currency)} to {selectedPayout.recipient_name}
+              <Alert severity="warning" icon={<PaymentIcon />}>
+                <Typography variant="body2">
+                  You are about to process a payout of{' '}
+                  <strong>{formatCurrency(selectedPayout.netAmount, selectedPayout.currency)}</strong>
+                  {' '}to <strong>{formatJournalistName(selectedPayout.journalist)}</strong>.
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Platform fee: {formatCurrency(selectedPayout.platformFeeAmount, selectedPayout.currency)}
+                </Typography>
               </Alert>
             )}
-            <TextField
-              label="Processing Notes"
-              fullWidth
-              multiline
-              rows={3}
-              value={processingNotes}
-              onChange={(e) => setProcessingNotes(e.target.value)}
-              placeholder="Add any notes about this payout processing..."
-            />
+            <Typography variant="body2" color="text.secondary">
+              This action will initiate the payment process. The funds will be transferred to the journalist's
+              payment method on file.
+            </Typography>
           </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setProcessDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleProcessSubmit} 
+          <Button
+            onClick={handleProcessSubmit}
             variant="contained"
             color="primary"
-            startIcon={<PaymentIcon />}
+            startIcon={<CheckCircleIcon />}
           >
-            Process Payout
+            Confirm & Process
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Cancel Payout Dialog */}
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Cancel Payout</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            {selectedPayout && (
+              <Alert severity="error">
+                <Typography variant="body2">
+                  You are about to cancel the payout for <strong>{formatJournalistName(selectedPayout.journalist)}</strong>.
+                </Typography>
+              </Alert>
+            )}
+            <TextField
+              label="Cancellation Reason"
+              fullWidth
+              multiline
+              rows={3}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Provide a reason for cancelling this payout..."
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelDialogOpen(false)}>Close</Button>
+          <Button
+            onClick={handleCancelSubmit}
+            variant="contained"
+            color="error"
+            startIcon={<CancelIcon />}
+          >
+            Cancel Payout
           </Button>
         </DialogActions>
       </Dialog>

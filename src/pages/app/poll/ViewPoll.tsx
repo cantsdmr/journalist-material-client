@@ -19,7 +19,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Poll, VotingEligibilityResponse } from '@/types/index';
-import PollCard from '@/components/poll/PollCard';
+import PollDetail from '@/components/poll/PollDetail';
 import { Link as RouterLink } from 'react-router-dom';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import PersonIcon from '@mui/icons-material/Person';
@@ -97,7 +97,6 @@ const ViewPoll: React.FC = () => {
   const [poll, setPoll] = useState<Nullable<Poll>>(null);
   const [loading, setLoading] = useState(true);
   const [userVote, setUserVote] = useState<string | null>(null);
-  const [showResultsMode, setShowResultsMode] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [votingEligibility, setVotingEligibility] = useState<VotingEligibilityResponse | null>(null);
@@ -171,18 +170,6 @@ const ViewPoll: React.FC = () => {
       if (updatedPoll) {
         setPoll(updatedPoll);
       }
-    }
-  };
-
-  const handleViewResults = async (pollId: string) => {
-    const updatedPoll = await execute(
-      () => api?.pollApi.get(pollId),
-      { showErrorToast: true }
-    );
-    
-    if (updatedPoll) {
-      setPoll(updatedPoll);
-      setShowResultsMode(true);
     }
   };
 
@@ -323,14 +310,20 @@ const ViewPoll: React.FC = () => {
             </Alert>
           )}
           
-          <PollCard
-            poll={poll}
-            onVote={handleVote}
-            onViewResults={handleViewResults}
-            userVote={userVote}
-            showResults={!!userVote || showResultsMode}
-            disabled={!votingEligibility?.canVote}
-          />
+          <Card>
+            <CardContent>
+              <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
+                {poll.title}
+              </Typography>
+              <PollDetail
+                poll={poll}
+                onVote={handleVote}
+                userVote={userVote}
+                showResults={!!userVote}
+                disabled={!votingEligibility?.canVote}
+              />
+            </CardContent>
+          </Card>
         </Grid>
         <Grid item xs={12} md={4}>
           <Stack spacing={3}>

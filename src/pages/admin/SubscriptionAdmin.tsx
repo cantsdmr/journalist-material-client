@@ -191,11 +191,11 @@ const SubscriptionAdmin: React.FC = () => {
       format: (_value, row) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Avatar sx={{ width: 32, height: 32 }}>
-            {row.user.display_name?.[0] || row.user.email?.[0]}
+            {row.user.displayName?.[0] || row.user.email?.[0]}
           </Avatar>
           <Box>
             <Typography variant="body2" fontWeight="medium" noWrap>
-              {row.user.display_name}
+              {row.user.displayName}
             </Typography>
             <Typography variant="caption" color="text.secondary" noWrap>
               {row.user.email}
@@ -230,22 +230,22 @@ const SubscriptionAdmin: React.FC = () => {
       ),
     },
     {
-      id: 'status',
+      id: 'statusId',
       label: 'Status',
       minWidth: 100,
       sortable: true,
-      format: (_value, row) => (
+      format: (value) => (
         <Chip
-          label={getSubscriptionStatusLabel(row.statusId)}
-          color={getSubscriptionStatusColor(row.statusId)}
+          label={getSubscriptionStatusLabel(value)}
+          color={getSubscriptionStatusColor(value)}
           size="small"
           sx={{ textTransform: 'capitalize' }}
         />
       ),
     },
     {
-      id: 'started_at',
-      label: 'Started',
+      id: 'subscribedAt',
+      label: 'Subscribed',
       minWidth: 120,
       sortable: true,
       format: (value) => (
@@ -255,7 +255,7 @@ const SubscriptionAdmin: React.FC = () => {
       ),
     },
     {
-      id: 'expires_at',
+      id: 'expiresAt',
       label: 'Expires',
       minWidth: 120,
       sortable: true,
@@ -266,7 +266,7 @@ const SubscriptionAdmin: React.FC = () => {
       ),
     },
     {
-      id: 'created_at',
+      id: 'createdAt',
       label: 'Created',
       minWidth: 120,
       sortable: true,
@@ -423,7 +423,7 @@ const SubscriptionAdmin: React.FC = () => {
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Name</Typography>
-                      <Typography variant="body2">{selectedSubscription.user.display_name}</Typography>
+                      <Typography variant="body2">{selectedSubscription.user.displayName}</Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Email</Typography>
@@ -475,15 +475,15 @@ const SubscriptionAdmin: React.FC = () => {
                   <Typography variant="h6" gutterBottom>Timeline</Typography>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="subtitle2" color="text.secondary">Started</Typography>
+                      <Typography variant="subtitle2" color="text.secondary">Subscribed</Typography>
                       <Typography variant="body2">
-                        {formatDate(selectedSubscription.startedAt)}
+                        {formatDate(selectedSubscription.subscribedAt)}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2" color="text.secondary">Expires</Typography>
                       <Typography variant="body2">
-                        {selectedSubscription.expiresAt 
+                        {selectedSubscription.expiresAt
                           ? formatDate(selectedSubscription.expiresAt)
                           : 'Never'
                         }
@@ -549,9 +549,9 @@ const SubscriptionAdmin: React.FC = () => {
           <Stack spacing={2} sx={{ pt: 1 }}>
             {selectedSubscription && (
               <Alert severity={actionType === 'activate' ? 'info' : 'warning'}>
-                {actionType === 'activate' && `Activating subscription for ${selectedSubscription.user.display_name}`}
-                {actionType === 'suspend' && `Suspending subscription for ${selectedSubscription.user.display_name}`}
-                {actionType === 'cancel' && `Canceling subscription for ${selectedSubscription.user.display_name}`}
+                {actionType === 'activate' && `Activating subscription for ${selectedSubscription.user.displayName}`}
+                {actionType === 'suspend' && `Suspending subscription for ${selectedSubscription.user.displayName}`}
+                {actionType === 'cancel' && `Canceling subscription for ${selectedSubscription.user.displayName}`}
               </Alert>
             )}
             <TextField

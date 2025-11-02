@@ -25,16 +25,24 @@ import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 
 // Styled components for AppBar usage
-const SearchContainer = styled(Box)(({ theme }) => ({
-  flexGrow: 1,
-  maxWidth: 600,
-  margin: '0 auto',
+const SearchContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'isFocused',
+})<{ isFocused?: boolean }>(({ theme, isFocused }) => ({
   position: 'relative',
+  width: isFocused ? '600px' : '480px',
+  maxWidth: isFocused ? '600px' : '480px',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  [theme.breakpoints.down('lg')]: {
+    width: isFocused ? '560px' : '460px',
+    maxWidth: isFocused ? '560px' : '460px',
+  },
   [theme.breakpoints.down('md')]: {
-    maxWidth: 400,
+    width: isFocused ? '400px' : '360px',
+    maxWidth: isFocused ? '400px' : '360px',
   },
   [theme.breakpoints.down('sm')]: {
-    maxWidth: 280,
+    width: isFocused ? '320px' : '280px',
+    maxWidth: isFocused ? '320px' : '280px',
   },
 }));
 
@@ -86,6 +94,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [suggestions, setSuggestions] = useState<StructuredSearchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const { getStructuredSuggestions } = useSearch();
   const navigate = useNavigate();
 
@@ -211,9 +220,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 
   return (
-    <SearchContainer 
+    <SearchContainer
       className={className}
-      sx={{ 
+      isFocused={isFocused}
+      sx={{
         width: fullWidth ? '100%' : undefined
       }}
     >
@@ -248,7 +258,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
           noOptionsText={isLoading ? "Loading..." : "No suggestions found"}
           open={isOpen}
           onOpen={() => setIsOpen(true)}
-          onClose={() => setIsOpen(false)}
+          onClose={() => {
+            setIsOpen(false);
+            setIsFocused(false);
+          }}
           ListboxProps={{
             style: { maxHeight: 400 } // Ensure enough height for all options
           }}
@@ -256,8 +269,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
             <TextField
               {...params}
               variant="outlined"
-              placeholder={placeholder}
+              placeholder={isFocused ? placeholder : "Search..."}
               onKeyPress={handleKeyPress}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => {
+                // Delay to allow clicking suggestions
+                setTimeout(() => {
+                  if (!isOpen) {
+                    setIsFocused(false);
+                  }
+                }, 200);
+              }}
               size="medium"
               InputProps={{
                 ...params.InputProps,
@@ -303,10 +325,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
             />
           )}
           PaperComponent={({ children, ...props }) => (
-            <Paper 
-              {...props} 
-              sx={{ 
-                mt: 0.5, 
+            <Paper
+              {...props}
+              sx={{
+                mt: 0.5,
                 boxShadow: 3,
                 maxHeight: 400,
                 overflow: 'auto',

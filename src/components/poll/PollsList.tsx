@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, Box, alpha } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Stack, Box, alpha, Grid, IconButton, Typography, Chip, useTheme } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Poll } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import PollCard from '@/components/poll/PollCard';
 import { EmptyState } from '@/components/common/EmptyState';
-import { PATHS } from '@/constants/paths';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ShareIcon from '@mui/icons-material/Share';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 interface PollsListProps {
   filters?: any;
   emptyTitle?: string;
   emptyDescription?: string;
   itemsPerPage?: number;
+  mode?: 'grid' | 'scroll';
 }
 
 const PollSkeleton = ({ count = 2 }: { count?: number }) => (
@@ -55,7 +58,8 @@ const PollsList: React.FC<PollsListProps> = ({
   filters = {},
   emptyTitle = 'No polls found',
   emptyDescription = 'No polls available at the moment',
-  itemsPerPage = 10
+  itemsPerPage = 10,
+  mode = 'scroll'
 }) => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +67,7 @@ const PollsList: React.FC<PollsListProps> = ({
   const [hasMore, setHasMore] = useState(true);
   const { api } = useApiContext();
   const { execute } = useApiCall();
+  const theme = useTheme();
 
   const fetchPolls = async (_page: number = page) => {
     try {
@@ -108,41 +113,248 @@ const PollsList: React.FC<PollsListProps> = ({
     );
   }
 
-  return (
-    <Box sx={{ width: '100%' }}>
-      {loading && polls.length === 0 ? (
-        <PollSkeleton />
-      ) : (
+  // Grid mode - traditional grid layout
+  if (mode === 'grid') {
+    return (
+      <Box sx={{ width: '100%' }}>
         <InfiniteScroll
           dataLength={polls.length}
           next={fetchMoreData}
           hasMore={hasMore}
           loader={<Box />}
-          endMessage={
-            <Box sx={{
-              textAlign: 'center',
-              mt: 4,
-              color: 'text.secondary',
-              fontSize: '0.875rem'
-            }}>
-              No more polls to display
-            </Box>
-          }
         >
-          <Stack spacing={2.5}>
+          <Grid container spacing={3}>
             {polls.map((poll) => (
-              <Box
-                key={poll.id}
-                component={RouterLink}
-                to={PATHS.APP_POLL_VIEW.replace(':id', poll.id)}
-                sx={{ textDecoration: 'none' }}
-              >
-                <PollCard poll={poll} />
-              </Box>
+              <Grid item xs={12} sm={6} md={4} key={poll.id}>
+                <PollCard poll={poll} showAsPreview={true} mode="grid" />
+              </Grid>
             ))}
-          </Stack>
+          </Grid>
         </InfiniteScroll>
-      )}
+      </Box>
+    );
+  }
+
+  // Scroll mode - single column centered layout like news
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        overflowY: 'scroll',
+        scrollSnapType: 'y mandatory',
+        scrollBehavior: 'smooth',
+        '&::-webkit-scrollbar': {
+          display: 'none'
+        },
+        msOverflowStyle: 'none',
+        scrollbarWidth: 'none',
+        px: { xs: 2, sm: 0 }
+      }}
+    >
+      <Box sx={{ width: '100%', maxWidth: 480 }}>
+        {loading && polls.length === 0 ? (
+          <PollSkeleton />
+        ) : (
+          <InfiniteScroll
+            dataLength={polls.length}
+            next={fetchMoreData}
+            hasMore={hasMore}
+            loader={<Box />}
+            endMessage={
+              <Box sx={{
+                textAlign: 'center',
+                py: 4,
+                color: 'text.secondary',
+                fontSize: '0.875rem',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                No more polls to display
+              </Box>
+            }
+            style={{ overflow: 'visible', paddingBottom: '64px' }}
+          >
+            {polls.map((poll) => {
+              const totalVotes = poll.stats?.totalVotes || 0;
+
+              return (
+                <Box
+                  key={poll.id}
+                  sx={{
+                    position: 'relative',
+                    scrollSnapAlign: 'start',
+                    scrollSnapStop: 'always',
+                    height: 'calc(100vh - 64px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <PollCard poll={poll} showAsPreview={true} mode="scroll" />
+
+                  {/* Right Side Action Bar - Outside the card on desktop, inside on mobile */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      right: { xs: 8, sm: -60 },
+                      bottom: '5vh',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 2.5,
+                      zIndex: 10
+                    }}
+                  >
+                    {/* Trending Badge */}
+                    {poll.isTrending && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <Chip
+                          icon={<TrendingUpIcon sx={{ fontSize: '0.875rem' }} />}
+                          label="Trending"
+                          size="small"
+                          sx={{
+                            height: 28,
+                            bgcolor: alpha(theme.palette.error.main, 0.9),
+                            color: 'white',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                          }}
+                        />
+                      </Box>
+                    )}
+
+                    {/* Vote Button */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <IconButton
+                        className="action-button"
+                        size="medium"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Handle vote
+                        }}
+                        sx={{
+                          bgcolor: theme.palette.mode === 'dark'
+                            ? alpha('#fff', 0.2)
+                            : alpha('#000', 0.6),
+                          backdropFilter: 'blur(10px)',
+                          color: 'white',
+                          boxShadow: theme.palette.mode === 'dark'
+                            ? '0 2px 8px rgba(0,0,0,0.3)'
+                            : '0 2px 8px rgba(0,0,0,0.5)',
+                          '&:hover': {
+                            bgcolor: alpha(theme.palette.primary.main, 0.8),
+                            transform: 'scale(1.1)'
+                          },
+                          transition: 'all 0.2s ease',
+                          width: 48,
+                          height: 48
+                        }}
+                      >
+                        <ThumbUpIcon sx={{ fontSize: '1.5rem' }} />
+                      </IconButton>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'white',
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          mt: 0.5,
+                          textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                        }}
+                      >
+                        {totalVotes > 999 ? `${(totalVotes / 1000).toFixed(1)}K` : totalVotes}
+                      </Typography>
+                    </Box>
+
+                    {/* Share Button */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <IconButton
+                        className="action-button"
+                        size="medium"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Handle share
+                        }}
+                        sx={{
+                          bgcolor: theme.palette.mode === 'dark'
+                            ? alpha('#fff', 0.2)
+                            : alpha('#000', 0.6),
+                          backdropFilter: 'blur(10px)',
+                          color: 'white',
+                          boxShadow: theme.palette.mode === 'dark'
+                            ? '0 2px 8px rgba(0,0,0,0.3)'
+                            : '0 2px 8px rgba(0,0,0,0.5)',
+                          '&:hover': {
+                            bgcolor: theme.palette.mode === 'dark'
+                              ? alpha('#fff', 0.3)
+                              : alpha('#000', 0.7),
+                            transform: 'scale(1.1)'
+                          },
+                          transition: 'all 0.2s ease',
+                          width: 48,
+                          height: 48
+                        }}
+                      >
+                        <ShareIcon sx={{ fontSize: '1.5rem' }} />
+                      </IconButton>
+                    </Box>
+
+                    {/* View Count */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          bgcolor: theme.palette.mode === 'dark'
+                            ? alpha('#fff', 0.2)
+                            : alpha('#000', 0.6),
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '50%',
+                          width: 48,
+                          height: 48,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: theme.palette.mode === 'dark'
+                            ? '0 2px 8px rgba(0,0,0,0.3)'
+                            : '0 2px 8px rgba(0,0,0,0.5)'
+                        }}
+                      >
+                        <VisibilityIcon
+                          sx={{
+                            fontSize: '1.5rem',
+                            color: 'white',
+                            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))'
+                          }}
+                        />
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'white',
+                          fontWeight: 700,
+                          fontSize: '0.75rem',
+                          mt: 0.5,
+                          textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                        }}
+                      >
+                        {poll.stats?.viewCount > 999
+                          ? `${(poll.stats.viewCount / 1000).toFixed(1)}K`
+                          : poll.stats?.viewCount || 0}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              );
+            })}
+          </InfiniteScroll>
+        )}
+      </Box>
     </Box>
   );
 };

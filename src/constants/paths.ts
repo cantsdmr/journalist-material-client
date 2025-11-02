@@ -12,7 +12,8 @@ export const NEWS = {
   ROOT: 'news',
   SUBPATHS : {
     TRENDING: 'trending',
-    MY_FEED: 'feed'
+    MY_FEED: 'feed',
+    DISCOVER: 'discover'
   },
   CREATE: 'create',
   EDIT: 'edit',
@@ -106,6 +107,7 @@ export const PATHS = {
   APP_NEWS: `${ENV_BASE}${BASE.APP}/${NEWS.ROOT}`,
   APP_NEWS_TRENDING: `${ENV_BASE}${BASE.APP}/${NEWS.ROOT}/trending`,
   APP_NEWS_MY_FEED: `${ENV_BASE}${BASE.APP}/${NEWS.ROOT}/feed`,
+  APP_NEWS_DISCOVER: `${ENV_BASE}${BASE.APP}/${NEWS.ROOT}/discover`,
   APP_NEWS_VIEW: `${ENV_BASE}${BASE.APP}/${NEWS.ROOT}/:id`,
   APP_CHANNELS: `${ENV_BASE}${BASE.APP}/${CHANNEL.ROOT}`,
   APP_CHANNEL_VIEW: `${ENV_BASE}${BASE.APP}/${CHANNEL.ROOT}/:channelId`,

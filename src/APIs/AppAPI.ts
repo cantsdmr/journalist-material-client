@@ -13,6 +13,7 @@ import { SearchAPI } from "./SearchAPI";
 import { FundingAPI } from "./FundingAPI";
 import { PaymentTokenAPI } from "./PaymentTokenAPI";
 import { IyzicoTokenAPI } from "./IyzicoTokenAPI";
+import { PayoutAPI } from "./PayoutAPI";
 
 export class AppAPI {
     private axiosJ: AxiosJournalist
@@ -30,6 +31,7 @@ export class AppAPI {
     public fundingApi: FundingAPI;
     public paymentTokenApi: PaymentTokenAPI;
     public iyzicoTokenApi: IyzicoTokenAPI;
+    public payoutApi: PayoutAPI;
 
     constructor() {
         this.axiosJ = new AxiosJournalist()
@@ -60,6 +62,7 @@ export class AppAPI {
         this.fundingApi = new FundingAPI(this.axiosJ)
         this.paymentTokenApi = new PaymentTokenAPI(this.axiosJ)
         this.iyzicoTokenApi = new IyzicoTokenAPI(this.axiosJ)
+        this.payoutApi = new PayoutAPI(this.axiosJ)
 
         return this
     }

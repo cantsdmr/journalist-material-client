@@ -36,6 +36,7 @@ import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Channel } from '@/types/entities/Channel';
 import { PaginatedResponse } from '@/utils/http';
+import { PATHS } from '@/constants/paths';
 
 const ChannelAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -319,7 +320,7 @@ const ChannelAdmin: React.FC = () => {
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            window.open(`/channels/${row.id}`, '_blank');
+            window.open(PATHS.APP_CHANNEL_VIEW.replace(':channelId', row.id), '_blank');
           }}
         >
           <ViewIcon fontSize="small" />

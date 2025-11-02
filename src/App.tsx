@@ -25,6 +25,7 @@ import LandingPage from '@/pages/LandingPage';
 // News pages
 import ListNews from '@/pages/app/news/ListNews';
 import ViewNews from '@/pages/app/news/ViewNews';
+import DiscoverNews from '@/pages/app/news/DiscoverNews';
 
 // Channel pages
 import ListChannels from '@/pages/app/channel/ListChannels';
@@ -117,6 +118,7 @@ const App: React.FC = () => {
         <Route path={`${NEWS.ROOT}/*`}>
           <Route path={NEWS.SUBPATHS.TRENDING} element={<ListNews key="trending" filters={{ trending: true }} />} />
           <Route path={NEWS.SUBPATHS.MY_FEED} element={<ListNews key="feed" filters={{ feed: true }} />} />
+          <Route path={NEWS.SUBPATHS.DISCOVER} element={<DiscoverNews />} />
           <Route path={`${NEWS.VIEW}`} element={<ViewNews />} />
         </Route>
         <Route path={`${CHANNEL.ROOT}/*`}>

@@ -21,22 +21,31 @@ interface Tag extends BaseTag {
 
 // Styled components
 const TagChip = styled(Chip)(({ theme }) => ({
-  borderRadius: theme.spacing(1),
-  height: 36,
+  borderRadius: theme.spacing(0.75),
+  height: 28,
   fontWeight: 500,
-  fontSize: '0.875rem',
-  padding: '0 12px',
+  fontSize: '0.75rem',
+  padding: '0 8px',
   transition: 'all 0.2s ease',
+  border: '1px solid transparent',
   '&.selected': {
+    // Inverse colors for selected state - more prominent
     backgroundColor: theme.palette.mode === 'dark'
-      ? theme.palette.grey[800]
+      ? theme.palette.common.white
       : theme.palette.grey[900],
     color: theme.palette.mode === 'dark'
-      ? theme.palette.common.white
+      ? theme.palette.grey[900]
       : theme.palette.common.white,
+    fontWeight: 600,
+    borderColor: theme.palette.mode === 'dark'
+      ? theme.palette.common.white
+      : theme.palette.grey[900],
     '&:hover': {
       backgroundColor: theme.palette.mode === 'dark'
-        ? theme.palette.grey[700]
+        ? theme.palette.grey[100]
+        : theme.palette.grey[800],
+      borderColor: theme.palette.mode === 'dark'
+        ? theme.palette.grey[100]
         : theme.palette.grey[800],
     }
   },
@@ -45,35 +54,40 @@ const TagChip = styled(Chip)(({ theme }) => ({
       ? 'rgba(255, 255, 255, 0.08)'
       : 'rgba(0, 0, 0, 0.06)',
     color: theme.palette.text.primary,
-    border: 'none',
     '&:hover': {
       backgroundColor: theme.palette.mode === 'dark'
         ? 'rgba(255, 255, 255, 0.12)'
         : 'rgba(0, 0, 0, 0.1)',
+      borderColor: theme.palette.mode === 'dark'
+        ? 'rgba(255, 255, 255, 0.2)'
+        : 'rgba(0, 0, 0, 0.2)',
     }
   }
 }));
 
-const ScrollableContainer = styled(Box)(({ theme }) => ({
+const ScrollableContainer = styled(Box)<{ horizontal?: boolean }>(({ theme, horizontal }) => ({
   display: 'flex',
-  overflowX: 'auto',
-  overflowY: 'hidden',
-  gap: theme.spacing(1),
-  paddingBottom: theme.spacing(0.5),
-  scrollbarWidth: 'none', // Firefox
-  '&::-webkit-scrollbar': {
-    display: 'none', // Chrome, Safari, Opera
-  },
-  msOverflowStyle: 'none', // IE and Edge
-  scrollBehavior: 'smooth'
+  flexDirection: horizontal ? 'row' : 'column',
+  gap: theme.spacing(horizontal ? 1 : 1),
+  scrollBehavior: 'smooth',
+  ...(horizontal && {
+    overflowX: 'auto',
+    overflowY: 'hidden',
+    paddingBottom: theme.spacing(0.5),
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none'
+    },
+    msOverflowStyle: 'none'
+  })
 }));
 
 const ArrowButton = styled(IconButton)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark'
     ? 'rgba(255, 255, 255, 0.08)'
     : 'rgba(0, 0, 0, 0.06)',
-  width: 36,
-  height: 36,
+  width: 32,
+  height: 32,
   flexShrink: 0,
   '&:hover': {
     backgroundColor: theme.palette.mode === 'dark'
@@ -90,14 +104,16 @@ export interface TagFilterProps {
   maxTags?: number;
   showCounts?: boolean;
   className?: string;
+  horizontal?: boolean;
 }
 
 const TagFilter: React.FC<TagFilterProps> = ({
   selectedTags = [],
   onTagsChange,
   contentType,
-  maxTags = 10,
-  className
+  maxTags: _maxTags = 10, // Renamed with underscore - single tag selection enforced
+  className,
+  horizontal = false
 }) => {
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -192,16 +208,14 @@ const TagFilter: React.FC<TagFilterProps> = ({
       // Remove tag
       onTagsChange(selectedTags.filter(tag => tag !== tagName));
     } else {
-      // Add tag (respect max limit)
-      if (selectedTags.length < maxTags) {
-        onTagsChange([...selectedTags, tagName]);
-      }
+      // Single tag selection only - replace existing tag
+      onTagsChange([tagName]);
     }
   };
 
-  // Check if content is scrollable
+  // Check if content is scrollable (only for horizontal mode)
   const checkScroll = () => {
-    if (containerRef.current) {
+    if (horizontal && containerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
       setShowLeftArrow(scrollLeft > 0);
       setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 1);
@@ -209,17 +223,19 @@ const TagFilter: React.FC<TagFilterProps> = ({
   };
 
   useEffect(() => {
-    checkScroll();
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkScroll);
-      window.addEventListener('resize', checkScroll);
-      return () => {
-        container.removeEventListener('scroll', checkScroll);
-        window.removeEventListener('resize', checkScroll);
-      };
+    if (horizontal) {
+      checkScroll();
+      const container = containerRef.current;
+      if (container) {
+        container.addEventListener('scroll', checkScroll);
+        window.addEventListener('resize', checkScroll);
+        return () => {
+          container.removeEventListener('scroll', checkScroll);
+          window.removeEventListener('resize', checkScroll);
+        };
+      }
     }
-  }, [availableTags, loading]);
+  }, [availableTags, loading, horizontal]);
 
   // Handle scroll left
   const handleScrollLeft = () => {
@@ -238,15 +254,15 @@ const TagFilter: React.FC<TagFilterProps> = ({
   // Render loading state
   if (loading) {
     return (
-      <Box className={className} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ScrollableContainer sx={{ flex: 1 }}>
+      <Box className={className}>
+        <ScrollableContainer horizontal={horizontal}>
           {[...Array(10)].map((_, index) => (
             <Skeleton
               key={index}
               variant="rounded"
-              width={100}
-              height={36}
-              sx={{ borderRadius: 1, flexShrink: 0 }}
+              width={horizontal ? 100 : '100%'}
+              height={28}
+              sx={{ borderRadius: 0.75, flexShrink: horizontal ? 0 : undefined }}
             />
           ))}
         </ScrollableContainer>
@@ -254,22 +270,62 @@ const TagFilter: React.FC<TagFilterProps> = ({
     );
   }
 
-  return (
-    <Box className={className} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      {showLeftArrow && (
-        <ArrowButton onClick={handleScrollLeft} size="small">
-          <ArrowBackIcon fontSize="small" />
-        </ArrowButton>
-      )}
+  // Horizontal layout with arrows
+  if (horizontal) {
+    return (
+      <Box className={className} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {showLeftArrow && (
+          <ArrowButton onClick={handleScrollLeft} size="small">
+            <ArrowBackIcon fontSize="small" />
+          </ArrowButton>
+        )}
 
-      <ScrollableContainer ref={containerRef} sx={{ flex: 1 }}>
+        <ScrollableContainer ref={containerRef} horizontal={horizontal} sx={{ flex: 1 }}>
+          {/* All button */}
+          <TagChip
+            label="All"
+            className={selectedTags.length === 0 ? 'selected' : ''}
+            onClick={() => onTagsChange([])}
+            clickable
+            sx={{ flexShrink: 0 }}
+          />
+
+          {availableTags.map((tag) => {
+            const isSelected = selectedTags.includes(tag.name);
+
+            return (
+              <TagChip
+                key={tag.id}
+                label={tag.name}
+                className={isSelected ? 'selected' : ''}
+                onClick={() => handleTagClick(tag.name)}
+                clickable
+                sx={{ flexShrink: 0 }}
+              />
+            );
+          })}
+        </ScrollableContainer>
+
+        {showRightArrow && (
+          <ArrowButton onClick={handleScrollRight} size="small">
+            <ArrowForwardIcon fontSize="small" />
+          </ArrowButton>
+        )}
+      </Box>
+    );
+  }
+
+  // Vertical layout (no arrows)
+  return (
+    <Box className={className}>
+      <ScrollableContainer ref={containerRef} horizontal={horizontal}>
         {/* All button */}
         <TagChip
           label="All"
           className={selectedTags.length === 0 ? 'selected' : ''}
           onClick={() => onTagsChange([])}
           clickable
-          sx={{ flexShrink: 0 }}
+          sx={{ width: '100%', justifyContent: 'flex-start' }}
         />
 
         {availableTags.map((tag) => {
@@ -282,17 +338,11 @@ const TagFilter: React.FC<TagFilterProps> = ({
               className={isSelected ? 'selected' : ''}
               onClick={() => handleTagClick(tag.name)}
               clickable
-              sx={{ flexShrink: 0 }}
+              sx={{ width: '100%', justifyContent: 'flex-start' }}
             />
           );
         })}
       </ScrollableContainer>
-
-      {showRightArrow && (
-        <ArrowButton onClick={handleScrollRight} size="small">
-          <ArrowForwardIcon fontSize="small" />
-        </ArrowButton>
-      )}
     </Box>
   );
 };

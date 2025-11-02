@@ -1,29 +1,32 @@
 import React from 'react';
 import {
-  Card,
   Typography,
   Box,
   Stack,
   alpha,
   IconButton,
-  Tooltip,
-  Avatar
+  Avatar,
+  Chip,
+  useTheme
 } from '@mui/material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { News } from '@/types/index';
 import { NEWS_MEDIA_TYPE, NEWS_MEDIA_FORMAT } from '@/enums/NewsEnums';
 import DefaultNewsAvatar from '@/assets/BG_journo.png';
 import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
-import ShareIcon from '@mui/icons-material/Share';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import { PATHS } from '@/constants/paths';
+import { formatDistanceToNow } from 'date-fns';
 
 interface NewsEntryProps {
   news: News;
+  mode?: 'grid' | 'scroll';
 }
 
-const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
+const NewsEntry: React.FC<NewsEntryProps> = ({ news, mode = 'scroll' }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const coverMedia = news.media?.find(m => m.type === NEWS_MEDIA_TYPE.COVER);
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -32,195 +35,185 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
     }
   };
 
+  const handleChannelClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', news.channel.id));
+  };
+
   return (
-    <Box sx={{ mb: 2.5 }}>
+    <Box
+      onClick={handleCardClick}
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: mode === 'grid' ? 'auto' : '90vh',
+        maxWidth: mode === 'scroll' ? '480px' : '100%',
+        margin: mode === 'scroll' ? '0 auto' : 0,
+        aspectRatio: mode === 'grid' ? '4/5' : undefined,
+        borderRadius: mode === 'grid' ? 3 : 4,
+        overflow: 'hidden',
+        bgcolor: theme.palette.mode === 'dark' ? '#000' : '#111',
+        boxShadow: 'none',
+        cursor: 'pointer',
+        transition: 'opacity 0.2s ease',
+        '&:hover': {
+          opacity: 0.95
+        }
+      }}
+    >
+      {/* Background Media */}
       <Box
-        component={RouterLink}
-        to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', news.channel.id)}
         sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          color: 'text.primary',
-          textDecoration: 'none',
-          mb: 1,
-          px: 0.5,
-          '&:hover': {
-            color: 'primary.main',
-            '& .channel-name': { color: 'primary.main' }
-          }
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0
         }}
       >
-        <Avatar
-          src={news.channel.logoUrl}
-          alt={news.channel.name}
-          variant="rounded"
+        {coverMedia?.format === NEWS_MEDIA_FORMAT.VIDEO ? (
+          <Box
+            component="video"
+            src={coverMedia.url}
+            autoPlay
+            loop
+            muted
+            playsInline
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'brightness(0.7)'
+            }}
+          />
+        ) : (
+          <Box
+            component="img"
+            src={coverMedia?.url || DefaultNewsAvatar}
+            alt={news.title}
+            sx={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'brightness(0.7)'
+            }}
+          />
+        )}
+        {/* Gradient Overlays */}
+        <Box
           sx={{
-            width: 24,
-            height: 24,
-            mr: 1,
-            bgcolor: 'grey.200',
-            borderRadius: 1
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '30%',
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
+            zIndex: 1
           }}
-        >
-          <AccountCircleIcon sx={{ fontSize: 16 }} />
-        </Avatar>
-        <Typography
-          variant="body2"
-          className="channel-name"
-          fontWeight={500}
+        />
+        <Box
           sx={{
-            transition: 'color 0.2s',
-            fontSize: '0.8rem'
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '70%',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%)',
+            zIndex: 1
           }}
-        >
-          {news.channel.name}
-        </Typography>
+        />
       </Box>
 
-      <Card
-        onClick={handleCardClick}
+      {/* Content Overlay */}
+      <Box
         sx={{
+          position: 'relative',
+          zIndex: 2,
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          cursor: 'pointer',
-          bgcolor: 'background.paper',
-          borderRadius: 1.5,
-          overflow: 'hidden',
-          boxShadow: 'none',
-          border: '1px solid',
-          borderColor: 'divider',
-          height: '100%',
-          '&:hover': {
-            '& .news-thumbnail': { transform: 'scale(1.05)' },
-            '& .news-title': { color: 'primary.main' },
-            boxShadow: 1
-          },
-          transition: 'box-shadow 0.2s ease'
+          justifyContent: 'space-between',
+          p: 2.5
         }}
       >
-        <Box
-          sx={{
-            position: 'relative',
-            width: '100%',
-            paddingTop: '56.25%', // 16:9 aspect ratio
-            overflow: 'hidden',
-            bgcolor: 'grey.100'
-          }}
-        >
-          {coverMedia?.format === NEWS_MEDIA_FORMAT.VIDEO ? (
-            <Box
-              component="video"
-              src={coverMedia.url}
-              preload="metadata"
-              className="news-thumbnail"
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                transition: 'transform 0.3s ease',
-                display: 'block',
-                bgcolor: 'black'
-              }}
-            />
-          ) : (
-            <Box
-              component="img"
-              src={coverMedia?.url || DefaultNewsAvatar}
-              alt={news.title}
-              className="news-thumbnail"
-              sx={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                transition: 'transform 0.3s ease',
-                display: 'block'
-              }}
-            />
-          )}
-          {news.qualityMetrics?.overallQualityScore && (
-            <Box
-              sx={{
-                position: 'absolute',
-                bottom: 12,
-                right: 12,
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                bgcolor: alpha('#000', 0.75),
-                color: 'white',
-                fontSize: '0.75rem',
-                fontWeight: 600
-              }}
-            >
-              {news.qualityMetrics.overallQualityScore.toFixed(1)}
+        {/* Grid Mode - Simplified Overlay */}
+        {mode === 'grid' ? (
+          <>
+            {/* Top Section - Quality Score Badge only */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+              {news.qualityMetrics?.overallQualityScore && (
+                <Chip
+                  icon={<VerifiedIcon sx={{ fontSize: '0.875rem' }} />}
+                  label={news.qualityMetrics.overallQualityScore.toFixed(1)}
+                  size="small"
+                  sx={{
+                    height: 24,
+                    bgcolor: alpha(theme.palette.success.main, 0.9),
+                    color: 'white',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                  }}
+                />
+              )}
             </Box>
-          )}
-        </Box>
 
-        <Box
-          sx={{
-            p: 1.5,
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column'
-          }}
-        >
-          <Typography
-            className="news-title"
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              lineHeight: 1.3,
-              transition: 'color 0.2s',
-              mb: 0.5,
-              fontSize: '0.9rem'
-            }}
-          >
-            {news.title}
-          </Typography>
+            {/* Bottom Section - Title, View Count and Favorite Button */}
+            <Box>
+              {/* Title */}
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '1.1rem',
+                  color: 'white',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.9)',
+                  mb: 1.5,
+                  lineHeight: 1.2,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}
+              >
+                {news.title}
+              </Typography>
 
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              mb: 1.5,
-              lineHeight: 1.4,
-              fontSize: '0.8rem'
-            }}
-          >
-            {news.content}
-          </Typography>
+              {/* Stats and Actions */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  px: 1
+                }}
+              >
+                {/* View Count */}
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <VisibilityIcon
+                    sx={{
+                      fontSize: '1.1rem',
+                      mr: 0.5,
+                      color: 'white',
+                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))'
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                      color: 'white',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                    }}
+                  >
+                    12K
+                  </Typography>
+                </Box>
 
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mt: 'auto'
-          }}>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontWeight: 500, fontSize: '0.7rem' }}
-            >
-              {new Date(news.publishedAt).toLocaleDateString()}
-            </Typography>
-
-            <Stack direction="row" spacing={0.5}>
-              <Tooltip title="Like">
+                {/* Favorite Button */}
                 <IconButton
                   className="action-button"
                   size="small"
@@ -229,36 +222,158 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news }) => {
                     // Handle like
                   }}
                   sx={{
-                    color: 'text.secondary',
-                    padding: '4px',
-                    '&:hover': { color: 'error.main' }
+                    bgcolor: alpha('#fff', 0.2),
+                    backdropFilter: 'blur(10px)',
+                    color: 'white',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    '&:hover': {
+                      bgcolor: alpha(theme.palette.error.main, 0.8),
+                      transform: 'scale(1.1)'
+                    },
+                    transition: 'all 0.2s ease'
                   }}
                 >
-                  <FavoriteIcon sx={{ fontSize: 18 }} />
+                  <FavoriteIcon sx={{ fontSize: '1rem' }} />
                 </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Share">
-                <IconButton
+              </Box>
+            </Box>
+          </>
+        ) : (
+          /* Scroll Mode - TikTok-style Layout */
+          <>
+            {/* Main Container with Right Side Actions */}
+            <Box sx={{ display: 'flex', height: '100%', position: 'relative' }}>
+              {/* Left Side - Content */}
+              <Box
+                sx={{
+                  flex: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end'
+                }}
+              >
+                {/* Channel Info */}
+                <Box
+                  onClick={handleChannelClick}
                   className="action-button"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Handle share
-                  }}
                   sx={{
-                    color: 'text.secondary',
-                    padding: '4px',
-                    '&:hover': { color: 'primary.main' }
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 1.5,
+                    cursor: 'pointer',
+                    '&:hover': {
+                      '& .channel-avatar': {
+                        transform: 'scale(1.1)'
+                      }
+                    }
                   }}
                 >
-                  <ShareIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          </Box>
-        </Box>
-      </Card>
+                  <Avatar
+                    src={news.channel.logoUrl}
+                    alt={news.channel.name}
+                    className="channel-avatar"
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: theme.palette.primary.main,
+                      border: '2px solid white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      transition: 'transform 0.2s ease'
+                    }}
+                  />
+                  <Box sx={{ ml: 1.5 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '0.95rem',
+                        color: 'white',
+                        textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+                      }}
+                    >
+                      {news.channel.name}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontSize: '0.75rem',
+                        color: 'rgba(255,255,255,0.9)',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                      }}
+                    >
+                      {formatDistanceToNow(new Date(news.publishedAt), { addSuffix: true })}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Title */}
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 800,
+                    fontSize: '1.2rem',
+                    color: 'white',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.9)',
+                    mb: 0.5,
+                    lineHeight: 1.2,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {news.title}
+                </Typography>
+
+                {/* Content/Description */}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: '0.875rem',
+                    color: 'rgba(255,255,255,0.95)',
+                    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                    lineHeight: 1.4,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    mb: 1.5
+                  }}
+                >
+                  {news.content}
+                </Typography>
+
+                {/* Tags */}
+                {news.tags && news.tags.length > 0 && (
+                  <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                    {news.tags.slice(0, 3).map((tag) => (
+                      <Chip
+                        key={tag.id}
+                        label={`#${tag.title}`}
+                        size="small"
+                        sx={{
+                          height: 22,
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+                          bgcolor: alpha('#fff', 0.15),
+                          backdropFilter: 'blur(10px)',
+                          color: 'white',
+                          border: '1px solid',
+                          borderColor: alpha('#fff', 0.2),
+                          textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                          '&:hover': {
+                            bgcolor: alpha('#fff', 0.25)
+                          }
+                        }}
+                      />
+                    ))}
+                  </Stack>
+                )}
+              </Box>
+            </Box>
+          </>
+        )}
+      </Box>
     </Box>
   );
 };
