@@ -1,3 +1,10 @@
+export type AccessInfo = {
+    canAccess: boolean;
+    requiresPremium: boolean;
+    reason?: string | null;
+    requiredTierName?: string | null;
+};
+
 export type Poll = {
     id: string;
     title: string;
@@ -45,6 +52,9 @@ export type Poll = {
         id: string;
         displayName: string;
     };
+
+    // access control
+    accessInfo?: AccessInfo;
 };
 
 export type PollOption = {

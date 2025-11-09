@@ -138,6 +138,7 @@ const PollsList: React.FC<PollsListProps> = ({
   // Scroll mode - single column centered layout like news
   return (
     <Box
+      id="polls-scroll-container"
       sx={{
         width: '100%',
         height: '100%',
@@ -163,6 +164,7 @@ const PollsList: React.FC<PollsListProps> = ({
             next={fetchMoreData}
             hasMore={hasMore}
             loader={<Box />}
+            scrollableTarget="polls-scroll-container"
             endMessage={
               <Box sx={{
                 textAlign: 'center',

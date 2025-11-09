@@ -29,10 +29,13 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import CommentIcon from '@mui/icons-material/Comment';
 import StarIcon from '@mui/icons-material/Star';
 import LockIcon from '@mui/icons-material/Lock';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { PATHS } from '@/constants/paths';
 import { formatDistanceToNow } from 'date-fns';
 import { alpha } from '@mui/material/styles';
 import { useApiCall } from '@/hooks/useApiCall';
+import { Link as RouterLink2 } from 'react-router-dom';
 
 const ViewPollSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -101,6 +104,9 @@ const ViewPoll: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [votingEligibility, setVotingEligibility] = useState<VotingEligibilityResponse | null>(null);
   const { execute } = useApiCall();
+
+  // Check if user has limited access to premium content
+  const hasLimitedAccess = poll?.accessInfo && !poll.accessInfo.canAccess;
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -257,17 +263,6 @@ const ViewPoll: React.FC = () => {
                     {poll.creator.displayName}
                   </Typography>
                 </Box>
-                
-                {/* Required Tier Badge */}
-                {poll.requiredTier && (
-                  <Chip
-                    icon={<StarIcon />}
-                    label={`${poll.requiredTier.name} Required`}
-                    color="warning"
-                    variant="outlined"
-                    size="small"
-                  />
-                )}
               </Box>
               <Stack direction="row" spacing={1}>
                 <IconButton 
@@ -297,19 +292,6 @@ const ViewPoll: React.FC = () => {
           </Box>
         </Grid>
         <Grid item xs={12} md={8}>
-          {/* Voting Eligibility Warning */}
-          {votingEligibility && !votingEligibility.canVote && (
-            <Alert 
-              severity="warning" 
-              icon={<LockIcon />}
-              sx={{ mb: 2 }}
-            >
-              <Typography variant="body2">
-                {votingEligibility.reason}
-              </Typography>
-            </Alert>
-          )}
-          
           <Card>
             <CardContent>
               <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
@@ -338,54 +320,106 @@ const ViewPoll: React.FC = () => {
               </Paper>
             )}
 
-            {/* Required Tier Information */}
-            {poll.requiredTier && (
+            {/* Poll Statistics or Premium Notice */}
+            {hasLimitedAccess ? (
+              <Paper
+                elevation={3}
+                sx={{
+                  p: 3,
+                  textAlign: 'center',
+                  bgcolor: theme => alpha(theme.palette.warning.main, 0.05),
+                  border: theme => `2px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+                  borderRadius: 3
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    bgcolor: theme => alpha(theme.palette.warning.main, 0.1),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto',
+                    mb: 2
+                  }}
+                >
+                  <LockIcon sx={{ fontSize: 30, color: 'warning.main' }} />
+                </Box>
+
+                <Typography variant="h6" gutterBottom fontWeight="bold" color="warning.dark">
+                  Premium Poll Statistics
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {poll.accessInfo?.reason || 'Subscribe to view detailed poll statistics and results.'}
+                </Typography>
+
+                {poll.accessInfo?.requiredTierName && (
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Required tier: <strong>{poll.accessInfo.requiredTierName}</strong>
+                  </Alert>
+                )}
+
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                    Subscribe to unlock:
+                  </Typography>
+                  <Stack spacing={0.5} alignItems="flex-start" sx={{ mx: 'auto', display: 'inline-flex' }}>
+                    {['View vote counts', 'See poll results', 'Participate in voting', 'Access detailed statistics'].map((feature, index) => (
+                      <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CheckCircleIcon color="success" fontSize="small" />
+                        <Typography variant="body2">{feature}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Button
+                  component={RouterLink2}
+                  to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', poll.channelId)}
+                  variant="contained"
+                  color="warning"
+                  size="medium"
+                  startIcon={<UpgradeIcon />}
+                  sx={{
+                    px: 3,
+                    py: 1.5,
+                    borderRadius: 2,
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  View Subscription Options
+                </Button>
+              </Paper>
+            ) : (
               <Paper sx={{ p: 2 }}>
                 <Typography variant="h6" gutterBottom>
-                  Access Requirements
+                  Poll Statistics
                 </Typography>
-                <Stack spacing={1}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <StarIcon color="warning" fontSize="small" />
-                    <Typography variant="subtitle2">
-                      {poll.requiredTier.name}
+                <Stack spacing={2}>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Total Votes
+                    </Typography>
+                    <Typography variant="h4">
+                      {poll.options.reduce((sum, option) => sum + option.voteCount, 0)}
                     </Typography>
                   </Box>
-                  {poll.requiredTier.description && (
-                    <Typography variant="body2" color="text.secondary">
-                      {poll.requiredTier.description}
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Time Remaining
                     </Typography>
-                  )}
-                  <Typography variant="caption" color="text.secondary">
-                    This poll requires a {poll.requiredTier.name} subscription or higher to vote.
-                  </Typography>
+                    <Typography variant="body1">
+                      {poll.endDate ? formatDistanceToNow(new Date(poll.endDate), { addSuffix: true }) : 'No end date'}
+                    </Typography>
+                  </Box>
                 </Stack>
               </Paper>
             )}
-            
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Poll Statistics
-              </Typography>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Total Votes
-                  </Typography>
-                  <Typography variant="h4">
-                    {poll.options.reduce((sum, option) => sum + option.voteCount, 0)}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Time Remaining
-                  </Typography>
-                  <Typography variant="body1">
-                    {poll.endDate ? formatDistanceToNow(new Date(poll.endDate), { addSuffix: true }) : 'No end date'}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Paper>
 
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>

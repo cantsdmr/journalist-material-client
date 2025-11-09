@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Chip, 
-  Card, 
-  CardContent, 
-  Grid, 
+import {
+  Container,
+  Typography,
+  Box,
+  Chip,
+  Card,
+  CardContent,
+  Grid,
   Stack,
   Paper,
-  Skeleton
+  Skeleton,
+  Alert,
+  Button,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -28,16 +34,19 @@ import { parseContent } from '@/utils/json';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 import TransactionTransparency from '@/components/news/TransactionTransparency';
+import LockIcon from '@mui/icons-material/Lock';
+import UpgradeIcon from '@mui/icons-material/Upgrade';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const ViewNewsSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
     <Grid container spacing={4}>
       <Grid item xs={12}>
-        <Skeleton 
-          variant="rectangular" 
-          width="100%" 
-          height={300} 
-          sx={{ borderRadius: 2, mb: 3 }} 
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={300}
+          sx={{ borderRadius: 2, mb: 3 }}
         />
       </Grid>
       <Grid item xs={12} md={8}>
@@ -51,12 +60,12 @@ const ViewNewsSkeleton = () => (
                 ))}
               </Stack>
             </Box>
-            
-            <Skeleton 
-              variant="rectangular" 
-              width="100%" 
-              height={300} 
-              sx={{ mb: 3, borderRadius: 1 }} 
+
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={300}
+              sx={{ mb: 3, borderRadius: 1 }}
             />
 
             <Stack spacing={2} sx={{ mb: 3 }}>
@@ -67,11 +76,11 @@ const ViewNewsSkeleton = () => (
               <Skeleton variant="text" width="95%" />
             </Stack>
 
-            <Skeleton 
-              variant="rectangular" 
-              width="100%" 
-              height={80} 
-              sx={{ mb: 3, borderRadius: 1 }} 
+            <Skeleton
+              variant="rectangular"
+              width="100%"
+              height={80}
+              sx={{ mb: 3, borderRadius: 1 }}
             />
 
             <Stack direction="row" spacing={1}>
@@ -93,11 +102,11 @@ const ViewNewsSkeleton = () => (
                     <Skeleton variant="text" width="40%" />
                     <Skeleton variant="text" width="20%" />
                   </Box>
-                  <Skeleton 
-                    variant="rectangular" 
-                    width="100%" 
-                    height={8} 
-                    sx={{ borderRadius: 1 }} 
+                  <Skeleton
+                    variant="rectangular"
+                    width="100%"
+                    height={8}
+                    sx={{ borderRadius: 1 }}
                   />
                 </Box>
               ))}
@@ -115,21 +124,29 @@ const ViewNews: React.FC = () => {
   const { execute } = useApiCall();
   const [entry, setEntry] = useState<Nullable<News>>(null);
   const [loading, setLoading] = useState(true);
+  const [hasLimitedAccess, setHasLimitedAccess] = useState(false);
 
   useEffect(() => {
     const getNews = async () => {
       if (id) {
         setLoading(true);
-        
+
+        // Use DETAIL access endpoint (full content without expensive relations)
         const result = await execute(
           () => api?.newsApi.get(id),
           { showErrorToast: true }
         );
-        
+
         if (result) {
           setEntry(result);
+
+          // Check if user has limited access (BRIEF group - preview only)
+          // This happens when accessInfo.canAccess is false for premium content
+          if (result.accessInfo && !result.accessInfo.canAccess) {
+            setHasLimitedAccess(true);
+          }
         }
-        
+
         setLoading(false);
       }
     };
@@ -215,15 +232,15 @@ const ViewNews: React.FC = () => {
               <Typography variant="h4" component="h1" gutterBottom>
                 {entry.title}
               </Typography>
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
                 gap: 2
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box 
+                  <Box
                     component={RouterLink}
                     to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', entry.channelId)}
                     sx={{
@@ -248,8 +265,8 @@ const ViewNews: React.FC = () => {
                       {entry.channel.name}
                     </Typography>
                   </Box>
-                  <Box 
-                    sx={{ 
+                  <Box
+                    sx={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       bgcolor: 'rgba(0, 0, 0, 0.3)',
@@ -275,37 +292,143 @@ const ViewNews: React.FC = () => {
         <Grid item xs={12} md={8}>
           <Card>
             <Box sx={{ p: 3 }}>
-              <JEditor
-                data={parseContent(entry.content)}
-                readOnly={true}
-                borderColor={theme => 
-                  theme.palette.mode === 'dark' 
-                    ? alpha(theme.palette.common.white, 0.1)
-                    : alpha(theme.palette.common.black, 0.1)
-                }
-              />
+              {/* Unified Premium Content Notice */}
+              {hasLimitedAccess ? (
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: 4,
+                    textAlign: 'center',
+                    bgcolor: theme => alpha(theme.palette.warning.main, 0.05),
+                    border: theme => `2px solid ${alpha(theme.palette.warning.main, 0.3)}`,
+                    borderRadius: 3
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      bgcolor: theme => alpha(theme.palette.warning.main, 0.1),
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto',
+                      mb: 2
+                    }}
+                  >
+                    <LockIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                  </Box>
 
-              <Box sx={{ mt: 2 }}>
-                {entry.tags.map((tag) => (
-                  <Chip 
-                    key={tag.id} 
-                    label={tag.title} 
-                    variant="outlined" 
-                    sx={{ mr: 1, mb: 1 }} 
+                  <Typography variant="h5" gutterBottom fontWeight="bold" color="warning.dark">
+                    Premium Content
+                  </Typography>
+
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500, mx: 'auto' }}>
+                    {entry.accessInfo?.reason || 'Subscribe to unlock the full article and support quality journalism.'}
+                  </Typography>
+
+                  {entry.accessInfo?.requiredTierName && (
+                    <Alert
+                      severity="info"
+                      sx={{
+                        mb: 3,
+                        maxWidth: 500,
+                        mx: 'auto',
+                        '& .MuiAlert-message': {
+                          width: '100%',
+                          textAlign: 'center'
+                        }
+                      }}
+                    >
+                      Required tier: <strong>{entry.accessInfo.requiredTierName}</strong>
+                    </Alert>
+                  )}
+
+                  <Box sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+                      Subscribe to unlock:
+                    </Typography>
+                    <List dense>
+                      {[
+                        'Full article content',
+                        'Quality metrics',
+                        'Fund information',
+                        'Social links',
+                        'Transaction transparency'
+                      ].map((feature, index) => (
+                        <ListItem key={index} sx={{ py: 0.5 }}>
+                          <ListItemIcon sx={{ minWidth: 32 }}>
+                            <CheckCircleIcon color="success" fontSize="small" />
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={feature}
+                            primaryTypographyProps={{ variant: 'body2' }}
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Box>
+
+                  <Button
+                    component={RouterLink}
+                    to={PATHS.APP_CHANNEL_VIEW.replace(':channelId', entry.channelId)}
+                    variant="contained"
+                    color="warning"
+                    size="large"
+                    startIcon={<UpgradeIcon />}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 2,
+                      fontWeight: 'bold',
+                      textTransform: 'none',
+                      fontSize: '1rem'
+                    }}
+                  >
+                    View Subscription Options
+                  </Button>
+                </Paper>
+              ) : (
+                <>
+                  {/* Full Content */}
+                  <JEditor
+                    data={parseContent(entry.content)}
+                    readOnly={true}
+                    borderColor={theme =>
+                      theme.palette.mode === 'dark'
+                        ? alpha(theme.palette.common.white, 0.1)
+                        : alpha(theme.palette.common.black, 0.1)
+                    }
                   />
-                ))}
-              </Box>
+
+                  <Box sx={{ mt: 2 }}>
+                    {entry.tags.map((tag) => (
+                      <Chip
+                        key={tag.id}
+                        label={tag.title}
+                        variant="outlined"
+                        sx={{ mr: 1, mb: 1 }}
+                      />
+                    ))}
+                  </Box>
+                </>
+              )}
             </Box>
           </Card>
         </Grid>
         <Grid item xs={12} md={4}>
           <Stack spacing={3}>
-            <NewsSocialLinks links={entry.socialLinks} />
-            
-            {entry.qualityMetrics && (
-              <Paper 
-                elevation={0} 
-                sx={{ 
+            {/* Social Links - Only show with full access */}
+            {!hasLimitedAccess && entry.socialLinks && entry.socialLinks.length > 0 && (
+              <NewsSocialLinks links={entry.socialLinks} />
+            )}
+
+            {/* Quality Metrics - Only show with full access */}
+            {!hasLimitedAccess && entry.qualityMetrics && (
+              <Paper
+                elevation={0}
+                sx={{
                   p: 2,
                   bgcolor: 'success.light',
                   color: 'success.contrastText',
@@ -327,10 +450,11 @@ const ViewNews: React.FC = () => {
               </Paper>
             )}
 
-            {entry.newsFund && (
-              <Paper 
-                elevation={0} 
-                sx={{ 
+            {/* News Fund - Only show with full access */}
+            {!hasLimitedAccess && entry.newsFund && (
+              <Paper
+                elevation={0}
+                sx={{
                   p: 2,
                   bgcolor: 'primary.light',
                   color: 'primary.contrastText',
@@ -354,14 +478,17 @@ const ViewNews: React.FC = () => {
           </Stack>
         </Grid>
       </Grid>
-      
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <TransactionTransparency 
-          newsId={entry.id}
-          channelId={entry.channelId}
-          newsFund={entry.newsFund}
-        />
-      </Container>
+
+      {/* Transaction Transparency - Only show with full access */}
+      {!hasLimitedAccess && (
+        <Container maxWidth="lg" sx={{ mt: 4 }}>
+          <TransactionTransparency
+            newsId={entry.id}
+            channelId={entry.channelId}
+            newsFund={entry.newsFund}
+          />
+        </Container>
+      )}
     </Container>
   );
 };

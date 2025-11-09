@@ -2,6 +2,13 @@
 import { Channel } from "./Channel";
 import { User } from "./User";
 
+export type AccessInfo = {
+    canAccess: boolean;
+    requiresPremium: boolean;
+    reason?: string | null;
+    requiredTierName?: string | null;
+};
+
 export type News = {
     id: string; // generated
     title: string;
@@ -22,6 +29,9 @@ export type News = {
     publishedAt: string;
     createdAt: string;
     updatedAt: string;
+
+    // access control
+    accessInfo?: AccessInfo;
 };
 
 export type QualityMetrics = {

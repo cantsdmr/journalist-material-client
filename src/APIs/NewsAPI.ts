@@ -110,10 +110,21 @@ export class NewsAPI extends HTTPApi {
     // ==================== INDIVIDUAL NEWS OPERATIONS ====================
 
     /**
-     * Get specific news by ID
+     * Get specific news by ID with DETAIL access
+     * Returns full content without expensive relations (metrics, funds, social links)
+     * Suitable for news detail pages
      */
     public async get(id: string): Promise<News> {
         return this._get<News>(`${API_PATH}/${id}`);
+    }
+
+    /**
+     * Get complete news details with FULL access
+     * Returns everything including expensive relations (metrics, funds, social links, stats)
+     * Suitable for admin views, analytics, or when complete data is needed
+     */
+    public async getDetails(id: string): Promise<News> {
+        return this._get<News>(`${API_PATH}/${id}/details`);
     }
 
     /**
