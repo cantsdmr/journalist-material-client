@@ -1,7 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
-// const ENV = import.meta.env.VITE_ENV;
 
 export class AxiosJournalist {
     private instance: AxiosInstance;
@@ -11,7 +10,6 @@ export class AxiosJournalist {
             baseURL: API_URL,
             headers: {
                 'Content-Type': 'application/json',
-                // 'X-Environment': ENV
             }
         });
       

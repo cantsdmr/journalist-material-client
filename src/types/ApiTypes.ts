@@ -90,3 +90,11 @@ export type Collection<T> = ListResponse<T>;
  * Frontend pagination object type
  */
 export type PaginationObject = PaginationQuery; 
+
+
+export type AccessInfo = {
+    canAccess: boolean;
+    requiresPremium: boolean;
+    reason?: string | null;
+    requiredTierName?: string | null;
+};

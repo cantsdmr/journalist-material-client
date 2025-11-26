@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -15,8 +15,7 @@ import {
   InputAdornment,
   Chip
 } from '@mui/material';
-import { useApiContext } from '@/contexts/ApiContext';
-import PaymentMethodSelector from './PaymentMethodSelector';
+import PayPalFundingButton from './PayPalFundingButton';
 import FundingProgress from './FundingProgress';
 
 export interface FundingData {
@@ -41,9 +40,7 @@ interface FundingModalProps {
 interface ContributionData {
   amount: number;
   currency: string;
-  payment_method_id: string;
   comment?: string;
-  is_anonymous: boolean;
 }
 
 const PRESET_AMOUNTS = [5, 10, 25, 50, 100];
@@ -60,39 +57,17 @@ const FundingModal: React.FC<FundingModalProps> = ({
   const [contributionData, setContributionData] = useState<ContributionData>({
     amount: 0,
     currency: fundingData.currency,
-    payment_method_id: '',
-    comment: '',
-    is_anonymous: false
+    comment: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-
-  const { api } = useApiContext();
-
-  useEffect(() => {
-    if (open) {
-      loadPaymentMethods();
-    }
-  }, [open]);
-
-  const loadPaymentMethods = async () => {
-    try {
-      const methods = await api.accountApi.getPaymentMethods();
-      setPaymentMethods(methods.items || []);
-    } catch (err) {
-      console.error('Failed to load payment methods:', err);
-    }
-  };
 
   const handleClose = () => {
     setStep('amount');
     setContributionData({
       amount: 0,
       currency: fundingData.currency,
-      payment_method_id: '',
-      comment: '',
-      is_anonymous: false
+      comment: ''
     });
     setError(null);
     onClose();
@@ -108,10 +83,6 @@ const FundingModal: React.FC<FundingModalProps> = ({
         setError('Please enter a valid contribution amount');
         return;
       }
-      if (paymentMethods.length === 0) {
-        setError('No payment methods available. Please add a payment method first.');
-        return;
-      }
       setError(null);
       setStep('payment');
     }
@@ -124,32 +95,19 @@ const FundingModal: React.FC<FundingModalProps> = ({
     }
   };
 
-  const handleSubmitContribution = async () => {
-    try {
-      setLoading(true);
-      setStep('processing');
-      setError(null);
+  const handlePayPalSuccess = (contribution: any) => {
+    onSuccess(contribution);
+    handleClose();
+  };
 
-      if (!contributionData.payment_method_id) {
-        setError('Please select a payment method');
-        return;
-      }
+  const handlePayPalError = (err: Error) => {
+    setError(err.message || 'Payment failed. Please try again.');
+    setLoading(false);
+  };
 
-      // Create contribution via API
-      const contribution = await api.fundingApi.createContribution(
-        contentType,
-        contentId,
-        contributionData as any
-      );
-
-      onSuccess(contribution);
-      handleClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to process contribution');
-      setStep('payment');
-    } finally {
-      setLoading(false);
-    }
+  const handlePayPalCancel = () => {
+    setError('Payment cancelled. You can try again when ready.');
+    setLoading(false);
   };
 
   // Calculate progress percentage for funding display
@@ -256,15 +214,22 @@ const FundingModal: React.FC<FundingModalProps> = ({
         </Box>
       </Box>
 
-      <PaymentMethodSelector
-        paymentMethods={paymentMethods}
-        selectedMethodId={contributionData.payment_method_id}
-        onMethodSelect={(methodId) => setContributionData(prev => ({
-          ...prev,
-          payment_method_id: methodId
-        }))}
-        currency={contributionData.currency}
-      />
+      <Box>
+        <Typography variant="subtitle1" gutterBottom>
+          Complete payment with PayPal
+        </Typography>
+        <PayPalFundingButton
+          contentType={contentType}
+          contentId={contentId}
+          amount={contributionData.amount}
+          currency={contributionData.currency}
+          comment={contributionData.comment}
+          onSuccess={handlePayPalSuccess}
+          onError={handlePayPalError}
+          onCancel={handlePayPalCancel}
+          disabled={loading}
+        />
+      </Box>
     </Stack>
   );
 
@@ -302,13 +267,6 @@ const FundingModal: React.FC<FundingModalProps> = ({
           <>
             <Button onClick={handlePreviousStep} disabled={loading}>
               Back
-            </Button>
-            <Button
-              onClick={handleSubmitContribution}
-              variant="contained"
-              disabled={loading || !contributionData.payment_method_id}
-            >
-              {loading ? 'Processing...' : `Contribute ${fundingData.currency} ${contributionData.amount}`}
             </Button>
           </>
         );

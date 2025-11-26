@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Container,
     Box,
@@ -12,8 +12,6 @@ import {
     Divider,
     Stack,
     CircularProgress,
-    Alert,
-    LinearProgress,
     Chip,
     Paper,
     alpha,
@@ -22,10 +20,14 @@ import {
     IconButton,
     TextField,
     InputAdornment,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
     // Link
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Channel } from '@/types/index';
+import { Channel, ChannelTier, TierPaymentConfig } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { useApiCall } from '@/hooks/useApiCall';
@@ -45,6 +47,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import ListNews from '@/pages/app/news/ListNews';
 import PollsList from '@/components/poll/PollsList';
 import TagFilter from '@/components/filters/TagFilter';
+import PayPalSubscriptionButton from '@/components/subscription/PayPalSubscriptionButton';
 
 const ViewChannel: React.FC = () => {
     const [channel, setChannel] = useState<Nullable<Channel>>(null);
@@ -54,14 +57,9 @@ const ViewChannel: React.FC = () => {
     const [selectedPollTags, setSelectedPollTags] = useState<string[]>([]);
     const [pollSearchQuery, setPollSearchQuery] = useState('');
     const [pollSearchInput, setPollSearchInput] = useState('');
-    const [pendingSubscription, setPendingSubscription] = useState<{
-        subscriptionId: string;
-        approvalUrl: string;
-        tierName: string;
-        tierId: string;
-    } | null>(null);
-    const [planStatus, setPlanStatus] = useState<'checking' | 'creating' | 'ready'>('ready');
     const [activeTab, setActiveTab] = useState(0);
+    const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false);
+    const [selectedTier, setSelectedTier] = useState<ChannelTier | null>(null);
     const { id } = useParams();
     const navigate = useNavigate();
     const { api } = useApiContext();
@@ -81,65 +79,13 @@ const ViewChannel: React.FC = () => {
     const isMember = hasSubscription(id ?? '');
     const currentTierId = getSubscriptionTier(id ?? '')?.id;
 
-    // Poll subscription status for pending subscriptions
-    const pollSubscriptionStatus = useCallback(async (subscriptionId: string) => {
-        try {
-            const status = await api?.subscriptionApi?.getSubscriptionStatus?.(subscriptionId);
-            if (status === 'active') {
-                setPendingSubscription(null);
-                await refreshProfile();
-                return true; // Stop polling
-            }
-            return false; // Continue polling
-        } catch (error) {
-            console.error('Error polling subscription status:', error);
-            return false;
-        }
-    }, [api, refreshProfile]);
-
-    // Handle PayPal approval window messages
-    useEffect(() => {
-        const handleApprovalMessage = (event: MessageEvent) => {
-            // Only accept messages from PayPal domains
-            if (!event.origin.includes('paypal.com') && !event.origin.includes('sandbox.paypal.com')) {
-                return;
-            }
-
-            if (event.data.type === 'payment_approval') {
-                if (event.data.status === 'approved' && pendingSubscription) {
-                    // Start polling for subscription activation
-                    const pollInterval = setInterval(async () => {
-                        const isActive = await pollSubscriptionStatus(pendingSubscription.subscriptionId);
-                        if (isActive) {
-                            clearInterval(pollInterval);
-                        }
-                    }, 2000); // Poll every 2 seconds
-
-                    // Stop polling after 60 seconds
-                    setTimeout(() => {
-                        clearInterval(pollInterval);
-                        setPendingSubscription(null);
-                    }, 60000);
-                } else if (event.data.status === 'cancelled') {
-                    setPendingSubscription(null);
-                    setSubscriptionLoading(false);
-                }
-            }
-        };
-
-        window.addEventListener('message', handleApprovalMessage);
-        return () => window.removeEventListener('message', handleApprovalMessage);
-    }, [pendingSubscription, pollSubscriptionStatus]);
-
     // Debug logging
     console.log('ViewChannel Debug:', {
         channelId: id,
         isMember,
         currentTierId,
         subscriptions: profile?.subscriptions,
-        profileLoaded: !!profile,
-        pendingSubscription,
-        planStatus
+        profileLoaded: !!profile
     });
 
     useEffect(() => {
@@ -185,89 +131,54 @@ const ViewChannel: React.FC = () => {
         const tier = channel.tiers?.find(t => t.id === tierId);
         if (!tier) return;
 
-        setSubscriptionLoading(true);
-        setPlanStatus('checking');
-
-        try {
-            // For paid tiers, show plan creation status
-            if (tier.price > 0) {
-                setPlanStatus('creating');
-            }
-
-            // Use direct subscription API
-            const result = await api?.subscriptionApi?.createDirectSubscription(channel.id, {
-                tierId,
-                notificationLevel: 1,
-                paymentMethodId: tier.price > 0 ? 'paypal_default' : undefined
-            });
-
-            setPlanStatus('ready');
-
-            if (result?.approvalUrl && result?.subscription) {
-                // Set pending subscription state
-                setPendingSubscription({
-                    subscriptionId: result.subscription.id,
-                    approvalUrl: result.approvalUrl,
-                    tierName: tier.name,
-                    tierId: tier.id
+        // For free tiers, use direct API call
+        if (tier.price === 0) {
+            setSubscriptionLoading(true);
+            try {
+                const result = await api?.subscriptionApi?.createDirectSubscription(channel.id, {
+                    tierId,
+                    notificationLevel: 1
                 });
 
-                // Open PayPal approval URL
-                const paymentWindow = window.open(
-                    result.approvalUrl,
-                    'paypal_payment',
-                    'width=600,height=700,scrollbars=yes,resizable=yes'
-                );
-
-                if (!paymentWindow) {
-                    alert('Popup blocked! Please allow popups and try again.');
-                    setPendingSubscription(null);
-                    setSubscriptionLoading(false);
-                    return;
+                if (result) {
+                    await refreshProfile();
                 }
-
-                // Monitor window closure (fallback if postMessage doesn't work)
-                const windowWatcher = setInterval(() => {
-                    if (paymentWindow.closed) {
-                        clearInterval(windowWatcher);
-                        // Give some time for webhook to process, then check status
-                        setTimeout(async () => {
-                            const isActive = await pollSubscriptionStatus(result.subscription.id);
-                            if (!isActive) {
-                                // If still not active, assume cancelled
-                                setPendingSubscription(null);
-                                setSubscriptionLoading(false);
-                            }
-                        }, 3000);
-                    }
-                }, 1000);
-
-            } else {
-                // Free subscription completed immediately
-                await refreshProfile();
+                setSubscriptionLoading(false);
+            } catch (error: any) {
+                console.error('Subscription failed:', error);
                 setSubscriptionLoading(false);
             }
-        } catch (error: any) {
-            console.error('Subscription failed:', error);
-            setPlanStatus('ready');
-            setSubscriptionLoading(false);
-
-            // Check if error is due to missing payment method
-            const errorMessage = error?.response?.data?.message || error?.message || '';
-            if (errorMessage.includes('PAYMENT_METHOD_REQUIRED') ||
-                errorMessage.includes('PayPal payment method') ||
-                errorMessage.includes('No PayPal payment method found')) {
-
-                // Show confirmation dialog to redirect to payment method setup
-                const shouldRedirect = window.confirm(
-                    'You need to add a PayPal payment method to subscribe to paid tiers. Would you like to add one now?'
-                );
-
-                if (shouldRedirect) {
-                    navigate('/app/account/payment-methods');
-                }
-            }
         }
+        // For paid tiers, the PayPal button component will handle the flow
+    };
+
+    const handleSubscribeClick = (tier: ChannelTier) => {
+        // For free tiers, subscribe directly
+        if (tier.price === 0) {
+            handleJoin(tier.id);
+        } else {
+            // For paid tiers, open dialog
+            setSelectedTier(tier);
+            setSubscriptionDialogOpen(true);
+        }
+    };
+
+    const handlePayPalSubscriptionSuccess = async (tierName: string, tierId: string) => {
+        console.log('PayPal subscription approved:', { tierName, tierId });
+
+        // Refresh profile immediately as subscription is already activated by backend
+        await refreshProfile();
+        setSubscriptionDialogOpen(false);
+        setSelectedTier(null);
+    };
+
+    const handlePayPalSubscriptionError = (error: Error) => {
+        console.error('PayPal subscription error:', error);
+        alert(`Subscription failed: ${error.message}`);
+    };
+
+    const handlePayPalSubscriptionCancel = () => {
+        console.log('PayPal subscription cancelled');
     };
 
     const handleUpdateMembership = async (tierId: string) => {
@@ -549,47 +460,6 @@ const ViewChannel: React.FC = () => {
                             {subscriptionLoading ? 'Processing...' : (isMember ? 'Cancel Membership' : 'Join Channel')}
                         </Button>
                     </Box>
-
-                    {/* Plan creation status */}
-                    {planStatus === 'creating' && (
-                        <Alert severity="info" sx={{ mt: 3, borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <CircularProgress size={16} />
-                                <Typography variant="body2">
-                                    Setting up PayPal subscription plan...
-                                </Typography>
-                            </Box>
-                        </Alert>
-                    )}
-
-                    {/* Pending subscription status */}
-                    {pendingSubscription && (
-                        <Alert
-                            severity="warning"
-                            sx={{ mt: 3, borderRadius: 2 }}
-                            action={
-                                <Button
-                                    size="small"
-                                    onClick={() => window.open(pendingSubscription.approvalUrl, '_blank')}
-                                >
-                                    Complete Payment
-                                </Button>
-                            }
-                        >
-                            <Box>
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                    🔄 Subscription Pending Approval
-                                </Typography>
-                                <Typography variant="caption" sx={{ display: 'block', mt: 0.5 }}>
-                                    {pendingSubscription.tierName} - Waiting for PayPal approval
-                                </Typography>
-                                <LinearProgress
-                                    sx={{ mt: 1, borderRadius: 1 }}
-                                    color="warning"
-                                />
-                            </Box>
-                        </Alert>
-                    )}
                 </Paper>
 
                 {/* Navigation Tabs */}
@@ -1017,29 +887,46 @@ const ViewChannel: React.FC = () => {
                                             </Typography>
 
                                             {/* Action Button */}
-                                            <Button
-                                                variant={currentTierId === tier.id ? "outlined" : "contained"}
-                                                fullWidth
-                                                size="large"
-                                                onClick={() => isMember ? handleUpdateMembership(tier.id) : handleJoin(tier.id)}
-                                                disabled={currentTierId === tier.id || subscriptionLoading}
-                                                sx={{
-                                                    py: 1.5,
-                                                    borderRadius: 50,
-                                                    textTransform: 'none',
-                                                    fontWeight: 600,
-                                                    fontSize: '1rem',
-                                                    boxShadow: currentTierId === tier.id ? 'none' : '0 4px 12px rgba(11, 108, 255, 0.3)',
-                                                    '&:hover': {
-                                                        boxShadow: currentTierId === tier.id ? 'none' : '0 6px 16px rgba(11, 108, 255, 0.4)',
-                                                    }
-                                                }}
-                                                startIcon={subscriptionLoading && <CircularProgress size={20} color="inherit" />}
-                                            >
-                                                {subscriptionLoading ? 'Processing...' :
-                                                    currentTierId === tier.id ? 'Current Plan' :
-                                                        isMember ? 'Switch to This Plan' : 'Contribute'}
-                                            </Button>
+                                            {currentTierId === tier.id ? (
+                                                <Button
+                                                    variant="outlined"
+                                                    fullWidth
+                                                    size="large"
+                                                    disabled
+                                                    sx={{
+                                                        py: 1.5,
+                                                        borderRadius: 50,
+                                                        textTransform: 'none',
+                                                        fontWeight: 600,
+                                                        fontSize: '1rem',
+                                                    }}
+                                                >
+                                                    Current Plan
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="contained"
+                                                    fullWidth
+                                                    size="large"
+                                                    onClick={() => isMember ? handleUpdateMembership(tier.id) : handleSubscribeClick(tier)}
+                                                    disabled={subscriptionLoading}
+                                                    sx={{
+                                                        py: 1.5,
+                                                        borderRadius: 50,
+                                                        textTransform: 'none',
+                                                        fontWeight: 600,
+                                                        fontSize: '1rem',
+                                                        boxShadow: '0 4px 12px rgba(11, 108, 255, 0.3)',
+                                                        '&:hover': {
+                                                            boxShadow: '0 6px 16px rgba(11, 108, 255, 0.4)',
+                                                        }
+                                                    }}
+                                                    startIcon={subscriptionLoading && <CircularProgress size={20} color="inherit" />}
+                                                >
+                                                    {subscriptionLoading ? 'Processing...' :
+                                                        isMember ? 'Switch to This Plan' : tier.price === 0 ? 'Join Free' : 'Subscribe'}
+                                                </Button>
+                                            )}
                                         </CardContent>
                                     </Card>
                                 </Grid>
@@ -1048,6 +935,79 @@ const ViewChannel: React.FC = () => {
                     </Box>
                 )}
             </Container>
+
+            {/* Subscription Dialog for Paid Tiers */}
+            <Dialog
+                open={subscriptionDialogOpen}
+                onClose={() => setSubscriptionDialogOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>
+                    Subscribe to {selectedTier?.name}
+                </DialogTitle>
+                <DialogContent>
+                    {selectedTier && (
+                        <Box>
+                            {/* Tier Info */}
+                            <Box sx={{ mb: 3 }}>
+                                <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+                                    {new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: selectedTier.currency.toUpperCase()
+                                    }).format(selectedTier.price / 100)}
+                                    <Typography component="span" variant="body2" color="text.secondary">
+                                        /month
+                                    </Typography>
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    {selectedTier.description}
+                                </Typography>
+                            </Box>
+
+                            <Divider sx={{ my: 2 }} />
+
+                            {/* Payment Provider Buttons */}
+                            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+                                Select Payment Method:
+                            </Typography>
+
+                            {selectedTier.paymentConfigs && selectedTier.paymentConfigs.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {selectedTier.paymentConfigs.map((config: TierPaymentConfig) => {
+                                        if (config.provider?.code === 'paypal' && config.isActive) {
+                                            return (
+                                                <Box key={config.id}>
+                                                    <PayPalSubscriptionButton
+                                                        planId={config.providerPlanId}
+                                                        channelId={channel!.id}
+                                                        tierName={selectedTier.name}
+                                                        tierId={selectedTier.id}
+                                                        onSuccess={handlePayPalSubscriptionSuccess}
+                                                        onError={handlePayPalSubscriptionError}
+                                                        onCancel={handlePayPalSubscriptionCancel}
+                                                        disabled={subscriptionLoading}
+                                                    />
+                                                </Box>
+                                            );
+                                        }
+                                        return null;
+                                    })}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" color="error">
+                                    No payment methods configured for this tier. Please contact the channel owner.
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setSubscriptionDialogOpen(false)}>
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

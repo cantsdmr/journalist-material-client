@@ -1,13 +1,7 @@
 // import { NEWS_STATUS } from "@/enums/NewsEnums";
+import { AccessInfo } from "../ApiTypes";
 import { Channel } from "./Channel";
 import { User } from "./User";
-
-export type AccessInfo = {
-    canAccess: boolean;
-    requiresPremium: boolean;
-    reason?: string | null;
-    requiredTierName?: string | null;
-};
 
 export type News = {
     id: string; // generated

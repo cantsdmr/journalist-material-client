@@ -37,7 +37,7 @@ const PayPalPaymentTokens: React.FC<PayPalPaymentTokensProps> = ({
 
     // Load PayPal SDK with Connect Button components for Payment Tokens
     const script = document.createElement('script');
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&components=buttons&vault=true`;
+    script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&components=buttons&vault=true`;
     script.async = true;
     
     script.onload = () => {

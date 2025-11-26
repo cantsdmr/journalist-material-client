@@ -37,6 +37,9 @@ import TransactionTransparency from '@/components/news/TransactionTransparency';
 import LockIcon from '@mui/icons-material/Lock';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import FundingModal, { FundingData } from '@/components/funding/FundingModal';
+import type { FundData } from '@/APIs/FundingAPI';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 const ViewNewsSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -126,6 +129,11 @@ const ViewNews: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [hasLimitedAccess, setHasLimitedAccess] = useState(false);
 
+  // Funding state
+  const [fundingModalOpen, setFundingModalOpen] = useState(false);
+  const [fundData, setFundData] = useState<FundData | null>(null);
+  const [loadingFund, setLoadingFund] = useState(false);
+
   useEffect(() => {
     const getNews = async () => {
       if (id) {
@@ -145,6 +153,9 @@ const ViewNews: React.FC = () => {
           if (result.accessInfo && !result.accessInfo.canAccess) {
             setHasLimitedAccess(true);
           }
+
+          // Load fund data
+          loadFundData(id);
         }
 
         setLoading(false);
@@ -153,6 +164,58 @@ const ViewNews: React.FC = () => {
 
     getNews();
   }, [id, execute]);
+
+  const loadFundData = async (newsId: string) => {
+    try {
+      setLoadingFund(true);
+      const fund = await api?.fundingApi.getFund('news', newsId);
+      setFundData(fund);
+    } catch (error) {
+      console.error('Failed to load fund data:', error);
+    } finally {
+      setLoadingFund(false);
+    }
+  };
+
+  const handleOpenFundingModal = async () => {
+    // Check if user has payment methods
+    try {
+      const paymentMethods = await api?.accountApi.getPaymentMethods();
+
+      if (!paymentMethods?.items || paymentMethods.items.length === 0) {
+        // Show warning that user needs to add payment method
+        alert('Please add a payment method before funding. You can add payment methods in your account settings.');
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to check payment methods:', error);
+    }
+
+    setFundingModalOpen(true);
+  };
+
+  const handleFundingSuccess = async (contribution: any) => {
+    // Reload fund data after successful contribution
+    if (id) {
+      await loadFundData(id);
+    }
+    // Optionally show success message
+    console.log('Contribution successful:', contribution);
+  };
+
+  const getFundingData = (): FundingData | null => {
+    if (!entry || !fundData) return null;
+
+    return {
+      id: fundData.id,
+      title: entry.title,
+      currentAmount: fundData.currentAmount / 100, // Convert from cents to decimal
+      goalAmount: fundData.goalAmount ? fundData.goalAmount / 100 : undefined,
+      currency: fundData.currency,
+      contributorCount: 0, // This would need to be fetched from fund summary
+      description: `Support quality journalism by funding this article`
+    };
+  };
 
   if (loading) {
     return <ViewNewsSkeleton />;
@@ -475,6 +538,71 @@ const ViewNews: React.FC = () => {
                 </Box>
               </Paper>
             )}
+
+            {/* Fund this Article - Always visible regardless of premium status */}
+            <Paper
+              elevation={2}
+              sx={{
+                p: 3,
+                borderRadius: 2,
+                border: '2px solid',
+                borderColor: 'primary.main',
+                bgcolor: theme => alpha(theme.palette.primary.main, 0.05)
+              }}
+            >
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <VolunteerActivismIcon color="primary" fontSize="large" />
+                  <Typography variant="h6" fontWeight="bold" color="primary">
+                    Fund this Article
+                  </Typography>
+                </Box>
+
+                {fundData && !loadingFund ? (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Current Funding
+                    </Typography>
+                    <Typography variant="h5" fontWeight="bold" color="primary.main">
+                      {fundData.currency} {(fundData.currentAmount / 100).toFixed(2)}
+                    </Typography>
+                    {fundData.goalAmount && (
+                      <Typography variant="caption" color="text.secondary">
+                        Goal: {fundData.currency} {(fundData.goalAmount / 100).toFixed(2)}
+                      </Typography>
+                    )}
+                  </Box>
+                ) : loadingFund ? (
+                  <Skeleton variant="rectangular" height={60} />
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Be the first to fund this article
+                  </Typography>
+                )}
+
+                <Typography variant="body2" color="text.secondary">
+                  Support quality journalism by contributing to this article
+                </Typography>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  size="large"
+                  startIcon={<VolunteerActivismIcon />}
+                  onClick={handleOpenFundingModal}
+                  disabled={!entry}
+                  sx={{
+                    py: 1.5,
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Fund Now
+                </Button>
+              </Stack>
+            </Paper>
           </Stack>
         </Grid>
       </Grid>
@@ -488,6 +616,18 @@ const ViewNews: React.FC = () => {
             newsFund={entry.newsFund}
           />
         </Container>
+      )}
+
+      {/* Funding Modal */}
+      {entry && fundData && (
+        <FundingModal
+          open={fundingModalOpen}
+          onClose={() => setFundingModalOpen(false)}
+          onSuccess={handleFundingSuccess}
+          contentType="news"
+          contentId={entry.id}
+          fundingData={getFundingData()!}
+        />
       )}
     </Container>
   );

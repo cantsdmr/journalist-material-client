@@ -256,7 +256,7 @@ const PaymentMethodsTab: React.FC = () => {
             Payment Methods
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Manage your payment methods for subscriptions
+            Manage your payout methods for receiving earnings
           </Typography>
         </Box>
 

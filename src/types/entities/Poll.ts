@@ -1,9 +1,4 @@
-export type AccessInfo = {
-    canAccess: boolean;
-    requiresPremium: boolean;
-    reason?: string | null;
-    requiredTierName?: string | null;
-};
+import { AccessInfo } from "../ApiTypes";
 
 export type Poll = {
     id: string;
@@ -20,6 +15,7 @@ export type Poll = {
     claimedAt?: string | null;
     isTrending: boolean;
     isConverted: boolean;
+    isPremium: boolean;
     fundingAmount: number;
     fundingGoal?: number;
     voteCount: number;

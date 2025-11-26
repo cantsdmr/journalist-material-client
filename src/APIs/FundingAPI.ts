@@ -91,16 +91,52 @@ export class FundingAPI extends HTTPApi {
     }
 
     /**
-     * Create a contribution to fund content
+     * Create a contribution to fund content (LEGACY - uses payment methods)
+     * @deprecated Use SDK-first methods (createPayPalOrder/capturePayPalOrder) instead
      */
     public async createContribution(
-        contentType: 'news' | 'poll', 
-        contentId: string, 
+        contentType: 'news' | 'poll',
+        contentId: string,
         contributionData: CreateContributionRequest
     ): Promise<FundContribution> {
         return this._post<FundContribution>(
-            `${API_PATH}/${contentType}/${contentId}/contribute`, 
+            `${API_PATH}/${contentType}/${contentId}/contribute`,
             contributionData
+        );
+    }
+
+    /**
+     * Create PayPal order for contribution (SDK-First Flow - Step 1)
+     */
+    public async createPayPalOrder(
+        contentType: 'news' | 'poll',
+        contentId: string,
+        data: {
+            amount: number;
+            currency: string;
+            comment?: string;
+        }
+    ): Promise<{ orderId: string; contributionId: string }> {
+        return this._post<{ orderId: string; contributionId: string }>(
+            `${API_PATH}/${contentType}/${contentId}/create-paypal-order`,
+            data
+        );
+    }
+
+    /**
+     * Capture PayPal order after user approval (SDK-First Flow - Step 2)
+     */
+    public async capturePayPalOrder(
+        contentType: 'news' | 'poll',
+        contentId: string,
+        data: {
+            orderId: string;
+            contributionId: string;
+        }
+    ): Promise<FundContribution> {
+        return this._post<FundContribution>(
+            `${API_PATH}/${contentType}/${contentId}/capture-paypal-order`,
+            data
         );
     }
 

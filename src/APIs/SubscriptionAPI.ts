@@ -120,6 +120,23 @@ export class SubscriptionAPI extends HTTPApi {
   }
 
   /**
+   * Activate PayPal subscription after SDK approval (SDK-First Flow)
+   */
+  public async activatePayPalSubscription(
+    channelId: string,
+    data: {
+      tierId: string;
+      paypalSubscriptionId: string;
+      notificationLevel?: number;
+    }
+  ): Promise<AdminSubscription> {
+    return this._post<AdminSubscription>(
+      `${API_PATH}/channels/${channelId}/activate-paypal`,
+      data
+    );
+  }
+
+  /**
    * Cancel user's own subscription
    */
   public async cancelUserSubscription(subscriptionId: string): Promise<{ message: string }> {

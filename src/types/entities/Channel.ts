@@ -18,6 +18,30 @@ export type Channel = {
     isSubscribed?: boolean;
 };
 
+export type PaymentProvider = {
+    code: string;           // 'paypal', 'stripe', 'iyzico'
+    name: string;           // 'PayPal', 'Stripe', 'Iyzico'
+    productId: string;      // Provider-specific product ID
+    planId: string;         // Provider-specific plan ID
+    isActive: boolean;      // Is this provider active for this tier?
+};
+
+export type TierPaymentConfig = {
+    id: string;
+    tierId: string;
+    providerId: string;
+    providerProductId: string;
+    providerPlanId: string;
+    isActive: boolean;
+    config?: Record<string, any>;
+    provider?: {
+        id: string;
+        code: string;
+        name: string;
+        isActive: boolean;
+    };
+};
+
 export type ChannelTier = {
     id: string;
     name: string;
@@ -29,6 +53,8 @@ export type ChannelTier = {
     maxSubscribers?: number;
     benefits: any[];
     currency: string;
+    paymentProviders?: PaymentProvider[];  // Multi-provider support (legacy)
+    paymentConfigs?: TierPaymentConfig[];  // New multi-provider configs
 };
 
 export type ChannelStats = {

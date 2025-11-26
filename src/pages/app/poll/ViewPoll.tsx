@@ -14,7 +14,6 @@ import {
   useTheme,
   Snackbar,
   Alert,
-  Chip
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -27,7 +26,6 @@ import ShareIcon from '@mui/icons-material/Share';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import CommentIcon from '@mui/icons-material/Comment';
-import StarIcon from '@mui/icons-material/Star';
 import LockIcon from '@mui/icons-material/Lock';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -36,6 +34,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { alpha } from '@mui/material/styles';
 import { useApiCall } from '@/hooks/useApiCall';
 import { Link as RouterLink2 } from 'react-router-dom';
+import FundingModal, { FundingData } from '@/components/funding/FundingModal';
+import type { FundData } from '@/APIs/FundingAPI';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 const ViewPollSkeleton = () => (
   <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -105,8 +106,25 @@ const ViewPoll: React.FC = () => {
   const [votingEligibility, setVotingEligibility] = useState<VotingEligibilityResponse | null>(null);
   const { execute } = useApiCall();
 
+  // Funding state
+  const [fundingModalOpen, setFundingModalOpen] = useState(false);
+  const [fundData, setFundData] = useState<FundData | null>(null);
+  const [loadingFund, setLoadingFund] = useState(false);
+
   // Check if user has limited access to premium content
-  const hasLimitedAccess = poll?.accessInfo && !poll.accessInfo.canAccess;
+  const hasLimitedAccess = poll?.isPremium && poll?.accessInfo && !poll.accessInfo.canAccess;
+
+  const loadFundData = async (pollId: string) => {
+    try {
+      setLoadingFund(true);
+      const fund = await api?.fundingApi.getFund('poll', pollId);
+      setFundData(fund);
+    } catch (error) {
+      console.error('Failed to load fund data:', error);
+    } finally {
+      setLoadingFund(false);
+    }
+  };
 
   useEffect(() => {
     const fetchPoll = async () => {
@@ -142,8 +160,11 @@ const ViewPoll: React.FC = () => {
         if (eligibilityResponse) {
           setVotingEligibility(eligibilityResponse);
         }
+
+        // Load fund data
+        loadFundData(id);
       }
-      
+
       setLoading(false);
     };
 
@@ -195,6 +216,46 @@ const ViewPoll: React.FC = () => {
   const toggleBookmark = () => {
     setIsBookmarked(!isBookmarked);
     // TODO: Implement bookmark functionality
+  };
+
+  const handleOpenFundingModal = async () => {
+    // Check if user has payment methods
+    try {
+      const paymentMethods = await api?.accountApi.getPaymentMethods();
+
+      if (!paymentMethods?.items || paymentMethods.items.length === 0) {
+        // Show warning that user needs to add payment method
+        alert('Please add a payment method before funding. You can add payment methods in your account settings.');
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to check payment methods:', error);
+    }
+
+    setFundingModalOpen(true);
+  };
+
+  const handleFundingSuccess = async (contribution: any) => {
+    // Reload fund data after successful contribution
+    if (id) {
+      await loadFundData(id);
+    }
+    // Optionally show success message
+    console.log('Contribution successful:', contribution);
+  };
+
+  const getFundingData = (): FundingData | null => {
+    if (!poll || !fundData) return null;
+
+    return {
+      id: fundData.id,
+      title: poll.title,
+      currentAmount: fundData.currentAmount / 100, // Convert from cents to decimal
+      goalAmount: fundData.goalAmount ? fundData.goalAmount / 100 : undefined,
+      currency: fundData.currency,
+      contributorCount: 0, // This would need to be fetched from fund summary
+      description: `Support quality journalism by funding this poll`
+    };
   };
 
   if (loading) {
@@ -293,10 +354,71 @@ const ViewPoll: React.FC = () => {
         </Grid>
         <Grid item xs={12} md={8}>
           <Card>
+            {/* Poll Media */}
+            {poll.media && poll.media.length > 0 && (
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: '100%',
+                  paddingTop: '56.25%', // 16:9 aspect ratio
+                  overflow: 'hidden',
+                  borderRadius: '4px 4px 0 0'
+                }}
+              >
+                <Box
+                  component={poll.media[0].format === 2 ? 'video' : 'img'}
+                  src={poll.media[0].url}
+                  alt={poll.media[0].caption || poll.title}
+                  controls={poll.media[0].format === 2}
+                  autoPlay={poll.media[0].format === 2}
+                  loop={poll.media[0].format === 2}
+                  muted={poll.media[0].format === 2}
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+                {poll.media[0].caption && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      bgcolor: alpha(theme.palette.common.black, 0.7),
+                      color: 'white',
+                      p: 1,
+                      backdropFilter: 'blur(4px)'
+                    }}
+                  >
+                    <Typography variant="caption">
+                      {poll.media[0].caption}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
+
             <CardContent>
               <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 3 }}>
                 {poll.title}
               </Typography>
+
+              {/* Voting Eligibility Warning */}
+              {votingEligibility && !votingEligibility.canVote && (
+                <Alert
+                  severity={userVote ? "info" : "warning"}
+                  sx={{ mb: 3 }}
+                  icon={userVote ? <CheckCircleIcon /> : undefined}
+                >
+                  {votingEligibility.reason || (userVote ? 'You have already voted on this poll' : 'You are not eligible to vote on this poll')}
+                </Alert>
+              )}
+
               <PollDetail
                 poll={poll}
                 onVote={handleVote}
@@ -406,7 +528,7 @@ const ViewPoll: React.FC = () => {
                       Total Votes
                     </Typography>
                     <Typography variant="h4">
-                      {poll.options.reduce((sum, option) => sum + option.voteCount, 0)}
+                      {poll.stats?.totalVotes ?? 0}
                     </Typography>
                   </Box>
                   <Box>
@@ -420,6 +542,71 @@ const ViewPoll: React.FC = () => {
                 </Stack>
               </Paper>
             )}
+
+            {/* Fund this Poll - Always visible regardless of premium status */}
+            <Paper
+              elevation={2}
+              sx={{
+                p: 3,
+                borderRadius: 2,
+                border: '2px solid',
+                borderColor: 'primary.main',
+                bgcolor: theme => alpha(theme.palette.primary.main, 0.05)
+              }}
+            >
+              <Stack spacing={2}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <VolunteerActivismIcon color="primary" fontSize="large" />
+                  <Typography variant="h6" fontWeight="bold" color="primary">
+                    Fund this Poll
+                  </Typography>
+                </Box>
+
+                {fundData && !loadingFund ? (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Current Funding
+                    </Typography>
+                    <Typography variant="h5" fontWeight="bold" color="primary.main">
+                      {fundData.currency} {(fundData.currentAmount / 100).toFixed(2)}
+                    </Typography>
+                    {fundData.goalAmount && (
+                      <Typography variant="caption" color="text.secondary">
+                        Goal: {fundData.currency} {(fundData.goalAmount / 100).toFixed(2)}
+                      </Typography>
+                    )}
+                  </Box>
+                ) : loadingFund ? (
+                  <Skeleton variant="rectangular" height={60} />
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    Be the first to fund this poll
+                  </Typography>
+                )}
+
+                <Typography variant="body2" color="text.secondary">
+                  Support quality journalism by contributing to this poll
+                </Typography>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  fullWidth
+                  size="large"
+                  startIcon={<VolunteerActivismIcon />}
+                  onClick={handleOpenFundingModal}
+                  disabled={!poll}
+                  sx={{
+                    py: 1.5,
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  }}
+                >
+                  Fund Now
+                </Button>
+              </Stack>
+            </Paper>
 
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
@@ -441,15 +628,28 @@ const ViewPoll: React.FC = () => {
           </Stack>
         </Grid>
       </Grid>
-      <Snackbar 
-        open={!!error} 
-        autoHideDuration={6000} 
+
+      {/* Funding Modal */}
+      {poll && fundData && (
+        <FundingModal
+          open={fundingModalOpen}
+          onClose={() => setFundingModalOpen(false)}
+          onSuccess={handleFundingSuccess}
+          contentType="poll"
+          contentId={poll.id}
+          fundingData={getFundingData()!}
+        />
+      )}
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setError(null)} 
-          severity="error" 
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
           sx={{ width: '100%' }}
         >
           {error}
