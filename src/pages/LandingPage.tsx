@@ -11,9 +11,25 @@ import {
   Search as SearchIcon,
   Article as ArticleIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import LandingPageAppBar from '@/components/navigation/LandingPageAppBar';
+import { PATHS } from '@/constants/paths';
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleJournalistSignup = () => {
+    navigate(`${PATHS.SIGNUP}?role=journalist`);
+  };
+
+  const handleReaderSignup = () => {
+    navigate(`${PATHS.SIGNUP}?role=reader`);
+  };
+
+  const handleBrowseStories = () => {
+    navigate(PATHS.APP_NEWS_TRENDING);
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <LandingPageAppBar />
@@ -66,6 +82,7 @@ const LandingPage: React.FC = () => {
                   variant="contained"
                   size="large"
                   startIcon={<SearchIcon />}
+                  onClick={handleBrowseStories}
                   sx={{
                     bgcolor: 'white',
                     color: '#1e3c72',
@@ -90,6 +107,7 @@ const LandingPage: React.FC = () => {
                   variant="outlined"
                   size="large"
                   startIcon={<ArticleIcon />}
+                  onClick={handleJournalistSignup}
                   sx={{
                     borderColor: 'rgba(255, 255, 255, 0.5)',
                     color: 'white',
@@ -112,7 +130,9 @@ const LandingPage: React.FC = () => {
                   variant="contained"
                   size="large"
                   startIcon={<ArticleIcon />}
+                  onClick={handleReaderSignup}
                   sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.15)',
                     borderColor: 'rgba(255, 255, 255, 0.5)',
                     color: 'white',
                     px: 4,
@@ -122,8 +142,9 @@ const LandingPage: React.FC = () => {
                     borderRadius: 1,
                     textTransform: 'none',
                     '&:hover': {
-                      borderColor: 'white',
-                      bgcolor: 'rgba(255, 255, 255, 0.1)'
+                      bgcolor: 'rgba(255, 255, 255, 0.25)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(255,255,255,0.2)'
                     },
                     transition: 'all 0.2s ease'
                   }}

@@ -195,6 +195,30 @@ const Login: React.FC = () => {
             Sign in with Apple
           </SocialButton> */}
       </Box>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Don't have an account?
+        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => navigate(`${PATHS.SIGNUP}?role=journalist`)}
+          >
+            Sign up as Journalist
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => navigate(`${PATHS.SIGNUP}?role=reader`)}
+          >
+            Sign up as Reader
+          </Button>
+        </Box>
+      </Box>
     </Container>
   );
 };
