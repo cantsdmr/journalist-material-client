@@ -32,7 +32,7 @@ const ViewChannelStudio: React.FC = () => {
     const fetchChannel = async () => {
         try {
             if (channelId) {
-                const result = await api?.channelApi.getChannel(channelId);
+                const result = await api?.app.channel.getChannel(channelId);
                 if (result) {
                     setChannel(result);
                 }

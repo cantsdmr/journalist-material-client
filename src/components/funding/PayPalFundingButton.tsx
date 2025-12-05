@@ -75,7 +75,7 @@ const PayPalFundingButton: React.FC<PayPalFundingButtonProps> = ({
 
                         try {
                             // Call backend to create PayPal order and pending contribution
-                            const result = await api?.fundingApi?.createPayPalOrder(
+                            const result = await api?.app.funding?.createPayPalOrder(
                                 contentType,
                                 contentId,
                                 {
@@ -115,7 +115,7 @@ const PayPalFundingButton: React.FC<PayPalFundingButtonProps> = ({
 
                         try {
                             // Call backend to capture PayPal order and complete contribution
-                            const contribution = await api?.fundingApi?.capturePayPalOrder(
+                            const contribution = await api?.app.funding?.capturePayPalOrder(
                                 contentType,
                                 contentId,
                                 {

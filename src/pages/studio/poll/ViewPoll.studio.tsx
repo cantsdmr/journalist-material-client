@@ -83,7 +83,7 @@ const ViewPollStudio: React.FC = () => {
         setLoading(true);
         
         const result = await execute(
-          () => api?.pollApi.get(id),
+          () => api?.app.poll.get(id),
           { showErrorToast: true }
         );
         
@@ -102,7 +102,7 @@ const ViewPollStudio: React.FC = () => {
     if (!id) return;
     
     const result = await execute(
-      () => api?.pollApi.convertToNews(id, newsData),
+      () => api?.app.poll.convertToNews(id, newsData),
       {
         showSuccessMessage: true,
         successMessage: 'Poll converted to news successfully!'
@@ -112,7 +112,7 @@ const ViewPollStudio: React.FC = () => {
     if (result) {
       // Refresh poll data to update conversion status
       const updatedPoll = await execute(
-        () => api?.pollApi.get(id),
+        () => api?.app.poll.get(id),
         { showErrorToast: true }
       );
       

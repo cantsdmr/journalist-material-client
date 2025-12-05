@@ -14,7 +14,7 @@ const CreateNewsStudio: React.FC = () => {
 
   const handleCreate = async (data: CreateNewsData) => {
     const result = await execute(
-      () => api?.newsApi.createNews(data),
+      () => api?.app.news.createNews(data),
       {
         showSuccessMessage: true,
         successMessage: 'News article created successfully!'

@@ -74,7 +74,7 @@ const PollsList: React.FC<PollsListProps> = ({
       setLoading(true);
 
       const response = await execute(
-        () => api?.pollApi.getPolls(filters, { page: _page, limit: itemsPerPage }),
+        () => api?.app.poll.getPolls(filters, { page: _page, limit: itemsPerPage }),
         { showErrorToast: true }
       );
 

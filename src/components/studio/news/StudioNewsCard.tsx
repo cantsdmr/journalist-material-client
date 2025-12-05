@@ -70,7 +70,7 @@ const StudioNewsCard: React.FC<StudioNewsCardProps> = ({
 
   const handleDelete = async () => {
     const result = await execute(
-      () => api?.newsApi.delete(news.id),
+      () => api?.app.news.delete(news.id),
       {
         showSuccessMessage: true,
         successMessage: 'News article deleted successfully'

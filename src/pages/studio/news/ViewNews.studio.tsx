@@ -121,7 +121,7 @@ const ViewNewsStudio: React.FC = () => {
         setLoading(true);
         
         const result = await execute(
-          () => api?.newsApi.get(id),
+          () => api?.app.news.get(id),
           { showErrorToast: true }
         );
         

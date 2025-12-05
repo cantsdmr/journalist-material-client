@@ -24,7 +24,7 @@ const ListTiers: React.FC = () => {
     if (!channelId) return;
     
     const result = await execute(
-      () => api?.channelApi.getTiers(channelId),
+      () => api?.app.channel.getTiers(channelId),
       { showErrorToast: true }
     );
     

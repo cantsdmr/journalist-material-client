@@ -33,7 +33,7 @@ export const TiersTab = memo<TiersTabProps>(({ channelId }) => {
     
     setIsLoading(true);
     const result = await fetchTiers(
-      () => api?.channelApi.getTiers(channelId),
+      () => api?.app.channel.getTiers(channelId),
       { showErrorToast: true }
     );
     
@@ -62,7 +62,7 @@ export const TiersTab = memo<TiersTabProps>(({ channelId }) => {
 
   const handleCreate = async (data: CreateChannelTierData) => {
     const result = await executeCreate(
-      () => api?.channelApi.createTier(channelId, data),
+      () => api?.app.channel.createTier(channelId, data),
       {
         showSuccessMessage: true,
         successMessage: 'Tier created successfully'
@@ -77,7 +77,7 @@ export const TiersTab = memo<TiersTabProps>(({ channelId }) => {
 
   const handleUpdate = async (tierId: string, data: EditChannelTierData) => {
     await executeUpdate(
-      () => api?.channelApi.updateTier(channelId, tierId, data),
+      () => api?.app.channel.updateTier(channelId, tierId, data),
       {
         showSuccessMessage: true,
         successMessage: 'Tier updated successfully'
@@ -90,7 +90,7 @@ export const TiersTab = memo<TiersTabProps>(({ channelId }) => {
 
   const handleDelete = async (tierId: string) => {
     await executeDelete(
-      () => api?.channelApi.deleteTier(channelId, tierId),
+      () => api?.app.channel.deleteTier(channelId, tierId),
       {
         showSuccessMessage: true,
         successMessage: 'Tier deleted successfully'
@@ -104,7 +104,7 @@ export const TiersTab = memo<TiersTabProps>(({ channelId }) => {
     try {
       setIsReordering(true);
       await executeUpdateTiers(
-        () => api?.channelApi.updateTiers(channelId, reorderedTiers),
+        () => api?.app.channel.updateTiers(channelId, reorderedTiers),
         {
           showSuccessMessage: true,
           successMessage: 'Tiers reordered successfully'

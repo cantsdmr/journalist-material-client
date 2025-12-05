@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { StringToSearchType, StringToSearchSort, SearchTypeString, SearchSortString } from '@/enums/SearchEnums';
-import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse, StructuredSearchSuggestionsResponse, StructuredSearchSuggestion } from '@/APIs/SearchAPI';
+import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse, StructuredSearchSuggestionsResponse, StructuredSearchSuggestion } from '@/APIs/app/SearchAPI';
 import { PaginatedResponse } from '@/utils/http';
 import { useApiCall } from './useApiCall';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -76,7 +76,7 @@ export const useSearch = (): UseSearchReturn => {
       };
 
       const data = await execute(
-        () => api?.searchApi.search(query, apiFilters, pagination),
+        () => api?.app.search.search(query, apiFilters, pagination),
         {
           showSuccessMessage: false,
         }
@@ -97,7 +97,7 @@ export const useSearch = (): UseSearchReturn => {
 
     try {
       const data: SearchSuggestionsResponse = await execute(
-        () => api?.searchApi.getSuggestions(query, type),
+        () => api?.app.search.getSuggestions(query, type),
         {
           showSuccessMessage: false
         }
@@ -114,7 +114,7 @@ export const useSearch = (): UseSearchReturn => {
       return [];
     }
 
-    if (!api?.searchApi) {
+    if (!api?.app.search) {
       console.error('Search API not available');
       return [];
     }
@@ -131,7 +131,7 @@ export const useSearch = (): UseSearchReturn => {
       console.error('Structured suggestions error:', err);
       return [];
     }
-  }, [execute, api?.searchApi]);
+  }, [execute, api?.app.search]);
 
   const clearResults = useCallback(() => {
     setSearchResults(null);

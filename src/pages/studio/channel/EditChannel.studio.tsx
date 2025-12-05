@@ -39,7 +39,7 @@ const EditChannel = () => {
 
     setIsLoading(true);
     const result = await fetchChannel(
-      () => api?.channelApi.getChannel(id),
+      () => api?.app.channel.getChannel(id),
       { showErrorToast: true }
     );
 
@@ -57,7 +57,7 @@ const EditChannel = () => {
     if (!id) return;
 
     await executeUpdate(
-      () => api?.channelApi.updateChannel(id, data),
+      () => api?.app.channel.updateChannel(id, data),
       {
         showSuccessMessage: true,
         successMessage: 'Channel updated successfully'

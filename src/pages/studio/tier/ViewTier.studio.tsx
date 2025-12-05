@@ -23,7 +23,7 @@ const ViewTier: React.FC = () => {
     if (!channelId || !tierId) return;
     
     const result = await execute(
-      () => api?.channelApi.getTier(channelId, tierId),
+      () => api?.app.channel.getTier(channelId, tierId),
       { showErrorToast: true }
     );
     

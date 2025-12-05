@@ -49,7 +49,7 @@ const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
 
   useEffect(() => {
     fetchTags();
-  }, [api?.newsApi != null]);
+  }, [api?.app.news != null]);
 
   return (
     <Box sx={{ 

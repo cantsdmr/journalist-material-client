@@ -17,7 +17,7 @@ const CreateTier: React.FC = () => {
     if (!channelId) return;
     
     const result = await execute(
-      () => api?.channelApi.createTier(channelId, data),
+      () => api?.app.channel.createTier(channelId, data),
       {
         showSuccessMessage: true,
         successMessage: 'Tier created successfully!'

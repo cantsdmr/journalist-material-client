@@ -73,7 +73,7 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
 
   const handleDelete = async () => {
     const result = await execute(
-      () => api?.pollApi.delete(poll.id),
+      () => api?.app.poll.delete(poll.id),
       {
         showSuccessMessage: true,
         successMessage: 'Poll deleted successfully'
@@ -89,7 +89,7 @@ const StudioPollCard: React.FC<StudioPollCardProps> = ({
 
   const handleConvert = async (newsData: any) => {
     const result = await execute(
-      () => api?.pollApi.convertToNews(poll.id, newsData),
+      () => api?.app.poll.convertToNews(poll.id, newsData),
       {
         showSuccessMessage: true,
         successMessage: 'Poll converted to news successfully!'

@@ -20,7 +20,7 @@ const EditPollStudio: React.FC = () => {
       if (!id) return;
       
       const result = await executeGet(
-        () => api?.pollApi.get(id),
+        () => api?.app.poll.get(id),
         { showErrorToast: true }
       );
       
@@ -30,13 +30,13 @@ const EditPollStudio: React.FC = () => {
     };
 
     fetchPoll();
-  }, [id, api?.pollApi, executeGet]);
+  }, [id, api?.app.poll, executeGet]);
 
   const handleUpdate = async (data: any) => {
     if (!id) return;
     
     await executeUpdate(
-      () => api?.pollApi.update(id, data),
+      () => api?.app.poll.update(id, data),
       {
         showSuccessMessage: true,
         successMessage: 'Poll updated successfully!'

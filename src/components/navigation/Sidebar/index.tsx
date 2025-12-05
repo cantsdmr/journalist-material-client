@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   useEffect(() => {
     const fetchPopularChannels = async () => {
       const response = await execute(
-        () => api?.channelApi.getChannels({}, { page: 1, limit: 5 }),
+        () => api?.app.channel.getChannels({}, { page: 1, limit: 5 }),
         { showErrorToast: false }
       );
       if (response) {

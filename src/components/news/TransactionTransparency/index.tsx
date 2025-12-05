@@ -78,7 +78,7 @@ const TransactionTransparency: React.FC<TransactionTransparencyProps> = ({
       try {
         // Fetch fund summary for the news
         const fundResult = await execute(
-          () => api?.fundingApi.getFundSummary('news', newsId),
+          () => api?.app.funding.getFundSummary('news', newsId),
           { showErrorToast: false }
         );
 

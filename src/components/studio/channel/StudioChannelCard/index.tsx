@@ -52,7 +52,7 @@ const StudioChannelCard: React.FC<StudioChannelCardProps> = ({
 
   const handleDelete = async () => {
     const result = await execute(
-      () => api?.channelApi.deleteChannel(channel.id),
+      () => api?.app.channel.deleteChannel(channel.id),
       {
         showSuccessMessage: true,
         successMessage: 'Channel deleted successfully'

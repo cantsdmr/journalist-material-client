@@ -37,7 +37,7 @@ const ListNewsStudio: React.FC = () => {
     if (!profile) return;
     
     const result = await execute(
-      () => api?.newsApi.getCreatorNews(profile.id, { page: _page, limit: 12 }),
+      () => api?.app.news.getCreatorNews(profile.id, { page: _page, limit: 12 }),
       { showErrorToast: true }
     );
     

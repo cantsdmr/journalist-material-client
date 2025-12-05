@@ -19,7 +19,7 @@ const EditTier: React.FC = () => {
       if (!channelId || !tierId) return;
       
       const result = await execute(
-        () => api?.channelApi.getTier(channelId, tierId),
+        () => api?.app.channel.getTier(channelId, tierId),
         { showErrorToast: true }
       );
       
@@ -29,13 +29,13 @@ const EditTier: React.FC = () => {
     };
 
     loadTier();
-  }, [channelId, tierId, api?.channelApi, execute]);
+  }, [channelId, tierId, api?.app.channel, execute]);
 
   const handleUpdate = async (data: EditChannelTierData) => {
     if (!channelId || !tierId) return;
     
     const result = await execute(
-      () => api?.channelApi.updateTier(channelId, tierId, data),
+      () => api?.app.channel.updateTier(channelId, tierId, data),
       {
         showSuccessMessage: true,
         successMessage: 'Tier updated successfully!'

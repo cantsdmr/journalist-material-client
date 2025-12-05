@@ -76,7 +76,7 @@ const NewsList: React.FC<NewsListProps> = ({
       setLoading(true);
 
       const response = await execute(
-        () => api?.newsApi.getNews(
+        () => api?.app.news.getNews(
           filters,
           {
             page: _page,

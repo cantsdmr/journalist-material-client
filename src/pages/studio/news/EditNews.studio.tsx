@@ -19,7 +19,7 @@ const EditNewsStudio: React.FC = () => {
       if (!id) return;
       
       const result = await executeGet(
-        () => api?.newsApi.get(id),
+        () => api?.app.news.get(id),
         { showErrorToast: true }
       );
       
@@ -29,13 +29,13 @@ const EditNewsStudio: React.FC = () => {
     };
 
     fetchNews();
-  }, [id, api?.newsApi, executeGet]);
+  }, [id, api?.app.news, executeGet]);
 
   const handleUpdate = async (data: EditNewsData) => {
     if (!id) return;
     
     await executeUpdate(
-      () => api?.newsApi.update(id, data),
+      () => api?.app.news.update(id, data),
       {
         showSuccessMessage: true,
         successMessage: 'News article updated successfully!'
