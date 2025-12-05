@@ -29,7 +29,7 @@ const ListChannels: React.FC = () => {
 
     try {
       // Use direct subscription API for all tiers
-      const result = await api?.subscriptionApi?.createDirectSubscription(channelId, {
+      const result = await api?.app.subscription?.createDirectSubscription(channelId, {
         tierId,
         notificationLevel: 1,
         paymentMethodId: 'paypal_default' // Will be used for paid subscriptions
@@ -73,7 +73,7 @@ const ListChannels: React.FC = () => {
 
   const handleCancel = async (channelId: string) => {
     try {
-      await api?.channelApi.unsubscribeFromChannel(channelId);
+      await api?.app.channel.unsubscribeFromChannel(channelId);
       await actions.refreshProfile();
     } catch (error) {
       console.error('Error cancelling subscription:', error);

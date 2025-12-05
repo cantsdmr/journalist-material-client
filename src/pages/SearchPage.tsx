@@ -37,8 +37,8 @@ import { styled } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PATHS } from '@/constants/paths';
-import type { SearchFilters } from '../hooks/useSearch';
-import type { SearchResult } from '../APIs/SearchAPI';
+import type { SearchFilters } from '@/hooks/useSearch';
+import type { SearchResult } from '@/APIs/app/SearchAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import { StringToSearchType, StringToSearchSort } from '@/enums/SearchEnums';
@@ -138,7 +138,7 @@ const SearchPage: React.FC = () => {
       });
 
       const result = await execute(
-        () => api?.searchApi.search(
+        () => api?.app.search.search(
           currentQuery,
           apiFilters,
           {

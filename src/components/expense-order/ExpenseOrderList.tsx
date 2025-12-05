@@ -56,18 +56,18 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
       const pagination = { page, limit: 10 };
 
       if (userRole === 'journalist') {
-        response = await api.expenseOrderApi.getMyExpenseOrders(
+        response = await api.app.expenseOrder.getMyExpenseOrders(
           pagination,
           statusFilter || undefined
         );
       } else if (channelId) {
-        response = await api.expenseOrderApi.getExpenseOrdersByChannel(
+        response = await api.app.expenseOrder.getExpenseOrdersByChannel(
           channelId,
           pagination,
           statusFilter || undefined
         );
       } else {
-        response = await api.expenseOrderApi.getPendingExpenseOrders(pagination);
+        response = await api.app.expenseOrder.getPendingExpenseOrders(pagination);
       }
 
       setExpenseOrders(response.data);
@@ -97,7 +97,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
 
   const handleSubmitExpenseOrder = async (expenseOrder: ExpenseOrder) => {
     try {
-      await api.expenseOrderApi.submitExpenseOrder(expenseOrder.id);
+      await api.app.expenseOrder.submitExpenseOrder(expenseOrder.id);
       await loadExpenseOrders(currentPage);
     } catch (err: any) {
       console.error('Error submitting expense order:', err);
@@ -107,7 +107,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
 
   const handleCancelExpenseOrder = async (expenseOrder: ExpenseOrder) => {
     try {
-      await api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id, 'Cancelled by user');
+      await api.app.expenseOrder.cancelExpenseOrder(expenseOrder.id, 'Cancelled by user');
       await loadExpenseOrders(currentPage);
     } catch (err: any) {
       console.error('Error cancelling expense order:', err);
@@ -117,7 +117,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
 
   const handleApproveExpenseOrder = async (expenseOrder: ExpenseOrder) => {
     try {
-      await api.expenseOrderApi.approveExpenseOrder(expenseOrder.id);
+      await api.app.expenseOrder.approveExpenseOrder(expenseOrder.id);
       await loadExpenseOrders(currentPage);
     } catch (err: any) {
       console.error('Error approving expense order:', err);
@@ -129,7 +129,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
     try {
       const reason = prompt('Please provide a reason for rejection:');
       if (reason) {
-        await api.expenseOrderApi.rejectExpenseOrder(expenseOrder.id, { rejectionReason: reason });
+        await api.app.expenseOrder.rejectExpenseOrder(expenseOrder.id, { rejectionReason: reason });
         await loadExpenseOrders(currentPage);
       }
     } catch (err: any) {
@@ -140,7 +140,7 @@ const ExpenseOrderList: React.FC<ExpenseOrderListProps> = ({
 
   const handleProcessPayment = async (expenseOrder: ExpenseOrder) => {
     try {
-      await api.expenseOrderApi.processPayment(expenseOrder.id);
+      await api.app.expenseOrder.processPayment(expenseOrder.id);
       await loadExpenseOrders(currentPage);
     } catch (err: any) {
       console.error('Error processing payment:', err);

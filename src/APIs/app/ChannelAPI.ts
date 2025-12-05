@@ -10,7 +10,7 @@ import {
     EditChannelTierData, 
     ChannelSubscribeData, 
     ChannelFilters 
-} from "../types";
+} from "../../types";
 
 const API_PATH = '/api/channels';
 const SUB_PATH = {

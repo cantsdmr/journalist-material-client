@@ -79,7 +79,7 @@ const TagAdmin: React.FC = () => {
       if (trendingFilter === 'true') filters.trending = true;
 
       const result = await execute(
-        () => api.tagApi.getTags(filters, { page: page + 1, limit: rowsPerPage }),
+        () => api.app.tag.getTags(filters, { page: page + 1, limit: rowsPerPage }),
         { showErrorToast: false }
       )as PaginatedResponse<any>;
 
@@ -108,7 +108,7 @@ const TagAdmin: React.FC = () => {
     
     try {
       await Promise.all(ids.map(id => 
-        execute(() => api.tagApi.deleteTag(id))
+        execute(() => api.app.tag.deleteTag(id))
       ));
       
       setSelected([]);
@@ -129,9 +129,9 @@ const TagAdmin: React.FC = () => {
 
     try {
       if (actionType === 'approve') {
-        await execute(() => api.tagApi.approveTag(selectedTag.id));
+        await execute(() => api.app.tag.approveTag(selectedTag.id));
       } else {
-        await execute(() => api.tagApi.rejectTag(selectedTag.id));
+        await execute(() => api.app.tag.rejectTag(selectedTag.id));
       }
       
       setActionDialogOpen(false);
@@ -147,7 +147,7 @@ const TagAdmin: React.FC = () => {
     if (!selectedTag) return;
 
     try {
-      await execute(() => api.tagApi.updateTag(selectedTag.id, tagData));
+      await execute(() => api.app.tag.updateTag(selectedTag.id, tagData));
       setEditDialogOpen(false);
       setSelectedTag(null);
       fetchTags();

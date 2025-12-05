@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { Container, Box, TextField, Button, Typography, Divider, Alert, Chip } from '@mui/material';
 import { googleProvider } from '@/utils/firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -51,7 +51,6 @@ const SignUp: React.FC = () => {
   });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [error, setError] = useState('');
-  const [isNewSignup, setIsNewSignup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const auth = useAuth();
@@ -163,7 +162,7 @@ const SignUp: React.FC = () => {
       const userCredential = await auth?.signUp(formData.email, formData.password);
       if (userCredential) {
         const result = await execute(
-          () => api?.authApi.signUp({
+          () => api?.auth.signUp({
             externalId: userCredential.uid,
             email: userCredential.email,
             displayName: formData.displayName.trim(),
@@ -177,7 +176,8 @@ const SignUp: React.FC = () => {
         );
 
         if (result) {
-          setIsNewSignup(true);
+          // Navigate immediately after successful signup
+          navigate(`${PATHS.POST_SIGNUP}?role=${role || 'reader'}`);
         }
       }
     } catch (err) {
@@ -186,7 +186,7 @@ const SignUp: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, auth, api, execute, validateForm, roleId]);
+  }, [formData, auth, api, execute, validateForm, roleId, navigate, role]);
 
   const handleProviderLogin = useCallback(async (provider: AuthProvider) => {
     setError('');
@@ -197,17 +197,18 @@ const SignUp: React.FC = () => {
       if (token && auth?.user) {
         // Try to sign in first (user might already exist)
         const signInResult = await execute(
-          () => api?.authApi.signIn({ idToken: token }),
+          () => api?.auth.signIn({ idToken: token }),
           { showErrorToast: false } // Don't show error if user doesn't exist yet
         );
 
         if (signInResult) {
-          // User already exists, they'll be redirected by useEffect
+          // User already exists, navigate to trending page
+          navigate(PATHS.APP_NEWS_TRENDING);
           return;
         } else {
           // User doesn't exist, create new user in backend
           const signUpResult = await execute(
-            () => api?.authApi.signUp({
+            () => api?.auth.signUp({
               externalId: auth.user.uid,
               email: auth.user.email || '',
               displayName: auth.user.displayName || '',
@@ -221,7 +222,8 @@ const SignUp: React.FC = () => {
           );
 
           if (signUpResult) {
-            setIsNewSignup(true);
+            // Navigate immediately after successful signup
+            navigate(`${PATHS.POST_SIGNUP}?role=${role || 'reader'}`);
           }
         }
       }
@@ -231,18 +233,7 @@ const SignUp: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [auth, api, execute, roleId]);
-
-  useEffect(() => {
-    if (auth?.user) {
-      if (isNewSignup) {
-        // Pass role to PostSignUpFlow via URL parameter
-        navigate(`${PATHS.POST_SIGNUP}?role=${role || 'reader'}`);
-      } else {
-        navigate(PATHS.APP_NEWS_TRENDING);
-      }
-    }
-  }, [auth?.user, isNewSignup, navigate, role]);
+  }, [auth, api, execute, roleId, navigate, role]);
 
   return (
     <Container maxWidth="xs" sx={{ mt: 8 }}>

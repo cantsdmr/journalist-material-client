@@ -79,7 +79,7 @@ const PayPalPaymentTokens: React.FC<PayPalPaymentTokensProps> = ({
             setError(null);
 
             // Create order for tokenization (minimal amount)
-            const response = await api.paymentTokenApi.createPayPalTokenizationOrder();
+            const response = await api.app.paymentToken.createPayPalTokenizationOrder();
             return response.id;
           } catch (err: any) {
             const errorMessage = err.message || 'Failed to initialize PayPal connection';
@@ -93,11 +93,11 @@ const PayPalPaymentTokens: React.FC<PayPalPaymentTokensProps> = ({
         onApprove: async (data: any) => {
           try {
             // Capture the order and get payment token
-            const response = await api.paymentTokenApi.capturePayPalTokenizationOrder(data.orderID);
+            const response = await api.app.paymentToken.capturePayPalTokenizationOrder(data.orderID);
             
             if (response.payment_token) {
               // Save payment method using the token
-              await api.accountApi.savePayPalPaymentMethod({
+              await api.app.account.savePayPalPaymentMethod({
                 payment_token: response.payment_token,
                 payer_id: data.payerID
               });

@@ -67,7 +67,7 @@ const NewsAdmin: React.FC = () => {
       };
 
       const result = await execute(
-        () => api.newsApi.getNews(params),
+        () => api.admin.news.getAllNews(params),
         { showErrorToast: false }
       ) as PaginatedResponse<any>;
 
@@ -96,7 +96,7 @@ const NewsAdmin: React.FC = () => {
     
     try {
       await Promise.all(ids.map(id => 
-        execute(() => api.newsApi.delete(id))
+        execute(() => api.app.news.delete(id))
       ));
       
       setSelected([]);
@@ -108,7 +108,7 @@ const NewsAdmin: React.FC = () => {
 
   const handleStatusChange = async (newsItem: News, newStatus: number) => {
     try {
-      await execute(() => api.newsApi.update(newsItem.id, { status: newStatus.toString() as any }));
+      await execute(() => api.app.news.update(newsItem.id, { status: newStatus.toString() as any }));
       fetchNews();
     } catch (err) {
       setError('Failed to update news status');
@@ -125,7 +125,7 @@ const NewsAdmin: React.FC = () => {
         content: newsData.content,
         status: newsData.status?.toString()
       };
-      await execute(() => api.newsApi.update(selectedNews.id, updateData as any));
+      await execute(() => api.app.news.update(selectedNews.id, updateData as any));
       setEditDialogOpen(false);
       setSelectedNews(null);
       fetchNews();

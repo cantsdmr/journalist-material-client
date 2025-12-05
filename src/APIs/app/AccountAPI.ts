@@ -10,7 +10,7 @@ import {
     UpdatePaymentMethodData, 
     SubscribeData,
     Channel 
-} from "../types";
+} from "../../types";
 
 const API_PATH = '/api/account';
 

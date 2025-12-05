@@ -27,7 +27,9 @@ import {
   CheckCircle as ActivateIcon,
   Security as SecurityIcon,
   AdminPanelSettings as AdminIcon,
-  Person as UserIcon
+  Person as UserIcon,
+  Add as AddIcon,
+  VpnKey as ClaimsIcon
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
@@ -46,7 +48,25 @@ const UserAdmin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
+  const [customClaimsDialogOpen, setCustomClaimsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  // New user registration state
+  const [newUser, setNewUser] = useState({
+    email: '',
+    externalId: '',
+    displayName: '',
+    photoUrl: '',
+    roleId: USER_ROLE.REGULAR_USER,
+    statusId: USER_STATUS.ACTIVE
+  });
+
+  // Custom claims state
+  const [customClaims, setCustomClaims] = useState({
+    system_role: USER_ROLE.REGULAR_USER,
+    system_status: USER_STATUS.ACTIVE
+  });
   
   // Filters and pagination
   const [page, setPage] = useState(0);
@@ -73,7 +93,7 @@ const UserAdmin: React.FC = () => {
       };
 
       const result = await execute(
-        () => api.userApi.getAll(params),
+        () => api.admin.users.getAllUsers(params),
         { showErrorToast: false }
       ) as PaginatedResponse<any>;
 
@@ -101,10 +121,10 @@ const UserAdmin: React.FC = () => {
     const ids = users.map(item => item.id);
     
     try {
-      await Promise.all(ids.map(id => 
-        execute(() => api.userApi.delete(id))
+      await Promise.all(ids.map(id =>
+        execute(() => api.admin.users.deleteUser(id))
       ));
-      
+
       setSelected([]);
       fetchUsers();
     } catch (err) {
@@ -116,13 +136,100 @@ const UserAdmin: React.FC = () => {
     if (!selectedUser) return;
 
     try {
-      await execute(() => api.userApi.update(selectedUser.id, userData));
+      await execute(
+        () => api.admin.users.updateUser(selectedUser.id, userData),
+        {
+          showSuccessMessage: true,
+          successMessage: 'User updated successfully'
+        }
+      );
       setEditDialogOpen(false);
       setSelectedUser(null);
       fetchUsers();
     } catch (err) {
       setError('Failed to update user');
     }
+  };
+
+  const handleRegisterUser = async () => {
+    try {
+      await execute(
+        () => api.admin.users.registerUser(newUser),
+        {
+          showSuccessMessage: true,
+          successMessage: 'User registered successfully'
+        }
+      );
+      setRegisterDialogOpen(false);
+      setNewUser({
+        email: '',
+        externalId: '',
+        displayName: '',
+        photoUrl: '',
+        roleId: USER_ROLE.REGULAR_USER,
+        statusId: USER_STATUS.ACTIVE
+      });
+      fetchUsers();
+    } catch (err) {
+      setError('Failed to register user');
+    }
+  };
+
+  const handleSuspendUser = async (userId: string, reason?: string) => {
+    try {
+      await execute(
+        () => api.admin.users.suspendUser(userId, { reason }),
+        {
+          showSuccessMessage: true,
+          successMessage: 'User suspended successfully'
+        }
+      );
+      fetchUsers();
+    } catch (err) {
+      setError('Failed to suspend user');
+    }
+  };
+
+  const handleUnsuspendUser = async (userId: string, reason?: string) => {
+    try {
+      await execute(
+        () => api.admin.users.unsuspendUser(userId, { reason }),
+        {
+          showSuccessMessage: true,
+          successMessage: 'User unsuspended successfully'
+        }
+      );
+      fetchUsers();
+    } catch (err) {
+      setError('Failed to unsuspend user');
+    }
+  };
+
+  const handleUpdateCustomClaims = async () => {
+    if (!selectedUser) return;
+
+    try {
+      await execute(
+        () => api.admin.users.updateUserCustomClaims(selectedUser.id, customClaims),
+        {
+          showSuccessMessage: true,
+          successMessage: 'Custom claims updated successfully'
+        }
+      );
+      setCustomClaimsDialogOpen(false);
+      fetchUsers();
+    } catch (err) {
+      setError('Failed to update custom claims');
+    }
+  };
+
+  const handleOpenCustomClaims = (user: User) => {
+    setSelectedUser(user);
+    setCustomClaims({
+      system_role: user.roleId,
+      system_status: user.statusId
+    });
+    setCustomClaimsDialogOpen(true);
   };
 
   const getRoleColor = (roleId: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
@@ -317,13 +424,25 @@ const UserAdmin: React.FC = () => {
         </IconButton>
       </Tooltip>
 
-      {row.statusId === USER_STATUS.ACTIVE && (
-        <Tooltip title="Block User">
+      <Tooltip title="Update Custom Claims">
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpenCustomClaims(row);
+          }}
+        >
+          <ClaimsIcon fontSize="small" color="info" />
+        </IconButton>
+      </Tooltip>
+
+      {row.statusId !== USER_STATUS.SUSPENDED && row.statusId !== USER_STATUS.BANNED && (
+        <Tooltip title="Suspend User">
           <IconButton
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              // Handle block user
+              handleSuspendUser(row.id);
             }}
           >
             <BlockIcon fontSize="small" color="warning" />
@@ -331,13 +450,13 @@ const UserAdmin: React.FC = () => {
         </Tooltip>
       )}
 
-      {(row.statusId === USER_STATUS.BLOCKED || row.statusId === USER_STATUS.SUSPENDED) && (
-        <Tooltip title="Activate User">
+      {(row.statusId === USER_STATUS.SUSPENDED) && (
+        <Tooltip title="Unsuspend User">
           <IconButton
             size="small"
             onClick={(e) => {
               e.stopPropagation();
-              // Handle activate user
+              handleUnsuspendUser(row.id);
             }}
           >
             <ActivateIcon fontSize="small" color="success" />
@@ -345,6 +464,16 @@ const UserAdmin: React.FC = () => {
         </Tooltip>
       )}
     </Stack>
+  );
+
+  const toolbarActions = (
+    <Button
+      variant="contained"
+      startIcon={<AddIcon />}
+      onClick={() => setRegisterDialogOpen(true)}
+    >
+      Register User
+    </Button>
   );
 
   return (
@@ -375,6 +504,7 @@ const UserAdmin: React.FC = () => {
         sortDirection={sortDirection}
         filters={filters}
         rowActions={rowActions}
+        toolbarActions={toolbarActions}
       />
 
       {/* Edit Dialog */}
@@ -531,6 +661,151 @@ const UserAdmin: React.FC = () => {
             variant="contained"
           >
             Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Register User Dialog */}
+      <Dialog
+        open={registerDialogOpen}
+        onClose={() => setRegisterDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Register New User</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ pt: 1 }}>
+            <TextField
+              label="Email"
+              type="email"
+              fullWidth
+              required
+              value={newUser.email}
+              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            />
+            <TextField
+              label="External ID (Firebase UID)"
+              fullWidth
+              required
+              value={newUser.externalId}
+              onChange={(e) => setNewUser({ ...newUser, externalId: e.target.value })}
+              helperText="The Firebase authentication UID for this user"
+            />
+            <TextField
+              label="Display Name"
+              fullWidth
+              required
+              value={newUser.displayName}
+              onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })}
+            />
+            <TextField
+              label="Photo URL"
+              fullWidth
+              value={newUser.photoUrl}
+              onChange={(e) => setNewUser({ ...newUser, photoUrl: e.target.value })}
+            />
+            <FormControl fullWidth>
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={newUser.roleId}
+                label="Role"
+                onChange={(e) => setNewUser({ ...newUser, roleId: e.target.value as number })}
+              >
+                {roleOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={newUser.statusId}
+                label="Status"
+                onChange={(e) => setNewUser({ ...newUser, statusId: e.target.value as number })}
+              >
+                {statusOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRegisterDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleRegisterUser}
+            variant="contained"
+            disabled={!newUser.email || !newUser.externalId || !newUser.displayName}
+          >
+            Register User
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Update Custom Claims Dialog */}
+      <Dialog
+        open={customClaimsDialogOpen}
+        onClose={() => setCustomClaimsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Update Firebase Custom Claims</DialogTitle>
+        <DialogContent>
+          {selectedUser && (
+            <Stack spacing={2} sx={{ pt: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                Update Firebase custom claims for: <strong>{selectedUser.displayName}</strong> ({selectedUser.email})
+              </Typography>
+
+              <FormControl fullWidth>
+                <InputLabel>System Role</InputLabel>
+                <Select
+                  value={customClaims.system_role}
+                  label="System Role"
+                  onChange={(e) => setCustomClaims({ ...customClaims, system_role: e.target.value as number })}
+                >
+                  {roleOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel>System Status</InputLabel>
+                <Select
+                  value={customClaims.system_status}
+                  label="System Status"
+                  onChange={(e) => setCustomClaims({ ...customClaims, system_status: e.target.value as number })}
+                >
+                  {statusOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Typography variant="caption" color="warning.main">
+                Warning: This will update the user's Firebase authentication custom claims.
+                The user may need to re-authenticate for changes to take effect.
+              </Typography>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCustomClaimsDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleUpdateCustomClaims}
+            variant="contained"
+            color="warning"
+          >
+            Update Claims
           </Button>
         </DialogActions>
       </Dialog>

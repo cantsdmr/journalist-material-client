@@ -77,7 +77,7 @@ const ExpenseOrderAdmin: React.FC = () => {
       }
 
       const result = await execute(
-        () => api.expenseOrderApi.getAllExpenseOrders({ page: page + 1, limit: rowsPerPage }, filters),
+        () => api.app.expenseOrder.getAllExpenseOrders({ page: page + 1, limit: rowsPerPage }, filters),
         { showErrorToast: false }
       ) as PaginatedResponse<any>;
 
@@ -117,7 +117,7 @@ const ExpenseOrderAdmin: React.FC = () => {
       switch (actionType) {
         case 'approve':
           result = await execute(
-            () => api.expenseOrderApi.approveExpenseOrder(selectedOrder.id, { notes: actionReason }),
+            () => api.app.expenseOrder.approveExpenseOrder(selectedOrder.id, { notes: actionReason }),
             {
               showSuccessMessage: true,
               successMessage: 'Expense order approved successfully!'
@@ -126,7 +126,7 @@ const ExpenseOrderAdmin: React.FC = () => {
           break;
         case 'reject':
           result = await execute(
-            () => api.expenseOrderApi.rejectExpenseOrder(selectedOrder.id, {
+            () => api.app.expenseOrder.rejectExpenseOrder(selectedOrder.id, {
               rejectionReason: actionReason,
               notes: actionReason
             }),
@@ -138,7 +138,7 @@ const ExpenseOrderAdmin: React.FC = () => {
           break;
         case 'payment':
           result = await execute(
-            () => api.expenseOrderApi.processPayment(selectedOrder.id, {
+            () => api.app.expenseOrder.processPayment(selectedOrder.id, {
               paymentReference
             }),
             {
@@ -164,7 +164,7 @@ const ExpenseOrderAdmin: React.FC = () => {
   //   if (!selectedOrder) return;
 
   //   try {
-  //     await execute(() => api.expenseOrderApi.updateExpenseOrder(selectedOrder.id, orderData));
+  //     await execute(() => api.app.expenseOrder.updateExpenseOrder(selectedOrder.id, orderData));
   //     setEditDialogOpen(false);
   //     setSelectedOrder(null);
   //     fetchExpenseOrders();

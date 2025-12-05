@@ -121,7 +121,7 @@ export const useSearch = (): UseSearchReturn => {
 
     try {
       const data: StructuredSearchSuggestionsResponse = await execute(
-        () => api.searchApi.getStructuredSuggestions(query, type),
+        () => api.app.search.getStructuredSuggestions(query, type),
         {
           showSuccessMessage: false
         }

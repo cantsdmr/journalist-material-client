@@ -100,7 +100,7 @@ const PayoutAdmin: React.FC = () => {
   const { execute } = useApiCall();
 
   const fetchPayouts = useCallback(async () => {
-    if (!api?.payoutApi) return;
+    if (!api?.app.payout) return;
 
     setLoading(true);
     setError(null);
@@ -115,7 +115,7 @@ const PayoutAdmin: React.FC = () => {
         params.status = statusFilter;
       }
 
-      const response = await execute(() => api.payoutApi.getPayouts(params));
+      const response = await execute(() => api.app.payout.getPayouts(params));
 
       if (response) {
         setPayouts(response.items || []);
@@ -146,10 +146,10 @@ const PayoutAdmin: React.FC = () => {
   };
 
   const handleProcessSubmit = async () => {
-    if (!selectedPayout || !api?.payoutApi) return;
+    if (!selectedPayout || !api?.app.payout) return;
 
     try {
-      await execute(() => api.payoutApi.processPayout(selectedPayout.id));
+      await execute(() => api.app.payout.processPayout(selectedPayout.id));
 
       setProcessDialogOpen(false);
       setSelectedPayout(null);
@@ -160,10 +160,10 @@ const PayoutAdmin: React.FC = () => {
   };
 
   const handleRetryPayout = async (payout: PayoutData) => {
-    if (!api?.payoutApi) return;
+    if (!api?.app.payout) return;
 
     try {
-      await execute(() => api.payoutApi.retryPayout(payout.id));
+      await execute(() => api.app.payout.retryPayout(payout.id));
       fetchPayouts();
     } catch (err) {
       setError('Failed to retry payout');
@@ -177,10 +177,10 @@ const PayoutAdmin: React.FC = () => {
   };
 
   const handleCancelSubmit = async () => {
-    if (!selectedPayout || !api?.payoutApi) return;
+    if (!selectedPayout || !api?.app.payout) return;
 
     try {
-      await execute(() => api.payoutApi.cancelPayout(selectedPayout.id, { reason: cancelReason }));
+      await execute(() => api.app.payout.cancelPayout(selectedPayout.id, { reason: cancelReason }));
 
       setCancelDialogOpen(false);
       setSelectedPayout(null);

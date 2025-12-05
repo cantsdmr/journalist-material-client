@@ -58,7 +58,7 @@ const SubscriptionAnalyticsPage: React.FC = () => {
     setError(null);
     
     const result = await execute(
-      () => api.subscriptionApi.getSubscriptionAnalytics({ period }),
+      () => api.app.subscription.getSubscriptionAnalytics({ period }),
       { showErrorToast: true }
     );
     

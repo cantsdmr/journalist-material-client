@@ -55,7 +55,7 @@ const SubscriptionsTab: React.FC = () => {
     setError(null);
     
     const result = await execute(
-      () => api.accountApi.getSubscriptions(),
+      () => api.app.account.getSubscriptions(),
       { showErrorToast: true }
     );
     
@@ -77,7 +77,7 @@ const SubscriptionsTab: React.FC = () => {
     setError(null);
     
     const result = await execute(
-      () => api.accountApi.cancelSubscription(selectedSubscription.id),
+      () => api.app.account.cancelSubscription(selectedSubscription.id),
       {
         showSuccessMessage: true,
         successMessage: 'Subscription canceled successfully'

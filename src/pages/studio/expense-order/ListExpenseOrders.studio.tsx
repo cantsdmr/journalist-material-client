@@ -61,7 +61,7 @@ const ListExpenseOrdersStudio: React.FC = () => {
     setLoading(true);
     
     const result = await execute(
-      () => api.expenseOrderApi.getMyExpenseOrders({ page: 1, limit: 50 }, status),
+      () => api.app.expenseOrder.getMyExpenseOrders({ page: 1, limit: 50 }, status),
       { showErrorToast: true }
     );
     
@@ -90,7 +90,7 @@ const ListExpenseOrdersStudio: React.FC = () => {
 
   const handleSubmitExpenseOrder = async (expenseOrder: ExpenseOrder) => {
     const result = await execute(
-      () => api.expenseOrderApi.submitExpenseOrder(expenseOrder.id),
+      () => api.app.expenseOrder.submitExpenseOrder(expenseOrder.id),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order submitted successfully!'
@@ -105,7 +105,7 @@ const ListExpenseOrdersStudio: React.FC = () => {
 
   const handleCancelExpenseOrder = async (expenseOrder: ExpenseOrder) => {
     const result = await execute(
-      () => api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id),
+      () => api.app.expenseOrder.cancelExpenseOrder(expenseOrder.id),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order cancelled successfully!'

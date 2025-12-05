@@ -30,7 +30,7 @@ const IyzicoPaymentTokens: React.FC<IyzicoPaymentTokensProps> = ({
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const profile = await api.accountApi.getProfile();
+        const profile = await api.app.account.getProfile();
         if (profile?.displayName && profile?.email) {
           // Parse display name into first and last name
           const nameParts = profile.displayName.trim().split(' ');
@@ -78,7 +78,7 @@ const IyzicoPaymentTokens: React.FC<IyzicoPaymentTokensProps> = ({
       const userIP = await getUserIP();
 
       // Initialize Iyzico tokenization session
-      const initResponse = await api.iyzicoTokenApi.initializeTokenization({
+      const initResponse = await api.app.iyzicoToken.initializeTokenization({
         name: userInfo.name,
         surname: userInfo.surname,
         email: userInfo.email,
@@ -147,7 +147,7 @@ const IyzicoPaymentTokens: React.FC<IyzicoPaymentTokensProps> = ({
         const userIP = await getUserIP();
 
         // Complete the tokenization process
-        const tokenResponse = await api.iyzicoTokenApi.savePaymentMethod({
+        const tokenResponse = await api.app.iyzicoToken.savePaymentMethod({
           sessionToken,
           name: userInfo.name,
           surname: userInfo.surname,

@@ -48,7 +48,7 @@ const ViewExpenseOrderStudio: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const result = await api.expenseOrderApi.getExpenseOrder(id);
+      const result = await api.app.expenseOrder.getExpenseOrder(id);
       setExpenseOrder(result);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch expense order');
@@ -83,7 +83,7 @@ const ViewExpenseOrderStudio: React.FC = () => {
 
     setActionLoading(true);
     try {
-      await api.expenseOrderApi.submitExpenseOrder(expenseOrder.id);
+      await api.app.expenseOrder.submitExpenseOrder(expenseOrder.id);
       await fetchExpenseOrder(); // Refresh data
     } catch (err: any) {
       setError(err.message || 'Failed to submit expense order');
@@ -97,7 +97,7 @@ const ViewExpenseOrderStudio: React.FC = () => {
 
     setActionLoading(true);
     try {
-      await api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id, cancelReason);
+      await api.app.expenseOrder.cancelExpenseOrder(expenseOrder.id, cancelReason);
       await fetchExpenseOrder(); // Refresh data
       setCancelDialogOpen(false);
       setCancelReason('');

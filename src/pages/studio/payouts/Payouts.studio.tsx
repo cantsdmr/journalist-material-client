@@ -72,7 +72,7 @@ const PayoutsStudio: React.FC = () => {
 
   const handleSaveExpenseOrder = async (data: any) => {
     try {
-      await api.expenseOrderApi.createExpenseOrder(data);
+      await api.app.expenseOrder.createExpenseOrder(data);
       setShowCreateForm(false);
       setTabValue(0);
       // Refresh dashboard

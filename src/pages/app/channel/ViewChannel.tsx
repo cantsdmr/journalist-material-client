@@ -93,7 +93,7 @@ const ViewChannel: React.FC = () => {
             if (!id) return;
 
             const result = await execute(
-                () => api?.channelApi.getChannel(id),
+                () => api?.app.channel.getChannel(id),
                 { showErrorToast: true }
             );
 
@@ -105,7 +105,7 @@ const ViewChannel: React.FC = () => {
         };
 
         fetchChannel();
-    }, [id, execute, api?.channelApi]);
+    }, [id, execute, api?.app.channel]);
 
     const handleNewsTagsChange = (tags: string[]) => {
         setSelectedNewsTags(tags);
@@ -135,7 +135,7 @@ const ViewChannel: React.FC = () => {
         if (tier.price === 0) {
             setSubscriptionLoading(true);
             try {
-                const result = await api?.subscriptionApi?.createDirectSubscription(channel.id, {
+                const result = await api?.app.subscription?.createDirectSubscription(channel.id, {
                     tierId,
                     notificationLevel: 1
                 });
@@ -191,7 +191,7 @@ const ViewChannel: React.FC = () => {
         const currentSubscription = profile?.subscriptions?.find(s => s.channelId === channel.id);
         if (currentSubscription) {
             try {
-                await api?.subscriptionApi?.cancelUserSubscription(currentSubscription.id);
+                await api?.app.subscription?.cancelUserSubscription(currentSubscription.id);
             } catch (error) {
                 console.error('Failed to cancel existing subscription:', error);
             }
@@ -206,7 +206,7 @@ const ViewChannel: React.FC = () => {
 
         // Always use legacy API for cancellation (for now)
         const result = await execute(
-            () => api?.channelApi.unsubscribeFromChannel(channel.id),
+            () => api?.app.channel.unsubscribeFromChannel(channel.id),
             {
                 showSuccessMessage: true,
                 successMessage: 'Membership cancelled successfully!'

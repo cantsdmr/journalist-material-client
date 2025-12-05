@@ -36,7 +36,7 @@ const ProfileTab: React.FC = () => {
     setError(null);
     
     const result = await execute(
-      () => api.accountApi.getProfile(),
+      () => api.app.account.getProfile(),
       { showErrorToast: true }
     );
     
@@ -75,7 +75,7 @@ const ProfileTab: React.FC = () => {
     setSuccess(null);
     
     const result = await execute(
-      () => api.accountApi.updateProfile(formData),
+      () => api.app.account.updateProfile(formData),
       {
         showSuccessMessage: true,
         successMessage: 'Profile updated successfully'

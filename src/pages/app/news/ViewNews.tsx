@@ -38,7 +38,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FundingModal, { FundingData } from '@/components/funding/FundingModal';
-import type { FundData } from '@/APIs/FundingAPI';
+import type { FundData } from '@/APIs/app/FundingAPI';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 const ViewNewsSkeleton = () => (
@@ -141,7 +141,7 @@ const ViewNews: React.FC = () => {
 
         // Use DETAIL access endpoint (full content without expensive relations)
         const result = await execute(
-          () => api?.newsApi.get(id),
+          () => api?.app.news.get(id),
           { showErrorToast: true }
         );
 
@@ -168,7 +168,7 @@ const ViewNews: React.FC = () => {
   const loadFundData = async (newsId: string) => {
     try {
       setLoadingFund(true);
-      const fund = await api?.fundingApi.getFund('news', newsId);
+      const fund = await api?.app.funding.getFund('news', newsId);
       setFundData(fund);
     } catch (error) {
       console.error('Failed to load fund data:', error);
@@ -180,7 +180,7 @@ const ViewNews: React.FC = () => {
   const handleOpenFundingModal = async () => {
     // Check if user has payment methods
     try {
-      const paymentMethods = await api?.accountApi.getPaymentMethods();
+      const paymentMethods = await api?.app.account.getPaymentMethods();
 
       if (!paymentMethods?.items || paymentMethods.items.length === 0) {
         // Show warning that user needs to add payment method

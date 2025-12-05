@@ -74,7 +74,7 @@ const PollAdmin: React.FC = () => {
       filters.order = sortDirection;
 
       const result = await execute(
-        () => api.pollApi.getPolls(filters, { page: page + 1, limit: rowsPerPage }),
+        () => api.admin.polls.getAllPolls(filters, { page: page + 1, limit: rowsPerPage }),
         { showErrorToast: false }
       )as PaginatedResponse<any>;
 
@@ -87,7 +87,7 @@ const PollAdmin: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, searchQuery, statusFilter, trendingFilter, fundedFilter, sortColumn, sortDirection, api.pollApi, execute]);
+  }, [page, rowsPerPage, searchQuery, statusFilter, trendingFilter, fundedFilter, sortColumn, sortDirection, api.admin.polls, execute]);
 
   useEffect(() => {
     fetchPolls();
@@ -103,7 +103,7 @@ const PollAdmin: React.FC = () => {
     
     try {
       await Promise.all(ids.map(id => 
-        execute(() => api.pollApi.delete(id))
+        execute(() => api.app.poll.delete(id))
       ));
       
       setSelected([]);
@@ -123,7 +123,7 @@ const PollAdmin: React.FC = () => {
         description: selectedPoll.description,
         endDate: selectedPoll.endDate
       };
-      await execute(() => api.pollApi.update(selectedPoll.id, updateData));
+      await execute(() => api.app.poll.update(selectedPoll.id, updateData));
       setEditDialogOpen(false);
       setSelectedPoll(null);
       fetchPolls();
@@ -134,7 +134,7 @@ const PollAdmin: React.FC = () => {
 
   const handleConvertToNews = async (poll: Poll) => {
     try {
-      await execute(() => api.pollApi.convertToNews(poll.id, {
+      await execute(() => api.app.poll.convertToNews(poll.id, {
         title: poll.title,
         summary: poll.description
       }));

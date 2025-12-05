@@ -6,7 +6,7 @@ import {
     UpdateTagData, 
     TagFilters,
     TagContentResponse
-} from "../types";
+} from "../../types";
 
 const API_PATH = '/api/tags';
 

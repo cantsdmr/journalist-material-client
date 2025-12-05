@@ -126,16 +126,16 @@ const TagFilter: React.FC<TagFilterProps> = ({
   // Fetch available tags for the content type
   useEffect(() => {
     const fetchTags = async () => {
-      if (!api?.tagApi) return;
+      if (!api?.app.tag) return;
 
       setLoading(true);
 
       try {
         // Fetch all tags, trending tags, and popular tags for the content type
         const [allResponse, trendingResponse, popularResponse] = await Promise.all([
-          execute(() => api.tagApi.getTags({ category: contentType === 'channels' ? undefined : contentType }), { showErrorToast: false }),
-          execute(() => api.tagApi.getTags({ trending: true, category: contentType === 'channels' ? undefined : contentType }), { showErrorToast: false }),
-          execute(() => api.tagApi.getTags({ popular: true, category: contentType === 'channels' ? undefined : contentType }), { showErrorToast: false })
+          execute(() => api.app.tag.getTags({ category: contentType === 'channels' ? undefined : contentType }), { showErrorToast: false }),
+          execute(() => api.app.tag.getTags({ trending: true, category: contentType === 'channels' ? undefined : contentType }), { showErrorToast: false }),
+          execute(() => api.app.tag.getTags({ popular: true, category: contentType === 'channels' ? undefined : contentType }), { showErrorToast: false })
         ]);
 
         // Combine and deduplicate tags

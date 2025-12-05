@@ -44,7 +44,7 @@ const ViewExpenseOrder: React.FC = () => {
     setError(null);
     
     const result = await execute(
-      () => api.expenseOrderApi.getExpenseOrder(id),
+      () => api.app.expenseOrder.getExpenseOrder(id),
       { showErrorToast: true }
     );
     
@@ -82,7 +82,7 @@ const ViewExpenseOrder: React.FC = () => {
     setActionLoading(true);
     
     const result = await execute(
-      () => api.expenseOrderApi.submitExpenseOrder(expenseOrder.id),
+      () => api.app.expenseOrder.submitExpenseOrder(expenseOrder.id),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order submitted successfully!'
@@ -102,7 +102,7 @@ const ViewExpenseOrder: React.FC = () => {
     setActionLoading(true);
     
     const result = await execute(
-      () => api.expenseOrderApi.cancelExpenseOrder(expenseOrder.id),
+      () => api.app.expenseOrder.cancelExpenseOrder(expenseOrder.id),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order cancelled successfully!'

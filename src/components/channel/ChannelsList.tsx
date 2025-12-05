@@ -77,7 +77,7 @@ const ChannelsList: React.FC<ChannelsListProps> = ({
       setLoading(true);
 
       const response = await execute(
-        () => api?.channelApi.getChannels(filters, { page: _page, limit: itemsPerPage }),
+        () => api?.app.channel.getChannels(filters, { page: _page, limit: itemsPerPage }),
         { showErrorToast: true }
       );
 

@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
-import { AppAPI } from "@/APIs/AppAPI";
+import { APIs } from "@/APIs/APIs";
 import { useAuth } from "./AuthContext";
 
 export type ApiContextValue = {
-    api: AppAPI,
+    api: APIs,
     isAuthenticated: boolean,
     isLoading: boolean,
     refreshToken: () => Promise<void>
@@ -14,7 +14,7 @@ const useApiContext = () => useContext<ApiContextValue>(ApiContext)
 
 export const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
     const [value, setValue] = useState<ApiContextValue>({
-        api: new AppAPI(),
+        api: new APIs(),
         isAuthenticated: false,
         isLoading: true,
         refreshToken: async () => {}

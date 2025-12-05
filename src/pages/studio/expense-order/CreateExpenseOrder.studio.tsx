@@ -28,7 +28,7 @@ const CreateExpenseOrderStudio: React.FC = () => {
 
   const handleSave = async (data: CreateExpenseOrderData) => {
     const result = await execute(
-      () => api.expenseOrderApi.createExpenseOrder(data),
+      () => api.app.expenseOrder.createExpenseOrder(data),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order created successfully!'

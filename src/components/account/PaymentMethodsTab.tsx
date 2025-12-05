@@ -54,11 +54,11 @@ const PaymentMethodsTab: React.FC = () => {
     // Fetch payment methods and available payment types in parallel
     const [methodsResult, availableTypesResult] = await Promise.all([
       execute(
-        () => api.accountApi.getPaymentMethods(),
+        () => api.app.account.getPaymentMethods(),
         { showErrorToast: true }
       ),
       execute(
-        () => api.accountApi.getAvailablePaymentMethods(),
+        () => api.app.account.getAvailablePaymentMethods(),
         { showErrorToast: false }
       )
     ]);
@@ -78,7 +78,7 @@ const PaymentMethodsTab: React.FC = () => {
     setError(null);
 
     const result = await execute(
-      () => api.accountApi.setDefaultPaymentMethod(paymentMethod.id),
+      () => api.app.account.setDefaultPaymentMethod(paymentMethod.id),
       {
         showSuccessMessage: true,
         successMessage: 'Default payment method updated'
@@ -96,7 +96,7 @@ const PaymentMethodsTab: React.FC = () => {
     setError(null);
 
     const result = await execute(
-      () => api.accountApi.deletePaymentMethod(selectedPaymentMethod.id),
+      () => api.app.account.deletePaymentMethod(selectedPaymentMethod.id),
       {
         showSuccessMessage: true,
         successMessage: 'Payment method deleted successfully'

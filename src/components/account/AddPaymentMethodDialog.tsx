@@ -80,7 +80,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
         return;
       }
 
-      await api.accountApi.addPaymentMethod(formData);
+      await api.app.account.addPaymentMethod(formData);
       onSuccess();
       handleClose();
     } catch (err: any) {

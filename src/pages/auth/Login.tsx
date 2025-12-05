@@ -78,7 +78,7 @@ const Login: React.FC = () => {
       const token = await auth?.signIn(email, password);
       if (token) {
         await execute(
-          () => api?.authApi.signIn({ idToken: token }),
+          () => api?.auth.signIn({ idToken: token }),
           {
             showSuccessMessage: true,
             successMessage: 'Successfully logged in!'
@@ -97,7 +97,7 @@ const Login: React.FC = () => {
       const token = await auth?.signInWithProvider(provider);
       if (token) {
         await execute(
-          () => api?.authApi.signIn({ idToken: token }),
+          () => api?.auth.signIn({ idToken: token }),
           {
             showSuccessMessage: true,
             successMessage: 'Successfully logged in!'

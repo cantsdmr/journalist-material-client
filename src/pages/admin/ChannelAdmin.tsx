@@ -75,7 +75,7 @@ const ChannelAdmin: React.FC = () => {
       // API call uses filters and pagination directly
 
       const result = await execute(
-        () => api.channelApi.getChannels(filters, { page: page + 1, limit: rowsPerPage }),
+        () => api.admin.channels.getAllChannels(filters, { page: page + 1, limit: rowsPerPage }),
         { showErrorToast: false }
       ) as PaginatedResponse<any>;
 
@@ -104,7 +104,7 @@ const ChannelAdmin: React.FC = () => {
     
     try {
       await Promise.all(ids.map(id => 
-        execute(() => api.channelApi.deleteChannel(id))
+        execute(() => api.app.channel.deleteChannel(id))
       ));
       
       setSelected([]);
@@ -118,7 +118,7 @@ const ChannelAdmin: React.FC = () => {
     if (!selectedChannel) return;
 
     try {
-      await execute(() => api.channelApi.updateChannel(selectedChannel.id, channelData));
+      await execute(() => api.app.channel.updateChannel(selectedChannel.id, channelData));
       setEditDialogOpen(false);
       setSelectedChannel(null);
       fetchChannels();

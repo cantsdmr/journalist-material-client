@@ -78,7 +78,7 @@ const SubscriptionAdmin: React.FC = () => {
       if (channelFilter) filters.channel_id = channelFilter;
 
       const result = await execute(
-        () => api.subscriptionApi.getAllSubscriptions(
+        () => api.app.subscription.getAllSubscriptions(
           { page: page + 1, limit: rowsPerPage },
           filters
         ),
@@ -94,7 +94,7 @@ const SubscriptionAdmin: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, searchQuery, statusFilter, channelFilter, api.subscriptionApi, execute]);
+  }, [page, rowsPerPage, searchQuery, statusFilter, channelFilter, api.app.subscription, execute]);
 
   useEffect(() => {
     fetchSubscriptions();
@@ -123,7 +123,7 @@ const SubscriptionAdmin: React.FC = () => {
         'canceled'; // Note: backend uses 'canceled' not 'cancelled'
         
       await execute(() => 
-        api.subscriptionApi.updateSubscriptionStatus(
+        api.app.subscription.updateSubscriptionStatus(
           selectedSubscription.id, 
           backendStatus,
           actionReason
@@ -146,7 +146,7 @@ const SubscriptionAdmin: React.FC = () => {
       const backendStatus = statusFilter === 'cancelled' ? 'canceled' : statusFilter;
       
       const blob = await execute(() => 
-        api.subscriptionApi.exportSubscriptions(
+        api.app.subscription.exportSubscriptions(
           { 
             status: backendStatus as "active" | "canceled" | "expired" | "suspended" | undefined,
             channel_id: channelFilter

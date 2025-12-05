@@ -56,11 +56,11 @@ const AdminDashboard: React.FC = () => {
     // Fetch analytics data for dashboard
     const [subscriptionAnalytics, revenueMetrics] = await Promise.all([
       execute(
-        () => api.subscriptionApi.getSubscriptionAnalytics({ period: '30d' }),
+        () => api.app.subscription.getSubscriptionAnalytics({ period: '30d' }),
         { showErrorToast: true }
       ),
       execute(
-        () => api.subscriptionApi.getRevenueMetrics({ period: '30d' }),
+        () => api.app.subscription.getRevenueMetrics({ period: '30d' }),
         { showErrorToast: true }
       )
     ]);

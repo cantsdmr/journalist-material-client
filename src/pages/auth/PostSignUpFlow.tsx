@@ -91,7 +91,7 @@ const PostSignUpFlow: React.FC = () => {
     console.log('PostSignUpFlow: Updating user role to:', roleId);
     
     await execute(
-      () => api?.accountApi.updateProfile({ roleId }),
+      () => api?.app.account.updateProfile({ roleId }),
       {
         showSuccessMessage: false, // Don't show success message for this
         showErrorToast: false // Don't block the UI flow even if role update fails
@@ -118,7 +118,7 @@ const PostSignUpFlow: React.FC = () => {
       localStorage.setItem('userInterests', JSON.stringify(profile.interests));
       
       // Navigate to appropriate dashboard based on role
-      // For now, all roles go to the trending page
+      // For now, all roles go to the feed page
       navigate(PATHS.APP_NEWS_MY_FEED);
     } catch (error) {
       console.error('Error saving profile:', error);

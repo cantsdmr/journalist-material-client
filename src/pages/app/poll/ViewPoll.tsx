@@ -35,7 +35,7 @@ import { alpha } from '@mui/material/styles';
 import { useApiCall } from '@/hooks/useApiCall';
 import { Link as RouterLink2 } from 'react-router-dom';
 import FundingModal, { FundingData } from '@/components/funding/FundingModal';
-import type { FundData } from '@/APIs/FundingAPI';
+import type { FundData } from '@/APIs/app/FundingAPI';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 const ViewPollSkeleton = () => (
@@ -117,7 +117,7 @@ const ViewPoll: React.FC = () => {
   const loadFundData = async (pollId: string) => {
     try {
       setLoadingFund(true);
-      const fund = await api?.fundingApi.getFund('poll', pollId);
+      const fund = await api?.app.funding.getFund('poll', pollId);
       setFundData(fund);
     } catch (error) {
       console.error('Failed to load fund data:', error);
@@ -134,7 +134,7 @@ const ViewPoll: React.FC = () => {
       
       // Fetch poll data
       const pollResult = await execute(
-        () => api?.pollApi.get(id),
+        () => api?.app.poll.get(id),
         { showErrorToast: true }
       );
       
@@ -143,7 +143,7 @@ const ViewPoll: React.FC = () => {
         
         // Fetch user's vote for this poll
         const voteResponse = await execute(
-          () => api?.pollApi.getUserVote(id),
+          () => api?.app.poll.getUserVote(id),
           { showErrorToast: false } // Don't show error if user hasn't voted
         );
         
@@ -153,7 +153,7 @@ const ViewPoll: React.FC = () => {
 
         // Check voting eligibility
         const eligibilityResponse = await execute(
-          () => api?.pollApi.checkVotingEligibility(id),
+          () => api?.app.poll.checkVotingEligibility(id),
           { showErrorToast: false }
         );
 
@@ -179,7 +179,7 @@ const ViewPoll: React.FC = () => {
     }
 
     const result = await execute(
-      () => api?.pollApi.vote(pollId, { optionId }),
+      () => api?.app.poll.vote(pollId, { optionId }),
       {
         showSuccessMessage: true,
         successMessage: 'Vote recorded successfully!'
@@ -190,7 +190,7 @@ const ViewPoll: React.FC = () => {
       setUserVote(optionId);
       // Refresh poll to get updated vote counts
       const updatedPoll = await execute(
-        () => api?.pollApi.get(pollId),
+        () => api?.app.poll.get(pollId),
         { showErrorToast: true }
       );
       
@@ -221,7 +221,7 @@ const ViewPoll: React.FC = () => {
   const handleOpenFundingModal = async () => {
     // Check if user has payment methods
     try {
-      const paymentMethods = await api?.accountApi.getPaymentMethods();
+      const paymentMethods = await api?.app.account.getPaymentMethods();
 
       if (!paymentMethods?.items || paymentMethods.items.length === 0) {
         // Show warning that user needs to add payment method

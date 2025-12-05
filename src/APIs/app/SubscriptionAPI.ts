@@ -9,7 +9,7 @@ import {
     AnalyticsOptions,
     RevenueOptions,
     BulkUpdateData
-} from "../types";
+} from "../../types";
 
 const API_PATH = '/api/subscriptions';
 

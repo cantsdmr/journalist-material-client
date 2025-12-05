@@ -35,7 +35,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsLoading(true);
     
     const result = await execute(
-      () => api.accountApi.getProfile(),
+      () => api.app.account.getProfile(),
       { showErrorToast: false }
     );
     

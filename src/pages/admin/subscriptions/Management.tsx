@@ -78,7 +78,7 @@ const SubscriptionManagement: React.FC = () => {
     setError(null);
     
     const result = await execute(
-      () => api.subscriptionApi.getAllSubscriptions(pagination, filters),
+      () => api.app.subscription.getAllSubscriptions(pagination, filters),
       { showErrorToast: true }
     );
     
@@ -93,7 +93,7 @@ const SubscriptionManagement: React.FC = () => {
     setAnalyticsLoading(true);
     
     const result = await execute(
-      () => api.subscriptionApi.getSubscriptionAnalytics({ period: '30d' }),
+      () => api.app.subscription.getSubscriptionAnalytics({ period: '30d' }),
       { showErrorToast: false } // Don't show error for analytics
     );
     
@@ -129,7 +129,7 @@ const SubscriptionManagement: React.FC = () => {
     };
     
     const result = await execute(
-      () => api.subscriptionApi.bulkUpdateSubscriptions(bulkData),
+      () => api.app.subscription.bulkUpdateSubscriptions(bulkData),
       {
         showSuccessMessage: true,
         successMessage: 'Successfully updated subscriptions'
@@ -152,7 +152,7 @@ const SubscriptionManagement: React.FC = () => {
 
   const handleExport = async () => {
     const result = await execute(
-      () => api.subscriptionApi.exportSubscriptions(filters, 'csv'),
+      () => api.app.subscription.exportSubscriptions(filters, 'csv'),
       { showErrorToast: true }
     );
     

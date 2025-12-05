@@ -53,12 +53,12 @@ const PayoutDashboard: React.FC<PayoutDashboardProps> = ({
       setError(null);
 
       // Load stats
-      const statsData = await api.expenseOrderApi.getExpenseOrderStats(channelId);
+      const statsData = await api.app.expenseOrder.getExpenseOrderStats(channelId);
       setStats(statsData);
 
       // Load channel data if channelId is provided
       if (channelId) {
-        const channelData = await api.channelApi.getChannel(channelId);
+        const channelData = await api.app.channel.getChannel(channelId);
         setChannel(channelData);
       }
     } catch (err: any) {

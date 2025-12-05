@@ -41,7 +41,7 @@ const EditExpenseOrderStudio: React.FC = () => {
         
         // Fetch expense order
         const expenseOrderResult = await execute(
-          () => api.expenseOrderApi.getExpenseOrder(id),
+          () => api.app.expenseOrder.getExpenseOrder(id),
           { showErrorToast: true }
         );
         
@@ -60,7 +60,7 @@ const EditExpenseOrderStudio: React.FC = () => {
     if (!id) return;
     
     const result = await execute(
-      () => api.expenseOrderApi.updateExpenseOrder(id, data),
+      () => api.app.expenseOrder.updateExpenseOrder(id, data),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order updated successfully!'
@@ -75,7 +75,7 @@ const EditExpenseOrderStudio: React.FC = () => {
 
   const handleSubmit = async (expenseOrder: ExpenseOrder) => {
     const result = await execute(
-      () => api.expenseOrderApi.submitExpenseOrder(expenseOrder.id),
+      () => api.app.expenseOrder.submitExpenseOrder(expenseOrder.id),
       {
         showSuccessMessage: true,
         successMessage: 'Expense order submitted successfully!'

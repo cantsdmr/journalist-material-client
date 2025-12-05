@@ -1,6 +1,6 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
-import { User } from "../types";
+import { User } from "../../types";
 
 export type CreateUserData = {
     email: string;
