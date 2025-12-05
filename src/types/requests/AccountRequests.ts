@@ -8,6 +8,7 @@ export type AddPaymentMethodData = {
   typeId: number;
   currency?: string;
   isDefault?: boolean;
+  payoutIdentifier?: string;
   details: {
     email?: string; // PayPal
     accountType?: 'personal' | 'business'; // PayPal

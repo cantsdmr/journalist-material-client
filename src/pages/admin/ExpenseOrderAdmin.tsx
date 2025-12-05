@@ -64,14 +64,20 @@ const ExpenseOrderAdmin: React.FC = () => {
   const fetchExpenseOrders = async () => {
     setLoading(true);
     setError(null);
-    
-    try {
-      // For admin, we want to get all expense orders, not just user's own
-      // Prepare filters for API call
 
-      // Using my-orders endpoint but should be modified for admin to get all orders
+    try {
+      // Use the new admin endpoint to get all expense orders with filters
+      const filters: { status?: number; channelId?: string; journalistId?: string } = {};
+
+      if (statusFilter) {
+        filters.status = parseInt(statusFilter);
+      }
+      if (channelFilter) {
+        filters.channelId = channelFilter;
+      }
+
       const result = await execute(
-        () => api.expenseOrderApi.getMyExpenseOrders({ page: page + 1, limit: rowsPerPage }, statusFilter ? parseInt(statusFilter) : undefined),
+        () => api.expenseOrderApi.getAllExpenseOrders({ page: page + 1, limit: rowsPerPage }, filters),
         { showErrorToast: false }
       ) as PaginatedResponse<any>;
 
@@ -107,26 +113,50 @@ const ExpenseOrderAdmin: React.FC = () => {
     if (!selectedOrder || !actionType) return;
 
     try {
+      let result;
       switch (actionType) {
         case 'approve':
-          await execute(() => api.expenseOrderApi.approveExpenseOrder(selectedOrder.id, { notes: actionReason }));
+          result = await execute(
+            () => api.expenseOrderApi.approveExpenseOrder(selectedOrder.id, { notes: actionReason }),
+            {
+              showSuccessMessage: true,
+              successMessage: 'Expense order approved successfully!'
+            }
+          );
           break;
         case 'reject':
-          await execute(() => api.expenseOrderApi.rejectExpenseOrder(selectedOrder.id, { rejectionReason: actionReason }));
+          result = await execute(
+            () => api.expenseOrderApi.rejectExpenseOrder(selectedOrder.id, {
+              rejectionReason: actionReason,
+              notes: actionReason
+            }),
+            {
+              showSuccessMessage: true,
+              successMessage: 'Expense order rejected successfully!'
+            }
+          );
           break;
         case 'payment':
-          await execute(() => api.expenseOrderApi.processPayment(selectedOrder.id, { 
-            paymentReference
-          }));
+          result = await execute(
+            () => api.expenseOrderApi.processPayment(selectedOrder.id, {
+              paymentReference
+            }),
+            {
+              showSuccessMessage: true,
+              successMessage: 'Payment processed successfully!'
+            }
+          );
           break;
       }
-      
-      setActionDialogOpen(false);
-      setSelectedOrder(null);
-      setActionType(null);
-      fetchExpenseOrders();
+
+      if (result) {
+        setActionDialogOpen(false);
+        setSelectedOrder(null);
+        setActionType(null);
+        fetchExpenseOrders();
+      }
     } catch (err) {
-      setError(`Failed to ${actionType} expense order`);
+      console.error(`Failed to ${actionType} expense order:`, err);
     }
   };
 

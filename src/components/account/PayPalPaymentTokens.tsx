@@ -8,12 +8,6 @@ interface PayPalPaymentTokensProps {
   disabled?: boolean;
 }
 
-declare global {
-  interface Window {
-    paypal: any;
-  }
-}
-
 const PayPalPaymentTokens: React.FC<PayPalPaymentTokensProps> = ({
   onSuccess,
   onError,

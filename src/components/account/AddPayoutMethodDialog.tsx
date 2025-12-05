@@ -221,12 +221,12 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
       }
 
       // Submit to API
-      await api.accountApi.addPayoutMethod({
+      await api.accountApi.addPaymentMethod({
         typeId: formData.typeId,
         currency: formData.currency,
         isDefault: formData.isDefault,
         payoutIdentifier,
-        payoutDetails
+        details: payoutDetails
       });
 
       onSuccess();

@@ -95,8 +95,8 @@ const ViewChannelStudio: React.FC = () => {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
-            <Box 
-                sx={{ 
+            <Box
+                sx={{
                     position: 'relative',
                     mb: 4,
                     '&::before': {
@@ -106,7 +106,12 @@ const ViewChannelStudio: React.FC = () => {
                         left: 0,
                         right: 0,
                         height: 200,
-                        backgroundImage: `url(${channel?.bannerUrl || 'https://via.placeholder.com/600x400'})`,
+                        backgroundImage: channel?.bannerUrl
+                            ? `url(${channel.bannerUrl})`
+                            : undefined,
+                        background: channel?.bannerUrl
+                            ? undefined
+                            : (theme: any) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         filter: 'brightness(0.9)',
@@ -134,13 +139,13 @@ const ViewChannelStudio: React.FC = () => {
                     />
                     <Typography variant="h4" gutterBottom>{channel.name}</Typography>
                     <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                        {channel.stats?.activeSubscriptionCount.toLocaleString('en-US', {
+                        {channel.stats?.activeSubscriptionCount?.toLocaleString('en-US', {
                             notation: 'compact',
                             maximumFractionDigits: 1
-                        })} followers • {channel.stats?.paidSubscriptionCount.toLocaleString('en-US', {
+                        }) || 0} followers • {channel.stats?.paidSubscriptionCount?.toLocaleString('en-US', {
                             notation: 'compact',
                             maximumFractionDigits: 1
-                        })} subscribers
+                        }) || 0} subscribers
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 3 }}>
                         {channel.description}
@@ -208,7 +213,12 @@ const ViewChannelStudio: React.FC = () => {
                                                 alignItems: 'baseline',
                                                 gap: 0.5
                                             }}>
-                                                ${tier.price}
+                                                {tier.price !== undefined && tier.currency ? (
+                                                    new Intl.NumberFormat('en-US', {
+                                                        style: 'currency',
+                                                        currency: tier.currency.toUpperCase()
+                                                    }).format(tier.price / 100)
+                                                ) : `$${tier.price || 0}`}
                                                 <Typography
                                                     component="span"
                                                     sx={{

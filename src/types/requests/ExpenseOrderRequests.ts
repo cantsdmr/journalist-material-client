@@ -29,6 +29,7 @@ export type ApproveExpenseOrderData = {
 
 export type RejectExpenseOrderData = {
   rejectionReason: string;
+  notes?: string
 };
 
 export type ProcessPaymentData = {

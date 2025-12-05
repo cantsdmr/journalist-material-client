@@ -46,6 +46,14 @@ export class ExpenseOrderAPI extends HTTPApi {
 
   // ==================== ADMIN/FINANCE MANAGER METHODS ====================
 
+  public async getAllExpenseOrders(pagination: PaginationObject = DEFAULT_PAGINATION, filters?: { status?: number; channelId?: string; journalistId?: string }): Promise<PaginatedCollection<ExpenseOrder>> {
+    const params: any = { ...pagination };
+    if (filters?.status !== undefined) params.status = filters.status;
+    if (filters?.channelId) params.channelId = filters.channelId;
+    if (filters?.journalistId) params.journalistId = filters.journalistId;
+    return this._list<ExpenseOrder>('/api/admin/expense-orders', params);
+  }
+
   public async approveExpenseOrder(expenseOrderId: string, data?: ApproveExpenseOrderData): Promise<ExpenseOrder> {
     return this._post<ExpenseOrder>(`${API_PATH}/${expenseOrderId}/approve`, data || {});
   }
