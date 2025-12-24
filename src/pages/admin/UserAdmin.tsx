@@ -110,6 +110,7 @@ const UserAdmin: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, rowsPerPage, searchQuery, statusFilter, roleFilter, sortColumn, sortDirection]);
 
   const handleEdit = (user: User) => {
@@ -526,7 +527,7 @@ const UserAdmin: React.FC = () => {
                       <TextField
                         label="Display Name"
                         fullWidth
-                        defaultValue={selectedUser.displayName}
+                        value={selectedUser.displayName || ''}
                         onChange={(e) => setSelectedUser({ ...selectedUser, displayName: e.target.value })}
                       />
                     </Grid>
@@ -534,7 +535,7 @@ const UserAdmin: React.FC = () => {
                       <TextField
                         label="Email"
                         fullWidth
-                        defaultValue={selectedUser.email}
+                        value={selectedUser.email || ''}
                         onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
                       />
                     </Grid>
@@ -542,7 +543,7 @@ const UserAdmin: React.FC = () => {
                       <TextField
                         label="Photo URL"
                         fullWidth
-                        defaultValue={selectedUser.photoUrl}
+                        value={selectedUser.photoUrl || ''}
                         onChange={(e) => setSelectedUser({ ...selectedUser, photoUrl: e.target.value })}
                       />
                     </Grid>
