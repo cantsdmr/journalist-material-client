@@ -506,7 +506,7 @@ const UserAdmin: React.FC = () => {
         sortDirection={sortDirection}
         filters={filters}
         rowActions={rowActions}
-        toolbarActions={toolbarActions}
+        actions={toolbarActions}
       />
 
       {/* Edit Dialog */}
