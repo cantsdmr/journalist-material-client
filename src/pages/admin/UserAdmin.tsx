@@ -227,8 +227,8 @@ const UserAdmin: React.FC = () => {
   const handleOpenCustomClaims = (user: User) => {
     setSelectedUser(user);
     setCustomClaims({
-      system_role: user.roleId,
-      system_status: user.statusId
+      system_role: user.roleId ?? USER_ROLE.REGULAR_USER,
+      system_status: user.statusId ?? USER_STATUS.ACTIVE
     });
     setCustomClaimsDialogOpen(true);
   };
