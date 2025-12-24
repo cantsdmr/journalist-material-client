@@ -64,7 +64,7 @@ export class AdminUserAPI extends HTTPApi {
     }
 
     public async updateUserCustomClaims(id: string, data: UpdateUserCustomClaimsData): Promise<void> {
-        await this._put<void>(`${ADMIN_API_PATH}/users/${id}/custom-claims`, data);
+        await this._put<void>(`${ADMIN_API_PATH}/users/${id}/custom-claims`, { customClaims: data });
     }
 
     public async suspendUser(id: string, data: SuspendUserData): Promise<void> {
