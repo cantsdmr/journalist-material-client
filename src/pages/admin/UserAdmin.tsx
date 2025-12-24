@@ -37,7 +37,7 @@ import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { User } from '@/types/entities/User';
 import { PaginatedResponse } from '@/utils/http';
 import { USER_ROLE, USER_STATUS } from '@/enums/UserEnums';
-import { UpdateUserCustomClaimsData } from '@/APIs/admin/AdminUserAPI';
+import { UpdateUserCustomClaimsData, RegisterUserData } from '@/APIs/admin/AdminUserAPI';
 
 const UserAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -54,7 +54,7 @@ const UserAdmin: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // New user registration state
-  const [newUser, setNewUser] = useState({
+  const [newUser, setNewUser] = useState<RegisterUserData>({
     email: '',
     externalId: '',
     displayName: '',
