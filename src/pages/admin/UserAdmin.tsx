@@ -37,6 +37,7 @@ import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { User } from '@/types/entities/User';
 import { PaginatedResponse } from '@/utils/http';
 import { USER_ROLE, USER_STATUS } from '@/enums/UserEnums';
+import { UpdateUserCustomClaimsData } from '@/APIs/admin/AdminUserAPI';
 
 const UserAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -63,7 +64,7 @@ const UserAdmin: React.FC = () => {
   });
 
   // Custom claims state
-  const [customClaims, setCustomClaims] = useState({
+  const [customClaims, setCustomClaims] = useState<UpdateUserCustomClaimsData>({
     system_role: USER_ROLE.REGULAR_USER,
     system_status: USER_STATUS.ACTIVE
   });
