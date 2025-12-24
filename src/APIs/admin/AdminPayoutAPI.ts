@@ -53,7 +53,7 @@ export class AdminPayoutAPI extends HTTPApi {
     }
 
     public async getPayoutStats(filters: PayoutStatsFilters = {}): Promise<any> {
-        return this._get<any>(`${ADMIN_API_PATH}/payouts/stats`, filters);
+        return this._list<any>(`${ADMIN_API_PATH}/payouts/stats`, filters);
     }
 
     public async getPayoutById(id: string): Promise<any> {

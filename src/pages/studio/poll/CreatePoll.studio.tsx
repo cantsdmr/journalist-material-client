@@ -15,7 +15,7 @@ const CreatePollStudio: React.FC = () => {
     if (!data) return;
     
     const result = await execute(
-      () => api?.studioApi.createPoll(data),
+      () => api?.studio.createPoll(data),
       {
         showSuccessMessage: true,
         successMessage: 'Poll created successfully!'

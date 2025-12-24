@@ -35,7 +35,7 @@ const NewsTags: React.FC<NewsTagsProps> = ({ selectedTag, onTagSelect }) => {
 
   const fetchTags = async () => {
     const result = await execute(
-      () => api?.tagApi.getNewsTags(),
+      () => api?.app.tag.getNewsTags(),
       { showErrorToast: true }
     );
     

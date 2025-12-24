@@ -37,7 +37,7 @@ import {
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import { ExpenseOrder } from '@/types/entities/ExpenseOrder';
-import { FundSummary, FundContribution } from '@/APIs/FundingAPI';
+import { FundSummary, FundContribution } from '@/APIs/app/FundingAPI';
 import { ExpenseOrderStatus, ExpenseOrderStatusColors, ExpenseOrderStatusLabels } from '@/enums/ExpenseOrderEnums';
 import { formatCurrency } from '@/utils/stringUtils';
 
@@ -84,7 +84,7 @@ const TransactionTransparency: React.FC<TransactionTransparencyProps> = ({
 
         // Fetch expense orders for the channel
         const expenseResult = await execute(
-          () => api?.expenseOrderApi.getExpenseOrdersByChannel(channelId),
+          () => api?.app.expenseOrder.getExpenseOrdersByChannel(channelId),
           { showErrorToast: false }
         );
 
