@@ -19,6 +19,7 @@ export interface AuthState {
   signInWithProvider: (provider: AuthProvider) => Promise<string | null>;
   signUp: (email: string, password: string) => Promise<FirebaseUser | null>;
   signOut: () => Promise<void>;
+  onTokenRefresh: (callback: () => void) => () => void;
 }
 
 // Firebase tokens expire after 1 hour
@@ -28,6 +29,7 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const tokenRefreshInterval = useRef<NodeJS.Timeout | null>(null);
+  const tokenRefreshCallbacks = useRef<Set<() => void>>(new Set());
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(firebaseAuth, (firebaseUser) => {
@@ -61,6 +63,15 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
         try {
           await user.getIdToken(true); // Force refresh
           console.log('Token refreshed automatically');
+
+          // Notify all subscribers about token refresh
+          tokenRefreshCallbacks.current.forEach(callback => {
+            try {
+              callback();
+            } catch (error) {
+              console.error('Error in token refresh callback:', error);
+            }
+          });
         } catch (error) {
           console.error('Error during automatic token refresh:', error);
         }
@@ -127,6 +138,15 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
     }
   };
 
+  const onTokenRefresh = (callback: () => void): (() => void) => {
+    tokenRefreshCallbacks.current.add(callback);
+
+    // Return unsubscribe function
+    return () => {
+      tokenRefreshCallbacks.current.delete(callback);
+    };
+  };
+
   return {
     user,
     isAuthenticated: user != null,
@@ -135,6 +155,7 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
     signIn,
     signInWithProvider,
     signUp,
-    signOut
+    signOut,
+    onTokenRefresh
   };
 };

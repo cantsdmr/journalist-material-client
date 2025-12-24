@@ -1,34 +1,59 @@
-import { createContext, useContext, useEffect, useState, useRef, useCallback } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { APIs } from "@/APIs/APIs";
 import { useAuth } from "./AuthContext";
 
 export type ApiContextValue = {
     api: APIs,
     isAuthenticated: boolean,
-    isLoading: boolean,
-    refreshToken: () => Promise<void>
+    isLoading: boolean
 }
 
 export const ApiContext = createContext(null as any)
 const useApiContext = () => useContext<ApiContextValue>(ApiContext)
 
+/**
+ * API Context Provider
+ *
+ * @requires AuthProvider - Must be wrapped by AuthProvider in the component tree
+ *
+ * This context manages API client configuration and automatically syncs
+ * authentication tokens with the API client when Firebase refreshes tokens.
+ * It subscribes to token refresh events from AuthContext to keep API
+ * authorization headers up-to-date.
+ *
+ * @example
+ * ```tsx
+ * <AuthProvider>
+ *   <ApiProvider>
+ *     <App />
+ *   </ApiProvider>
+ * </AuthProvider>
+ * ```
+ */
 export const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+    const auth = useAuth();
+
+    // Guard: Ensure AuthProvider is in the tree
+    if (!auth) {
+        throw new Error(
+            'ApiProvider must be used within AuthProvider. ' +
+            'Please wrap ApiProvider with AuthProvider in your component tree.'
+        );
+    }
+
     const [value, setValue] = useState<ApiContextValue>({
         api: new APIs(),
         isAuthenticated: false,
-        isLoading: true,
-        refreshToken: async () => {}
+        isLoading: true
     });
-    const auth = useAuth();
-    const tokenRefreshTimeout = useRef<NodeJS.Timeout | null>(null);
 
     // Function to update API with new token
     const updateApiWithToken = useCallback(async (forceRefresh = false) => {
-        if (auth?.user) {
+        if (auth.user) {
             const token = await auth.getToken(forceRefresh);
             if (token) {
                 setValue(prev => {
-                    const updatedApi = prev.api?.setAuthHeader(token).setApis();
+                    const updatedApi = prev.api.setAuthHeader(token).setApis();
                     return {
                         ...prev,
                         api: updatedApi,
@@ -40,7 +65,7 @@ export const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
         } else {
             // Reset API when user logs out
             setValue(prev => {
-                const updatedApi = prev.api?.setAuthHeader(null).setApis();
+                const updatedApi = prev.api.setAuthHeader(null).setApis();
                 return {
                     ...prev,
                     api: updatedApi,
@@ -51,34 +76,29 @@ export const ApiProvider: React.FC<React.PropsWithChildren> = ({ children }) => 
         }
     }, [auth]);
 
-    // Refresh token function
-    const refreshToken = useCallback(async () => {
-        console.log('Manually refreshing token...');
-        await updateApiWithToken(true); // Force refresh
-    }, [updateApiWithToken]);
-
     // Initial setup and user changes
     useEffect(() => {
         updateApiWithToken(false);
-    }, [auth?.user, auth?.isAuthenticated, updateApiWithToken]);
+    }, [auth.user, auth.isAuthenticated, updateApiWithToken]);
 
-    // Update the refreshToken function in context
+    // Subscribe to Firebase token refresh events
     useEffect(() => {
-        setValue(prev => ({
-            ...prev,
-            refreshToken
-        }));
-    }, [refreshToken]);
+        console.log('Subscribing to Firebase token refresh events...');
 
-    // Cleanup timeout on unmount
-    useEffect(() => {
-        const timeout = tokenRefreshTimeout.current;
-        return () => {
-            if (timeout) {
-                clearTimeout(timeout);
+        const unsubscribe = auth.onTokenRefresh(async () => {
+            try {
+                console.log('Firebase token refreshed - updating API authorization header...');
+                await updateApiWithToken(false);
+            } catch (error) {
+                console.error('Error updating API token after Firebase refresh:', error);
             }
+        });
+
+        return () => {
+            console.log('Unsubscribing from Firebase token refresh events...');
+            unsubscribe();
         };
-    }, []);
+    }, [auth, updateApiWithToken]);
 
     return <ApiContext.Provider value={value}>
         {children}

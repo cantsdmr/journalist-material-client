@@ -10,7 +10,6 @@ import RssFeedIcon from '@mui/icons-material/RssFeed';
 import AddToQueueIcon from '@mui/icons-material/AddToQueue';
 import PollIcon from '@mui/icons-material/Poll';
 import AddChartIcon from '@mui/icons-material/AddChart';
-import SearchIcon from '@mui/icons-material/Search';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { PATHS } from '@/constants/paths';
@@ -26,14 +25,6 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
 }) => {
   const location = useLocation();
   const isMobile = window.innerWidth <= 600;
-
-  const generalItems = [
-    { 
-      path: PATHS.STUDIO_SEARCH, 
-      icon: <SearchIcon />, 
-      label: 'Search' 
-    },
-  ];
 
   const menuItems = {
     news: [
@@ -90,57 +81,6 @@ const StudioSidebar: React.FC<StudioSidebarProps> = ({
     <Box>
       <Toolbar />
       <List sx={{ px: 2 }}>
-        {/* General Section */}
-        <Typography
-          variant="overline"
-          sx={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: 'text.secondary',
-            ml: 1,
-            mb: 1
-          }}
-        >
-          General
-        </Typography>
-        {generalItems.map((item) => (
-          <ListItem
-            button
-            component={Link}
-            to={item.path}
-            key={item.path}
-            selected={location.pathname === item.path}
-            sx={{
-              borderRadius: 1,
-              mb: 0.5,
-              '&.Mui-selected': {
-                backgroundColor: 'action.selected',
-              },
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              }
-            }}
-          >
-            <ListItemIcon 
-              sx={{ 
-                minWidth: 40,
-                color: location.pathname === item.path ? 'primary.main' : 'inherit'
-              }}
-            >
-              {item.icon}
-            </ListItemIcon>
-            <ListItemText 
-              primary={item.label}
-              primaryTypographyProps={{
-                fontSize: '0.875rem',
-                fontWeight: location.pathname === item.path ? 600 : 400
-              }}
-            />
-          </ListItem>
-        ))}
-
-        <Divider sx={{ my: 2 }} />
-
         {/* News Management Section */}
         <Typography
           variant="overline"
