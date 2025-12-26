@@ -25,18 +25,18 @@ import {
 import { useApiContext } from '@/contexts/ApiContext';
 import { PaymentMethod, PaymentMethodTypeEnum } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
-import PayPalPaymentTokens from './PayPalPaymentTokens';
+import PayPalPayoutConnect from './PayPalPayoutConnect';
 import IyzicoPaymentTokens from './IyzicoPaymentTokens';
 
-const PaymentMethodsTab: React.FC = () => {
+const PayoutMethodsTab: React.FC = () => {
   const theme = useTheme();
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [availablePaymentTypes, setAvailablePaymentTypes] = useState<number[]>([]);
+  const [payoutMethods, setPayoutMethods] = useState<PaymentMethod[]>([]);
+  const [availablePayoutTypes, setAvailablePayoutTypes] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [selectedPayoutMethod, setSelectedPayoutMethod] = useState<PaymentMethod | null>(null);
   const [showPayPalDialog, setShowPayPalDialog] = useState(false);
   const [showIyzicoDialog, setShowIyzicoDialog] = useState(false);
 
@@ -51,37 +51,37 @@ const PaymentMethodsTab: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    // Fetch payment methods and available payment types in parallel
+    // Fetch payout methods and available payout types in parallel
     const [methodsResult, availableTypesResult] = await Promise.all([
       execute(
-        () => api.app.account.getPaymentMethods(),
+        () => api.app.account.getPayoutMethods(),
         { showErrorToast: true }
       ),
       execute(
-        () => api.app.account.getAvailablePaymentMethods(),
+        () => api.app.account.getAvailablePayoutMethods(),
         { showErrorToast: false }
       )
     ]);
 
     if (methodsResult) {
-      setPaymentMethods(methodsResult.items ?? []);
+      setPayoutMethods(methodsResult.items ?? []);
     }
 
     if (availableTypesResult) {
-      setAvailablePaymentTypes(availableTypesResult);
+      setAvailablePayoutTypes(availableTypesResult.map(e => e.id));
     }
 
     setLoading(false);
   };
 
-  const handleSetDefault = async (paymentMethod: PaymentMethod) => {
+  const handleSetDefault = async (payoutMethod: PaymentMethod) => {
     setError(null);
 
     const result = await execute(
-      () => api.app.account.setDefaultPaymentMethod(paymentMethod.id),
+      () => api.app.account.setDefaultPayoutMethod(payoutMethod.id),
       {
         showSuccessMessage: true,
-        successMessage: 'Default payment method updated'
+        successMessage: 'Default payout method updated'
       }
     );
 
@@ -91,38 +91,38 @@ const PaymentMethodsTab: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (!selectedPaymentMethod) return;
+    if (!selectedPayoutMethod) return;
 
     setError(null);
 
     const result = await execute(
-      () => api.app.account.deletePaymentMethod(selectedPaymentMethod.id),
+      () => api.app.account.deletePayoutMethod(selectedPayoutMethod.id),
       {
         showSuccessMessage: true,
-        successMessage: 'Payment method deleted successfully'
+        successMessage: 'Payout method deleted successfully'
       }
     );
 
     if (result) {
       await fetchData();
       setDeleteDialogOpen(false);
-      setSelectedPaymentMethod(null);
+      setSelectedPayoutMethod(null);
     }
   };
 
-  const openDeleteDialog = (paymentMethod: PaymentMethod) => {
-    setSelectedPaymentMethod(paymentMethod);
+  const openDeleteDialog = (payoutMethod: PaymentMethod) => {
+    setSelectedPayoutMethod(payoutMethod);
     setDeleteDialogOpen(true);
   };
 
   const closeDeleteDialog = () => {
     setDeleteDialogOpen(false);
-    setSelectedPaymentMethod(null);
+    setSelectedPayoutMethod(null);
   };
 
-  const handlePaymentMethodAdded = async () => {
+  const handlePayoutMethodAdded = async () => {
     await fetchData();
-    setSuccess('Payment method added successfully');
+    setSuccess('Payout method added successfully');
   };
 
   const handlePayPalConnect = () => {
@@ -136,7 +136,7 @@ const PaymentMethodsTab: React.FC = () => {
       await fetchData(); // Direct fetch to ensure data is refreshed
       setSuccess('PayPal account connected successfully!');
     } catch (error) {
-      console.error('Error refreshing payment methods:', error);
+      console.error('Error refreshing payout methods:', error);
       setSuccess('PayPal account connected successfully!');
     }
   };
@@ -152,7 +152,7 @@ const PaymentMethodsTab: React.FC = () => {
 
   const handleIyzicoSuccess = async () => {
     setShowIyzicoDialog(false);
-    await handlePaymentMethodAdded();
+    await handlePayoutMethodAdded();
     setSuccess('Iyzico card added successfully!');
   };
 
@@ -161,7 +161,7 @@ const PaymentMethodsTab: React.FC = () => {
     setShowIyzicoDialog(false);
   };
 
-  const getPaymentMethodLogo = (typeId: number) => {
+  const getPayoutMethodLogo = (typeId: number) => {
     switch (typeId) {
       case PaymentMethodTypeEnum.PAYPAL:
         return (
@@ -202,24 +202,24 @@ const PaymentMethodsTab: React.FC = () => {
     }
   };
 
-  const getPaymentMethodDetails = (method: PaymentMethod) => {
+  const getPayoutMethodDetails = (method: PaymentMethod) => {
     switch (method.typeId) {
       case PaymentMethodTypeEnum.PAYPAL:
         return method.details.email;
       case PaymentMethodTypeEnum.IYZICO: {
-        // For tokenized Iyzico payments, show card type and last 4 digits
+        // For tokenized Iyzico payouts, show card type and last 4 digits
         const cardType = method.details.cardAssociation || 'Card';
         const lastFour = method.details.lastFourDigits || '****';
         return `${cardType} •••• ${lastFour}`;
       }
       default:
-        return 'Payment method';
+        return 'Payout method';
     }
   };
 
-  // Check if a payment type is available in the region
-  const isPaymentTypeAvailable = (typeId: number) => {
-    return availablePaymentTypes.includes(typeId);
+  // Check if a payout type is available in the region
+  const isPayoutTypeAvailable = (typeId: number) => {
+    return availablePayoutTypes.includes(typeId);
   };
 
   if (loading) {
@@ -253,17 +253,17 @@ const PaymentMethodsTab: React.FC = () => {
 
         <Box sx={{ mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-            Payment Methods
+            Payout Methods
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Manage your payout methods for receiving earnings
           </Typography>
         </Box>
 
-        {/* Available Payment Providers */}
+        {/* Available Payout Providers */}
         <Stack spacing={0} divider={<Divider />} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
           {/* PayPal Row - Only show if available */}
-          {isPaymentTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && (
+          {isPayoutTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && (
             <Box
               sx={{
                 p: 2.5,
@@ -298,7 +298,7 @@ const PaymentMethodsTab: React.FC = () => {
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     PayPal
                   </Typography>
-                  {paymentMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) && (
+                  {payoutMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) && (
                     <Chip
                       label="Connected"
                       size="small"
@@ -330,14 +330,14 @@ const PaymentMethodsTab: React.FC = () => {
                     fontWeight: 500
                   }}
                 >
-                  {paymentMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) ? 'Add Another' : 'Connect'}
+                  {payoutMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) ? 'Add Another' : 'Connect'}
                 </Button>
               </Box>
             </Box>
           )}
 
           {/* Iyzico Row - Only show if available */}
-          {isPaymentTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
+          {isPayoutTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
             <Box
               sx={{
                 p: 2.5,
@@ -372,9 +372,9 @@ const PaymentMethodsTab: React.FC = () => {
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     Credit/Debit Card
                   </Typography>
-                  {paymentMethods.some(m => m.typeId === PaymentMethodTypeEnum.IYZICO) && (
+                  {payoutMethods.some(m => m.typeId === PaymentMethodTypeEnum.IYZICO) && (
                     <Chip
-                      label={`${paymentMethods.filter(m => m.typeId === PaymentMethodTypeEnum.IYZICO).length} Card(s)`}
+                      label={`${payoutMethods.filter(m => m.typeId === PaymentMethodTypeEnum.IYZICO).length} Card(s)`}
                       size="small"
                       color="success"
                       sx={{
@@ -410,29 +410,29 @@ const PaymentMethodsTab: React.FC = () => {
             </Box>
           )}
 
-          {/* Show message if no payment methods are available */}
-          {!isPaymentTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && !isPaymentTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
+          {/* Show message if no payout methods are available */}
+          {!isPayoutTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && !isPayoutTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
             <Box sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
-                No payment methods are currently available in your region.
+                No payout methods are currently available in your region.
               </Typography>
             </Box>
           )}
         </Stack>
 
-        {/* Connected Payment Methods */}
-        {paymentMethods.length > 0 && (
+        {/* Connected Payout Methods */}
+        {payoutMethods.length > 0 && (
           <>
             <Box sx={{ mt: 4, mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                 Connected Methods
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Your active payment methods
+                Your active payout methods
               </Typography>
             </Box>
             <Stack spacing={0} divider={<Divider />} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
-              {paymentMethods.map((method, index) => (
+              {payoutMethods.map((method, index) => (
                 <Box
                   key={method.id}
                   sx={{
@@ -449,7 +449,7 @@ const PaymentMethodsTab: React.FC = () => {
                 >
                   {/* Logo */}
                   <Box sx={{ flexShrink: 0 }}>
-                    {getPaymentMethodLogo(method.typeId)}
+                    {getPayoutMethodLogo(method.typeId)}
                   </Box>
 
                   {/* Details */}
@@ -474,7 +474,7 @@ const PaymentMethodsTab: React.FC = () => {
                     </Box>
 
                     <Typography variant="body2" color="text.primary" sx={{ mb: 0.5, fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                      {getPaymentMethodDetails(method)}
+                      {getPayoutMethodDetails(method)}
                     </Typography>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -535,13 +535,13 @@ const PaymentMethodsTab: React.FC = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={closeDeleteDialog}>
-        <DialogTitle>Delete Payment Method</DialogTitle>
+        <DialogTitle>Delete Payout Method</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete this payment method?
-            {selectedPaymentMethod?.isDefault && (
+            Are you sure you want to delete this payout method?
+            {selectedPayoutMethod?.isDefault && (
               <Alert severity="warning" sx={{ mt: 2 }}>
-                This is your default payment method. You'll need to set another payment method as default.
+                This is your default payout method. You'll need to set another payout method as default.
               </Alert>
             )}
           </Typography>
@@ -565,9 +565,9 @@ const PaymentMethodsTab: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Connect PayPal Account</DialogTitle>
+        <DialogTitle>Connect PayPal Account for Payouts</DialogTitle>
         <DialogContent>
-          <PayPalPaymentTokens
+          <PayPalPayoutConnect
             onSuccess={handlePayPalSuccess}
             onError={handlePayPalError}
             disabled={false}
@@ -605,4 +605,4 @@ const PaymentMethodsTab: React.FC = () => {
   );
 };
 
-export default PaymentMethodsTab;
+export default PayoutMethodsTab;

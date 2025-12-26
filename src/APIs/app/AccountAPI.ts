@@ -27,36 +27,37 @@ export class AccountAPI extends HTTPApi {
     return this._put<UserProfile>(`${API_PATH}/profile`, data);
   }
 
-  public async getPaymentMethods() {
-    return this._list<{ data: PaymentMethod[], pagination: any }>(`${API_PATH}/payment-methods`);
+  // Payout Methods endpoints (for receiving payouts)
+  public async getPayoutMethods() {
+    return this._list<{ data: PaymentMethod[], pagination: any }>(`${API_PATH}/payout-methods`);
   }
 
-  public async getPaymentMethod(paymentMethodId: string) {
-    return this._get<PaymentMethod>(`${API_PATH}/payment-methods/${paymentMethodId}`);
+  public async getPayoutMethod(payoutMethodId: string) {
+    return this._get<PaymentMethod>(`${API_PATH}/payout-methods/${payoutMethodId}`);
   }
 
-  public async getDefaultPaymentMethod() {
-    return this._get<PaymentMethod>(`${API_PATH}/payment-methods/default`);
+  public async getDefaultPayoutMethod() {
+    return this._get<PaymentMethod>(`${API_PATH}/payout-methods/default`);
   }
 
-  public async addPaymentMethod(data: AddPaymentMethodData) {
-    return this._post<{ data: PaymentMethod }>(`${API_PATH}/payment-methods`, data);
+  public async addPayoutMethod(data: AddPaymentMethodData) {
+    return this._post<{ data: PaymentMethod }>(`${API_PATH}/payout-methods`, data);
   }
 
-  public async updatePaymentMethod(paymentMethodId: string, data: UpdatePaymentMethodData) {
-    return this._put<{ data: PaymentMethod }>(`${API_PATH}/payment-methods/${paymentMethodId}`, data);
+  public async updatePayoutMethod(payoutMethodId: string, data: UpdatePaymentMethodData) {
+    return this._put<{ data: PaymentMethod }>(`${API_PATH}/payout-methods/${payoutMethodId}`, data);
   }
 
-  public async deletePaymentMethod(paymentMethodId: string) {
-    return this._remove<void>(`${API_PATH}/payment-methods/${paymentMethodId}`);
+  public async deletePayoutMethod(payoutMethodId: string) {
+    return this._remove<void>(`${API_PATH}/payout-methods/${payoutMethodId}`);
   }
 
-  public async setDefaultPaymentMethod(paymentMethodId: string) {
-    return this._patch<{ data: PaymentMethod }>(`${API_PATH}/payment-methods/${paymentMethodId}/default`, {});
+  public async setDefaultPayoutMethod(payoutMethodId: string) {
+    return this._patch<{ data: PaymentMethod }>(`${API_PATH}/payout-methods/${payoutMethodId}/default`, {});
   }
 
-  public async getAvailablePaymentMethods() {
-    return this._get<PaymentMethodType[]>(`${API_PATH}/payment-methods/available`);
+  public async getAvailablePayoutMethods() {
+    return this._get<PaymentMethodType[]>(`${API_PATH}/payout-methods/available`);
   }
 
   public async getSubscriptions() {
@@ -75,8 +76,12 @@ export class AccountAPI extends HTTPApi {
     return this._list<Channel>(`${API_PATH}/channels`, pagination);
   }
 
-  // PayPal Payment Tokens methods
-  public async savePayPalPaymentMethod(data: { payment_token: string; payer_id?: string }) {
-    return this._post<PaymentMethod>(`${API_PATH}/payment-methods/paypal/tokens/save`, data);
+  // PayPal AAC (Account Acquisition and Consent) methods for payout setup
+  public async exchangePayPalAuthCode(authCode: string) {
+    return this._post<{ payerId: string; email: string }>(`${API_PATH}/paypal/exchange-auth-code`, { authCode });
+  }
+
+  public async savePayPalPayoutMethod(data: { payerId: string; email: string }) {
+    return this._post<PaymentMethod>(`${API_PATH}/paypal/save-payout-method`, data);
   }
 } 

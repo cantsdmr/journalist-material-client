@@ -180,7 +180,7 @@ const ViewNews: React.FC = () => {
   const handleOpenFundingModal = async () => {
     // Check if user has payment methods
     try {
-      const paymentMethods = await api?.app.account.getPaymentMethods();
+      const paymentMethods = await api?.app.account.getPayoutMethods();
 
       if (!paymentMethods?.items || paymentMethods.items.length === 0) {
         // Show warning that user needs to add payment method

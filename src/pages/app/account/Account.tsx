@@ -26,7 +26,7 @@ import {
   ArrowBack
 } from '@mui/icons-material';
 import ProfileTab from '@/components/account/ProfileTab';
-import PaymentMethodsTab from '@/components/account/PaymentMethodsTab';
+import PayoutMethodsTab from '@/components/account/PayoutMethodsTab';
 import SubscriptionsTab from '@/components/account/SubscriptionsTab';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -181,7 +181,7 @@ const Account: React.FC = () => {
       case 'profile':
         return <ProfileTab />;
       case 'payment':
-        return <PaymentMethodsTab />;
+        return <PayoutMethodsTab />;
       case 'subscriptions':
         return <SubscriptionsTab />;
       case 'appearance':

@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { PaymentMethodTypeEnum, AddPaymentMethodData } from '@/types/index';
-import PayPalPaymentTokens from './PayPalPaymentTokens';
+import PayPalPayoutConnect from './PayPalPayoutConnect';
 import IyzicoPaymentTokens from './IyzicoPaymentTokens';
 
 interface AddPaymentMethodDialogProps {
@@ -80,7 +80,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
         return;
       }
 
-      await api.app.account.addPaymentMethod(formData);
+      await api.app.account.addPayoutMethod(formData);
       onSuccess();
       handleClose();
     } catch (err: any) {
@@ -123,7 +123,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
     switch (formData.typeId) {
       case PaymentMethodTypeEnum.PAYPAL:
         return (
-          <PayPalPaymentTokens
+          <PayPalPayoutConnect
             onSuccess={() => {
               onSuccess();
               handleClose();
@@ -180,7 +180,7 @@ const AddPaymentMethodDialog: React.FC<AddPaymentMethodDialogProps> = ({
               </Typography>
               {formData.typeId === PaymentMethodTypeEnum.PAYPAL && (
                 <Typography variant="body2" color="primary" sx={{ mb: 2, fontWeight: 'medium' }}>
-                  Click the PayPal Connect button below to securely link your PayPal account
+                  Click the Connect with PayPal button below to securely link your account for receiving payouts
                 </Typography>
               )}
               {formData.typeId === PaymentMethodTypeEnum.IYZICO && (

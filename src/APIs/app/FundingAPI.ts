@@ -91,21 +91,6 @@ export class FundingAPI extends HTTPApi {
     }
 
     /**
-     * Create a contribution to fund content (LEGACY - uses payment methods)
-     * @deprecated Use SDK-first methods (createPayPalOrder/capturePayPalOrder) instead
-     */
-    public async createContribution(
-        contentType: 'news' | 'poll',
-        contentId: string,
-        contributionData: CreateContributionRequest
-    ): Promise<FundContribution> {
-        return this._post<FundContribution>(
-            `${API_PATH}/${contentType}/${contentId}/contribute`,
-            contributionData
-        );
-    }
-
-    /**
      * Create PayPal order for contribution (SDK-First Flow - Step 1)
      */
     public async createPayPalOrder(

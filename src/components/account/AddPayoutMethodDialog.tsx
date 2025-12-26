@@ -221,7 +221,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
       }
 
       // Submit to API
-      await api.app.account.addPaymentMethod({
+      await api.app.account.addPayoutMethod({
         typeId: formData.typeId,
         currency: formData.currency,
         isDefault: formData.isDefault,
