@@ -1,3 +1,4 @@
+import { PaymentProvider } from "./Account";
 import { User } from "./User";
 import { USER_ROLE } from "@/enums/UserEnums";
 
@@ -16,14 +17,6 @@ export type Channel = {
     stats?: ChannelStats;
     creatorId: string;
     isSubscribed?: boolean;
-};
-
-export type PaymentProvider = {
-    code: string;           // 'paypal', 'stripe', 'iyzico'
-    name: string;           // 'PayPal', 'Stripe', 'Iyzico'
-    productId: string;      // Provider-specific product ID
-    planId: string;         // Provider-specific plan ID
-    isActive: boolean;      // Is this provider active for this tier?
 };
 
 export type TierPaymentConfig = {

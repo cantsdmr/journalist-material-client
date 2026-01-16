@@ -474,7 +474,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
             >
               <MenuItem value="">Select a payout method</MenuItem>
               {availableTypes.map((provider) => (
-                <MenuItem key={provider.id} value={provider.code}>
+                <MenuItem key={provider.code} value={provider.code}>
                   {provider.name}
                 </MenuItem>
               ))}
@@ -484,7 +484,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
           {selectedType && (
             <Box>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {selectedType.description}
+                {selectedType.name}
               </Typography>
               {renderPayoutFields()}
             </Box>
