@@ -1,15 +1,15 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { DEFAULT_PAGINATION, HTTPApi, PaginationObject } from "@/utils/http";
-import { 
-    UserProfile, 
-    PaymentMethod, 
-    PaymentMethodType, 
-    Subscription, 
-    UpdateProfileData, 
-    AddPaymentMethodData, 
-    UpdatePaymentMethodData, 
+import {
+    UserProfile,
+    PaymentMethod,
+    PaymentProvider,
+    Subscription,
+    UpdateProfileData,
+    AddPaymentMethodData,
+    UpdatePaymentMethodData,
     SubscribeData,
-    Channel 
+    Channel
 } from "../../types";
 
 const API_PATH = '/api/account';
@@ -57,7 +57,7 @@ export class AccountAPI extends HTTPApi {
   }
 
   public async getAvailablePayoutMethods() {
-    return this._get<PaymentMethodType[]>(`${API_PATH}/payout-methods/available`);
+    return this._get<PaymentProvider[]>(`${API_PATH}/payout-methods/available`);
   }
 
   public async getSubscriptions() {

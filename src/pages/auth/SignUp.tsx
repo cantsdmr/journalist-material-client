@@ -159,15 +159,17 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Step 1: Firebase Auth - create user
       const userCredential = await auth?.signUp(formData.email, formData.password);
       if (userCredential) {
+        // Step 2: Backend signUp
         const result = await execute(
           () => api?.auth.signUp({
             externalId: userCredential.uid,
             email: userCredential.email,
             displayName: formData.displayName.trim(),
             photoUrl: userCredential.photoURL ?? '',
-            roleId: roleId // Use roleId from URL parameter
+            roleId: roleId
           }),
           {
             showSuccessMessage: true,
@@ -175,8 +177,12 @@ const SignUp: React.FC = () => {
           }
         );
 
-        if (result) {
-          // Navigate immediately after successful signup
+        if (!result) {
+          // Backend call failed - sign out from Firebase to reset state
+          await auth?.signOut();
+          setError('Failed to connect to server. Please try again.');
+        } else {
+          // Step 3: Navigate to post-signup - Profile will be fetched by PrivateRoute/ProfileContext
           navigate(`${PATHS.POST_SIGNUP}?role=${role || 'reader'}`);
         }
       }
@@ -193,16 +199,17 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Step 1: Firebase Auth with provider
       const token = await auth?.signInWithProvider(provider);
       if (token && auth?.user) {
-        // Try to sign in first (user might already exist)
+        // Step 2: Try to sign in first (user might already exist)
         const signInResult = await execute(
           () => api?.auth.signIn({ idToken: token }),
           { showErrorToast: false } // Don't show error if user doesn't exist yet
         );
 
         if (signInResult) {
-          // User already exists, navigate to trending page
+          // User already exists - navigate to app
           navigate(PATHS.APP_NEWS_TRENDING);
           return;
         } else {
@@ -213,7 +220,7 @@ const SignUp: React.FC = () => {
               email: auth.user.email || '',
               displayName: auth.user.displayName || '',
               photoUrl: auth.user.photoURL || '',
-              roleId: roleId // Use roleId from URL parameter
+              roleId: roleId
             }),
             {
               showSuccessMessage: true,
@@ -221,8 +228,12 @@ const SignUp: React.FC = () => {
             }
           );
 
-          if (signUpResult) {
-            // Navigate immediately after successful signup
+          if (!signUpResult) {
+            // Backend call failed - sign out from Firebase to reset state
+            await auth?.signOut();
+            setError('Failed to connect to server. Please try again.');
+          } else {
+            // Navigate to post-signup - Profile will be fetched by PrivateRoute/ProfileContext
             navigate(`${PATHS.POST_SIGNUP}?role=${role || 'reader'}`);
           }
         }

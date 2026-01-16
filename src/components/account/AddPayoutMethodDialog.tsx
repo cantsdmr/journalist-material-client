@@ -18,17 +18,17 @@ import {
   Checkbox
 } from '@mui/material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { PaymentMethodTypeEnum } from '@/types/index';
+import { PaymentProviderCode, type PaymentProviderCodeType, type PaymentProvider } from '@/types/index';
 
 interface AddPayoutMethodDialogProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  availableTypes: Array<{ id: number; name: string; description?: string }>;
+  availableTypes: PaymentProvider[];
 }
 
 interface PayoutFormData {
-  typeId: number;
+  providerCode: PaymentProviderCodeType | '';
   currency: string;
   isDefault: boolean;
   // PayPal fields
@@ -55,7 +55,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
   availableTypes
 }) => {
   const [formData, setFormData] = useState<PayoutFormData>({
-    typeId: 0,
+    providerCode: '',
     currency: 'USD',
     isDefault: false
   });
@@ -66,7 +66,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
 
   const handleClose = () => {
     setFormData({
-      typeId: 0,
+      providerCode: '',
       currency: 'USD',
       isDefault: false
     });
@@ -91,7 +91,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
       setError(null);
 
       // Validate required fields
-      if (!formData.typeId) {
+      if (!formData.providerCode) {
         setError('Please select a payout method type');
         return;
       }
@@ -99,8 +99,8 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
       let payoutIdentifier = '';
       let payoutDetails: any = {};
 
-      // Validate and build payout details based on type
-      if (formData.typeId === PaymentMethodTypeEnum.PAYPAL) {
+      // Validate and build payout details based on provider code
+      if (formData.providerCode === PaymentProviderCode.PAYPAL) {
         if (!formData.paypalEmail) {
           setError('PayPal email is required');
           return;
@@ -116,7 +116,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
           email: formData.paypalEmail,
           type: 'PAYPAL'
         };
-      } else if (formData.typeId === PaymentMethodTypeEnum.IYZICO) {
+      } else if (formData.providerCode === PaymentProviderCode.IYZICO) {
         // Iyzico payout validation
         if (!formData.iyzicoRecipientType) {
           setError('Please select a recipient type for Iyzico');
@@ -175,7 +175,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
             swiftCode: formData.swiftCode
           };
         }
-      } else if (formData.typeId === PaymentMethodTypeEnum.BANK_TRANSFER) {
+      } else if (formData.providerCode === PaymentProviderCode.BANK_TRANSFER) {
         // For IBAN-based transfers
         if (formData.iban) {
           if (!validateIBAN(formData.iban)) {
@@ -222,11 +222,11 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
 
       // Submit to API
       await api.app.account.addPayoutMethod({
-        typeId: formData.typeId,
+        providerCode: formData.providerCode,
         currency: formData.currency,
         isDefault: formData.isDefault,
         payoutIdentifier,
-        details: payoutDetails
+        payoutDetails
       });
 
       onSuccess();
@@ -249,11 +249,11 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
     setFormData(prev => ({ ...prev, [field]: event.target.value }));
   };
 
-  const selectedType = availableTypes.find(type => type.id === formData.typeId);
+  const selectedType = availableTypes.find(provider => provider.code === formData.providerCode);
 
   const renderPayoutFields = () => {
-    switch (formData.typeId) {
-      case PaymentMethodTypeEnum.PAYPAL:
+    switch (formData.providerCode) {
+      case PaymentProviderCode.PAYPAL:
         return (
           <TextField
             fullWidth
@@ -267,7 +267,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
           />
         );
 
-      case PaymentMethodTypeEnum.IYZICO:
+      case PaymentProviderCode.IYZICO:
         return (
           <Stack spacing={2}>
             <FormControl fullWidth required>
@@ -362,7 +362,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
           </Stack>
         );
 
-      case PaymentMethodTypeEnum.BANK_TRANSFER:
+      case PaymentProviderCode.BANK_TRANSFER:
         return (
           <Stack spacing={2}>
             <Typography variant="subtitle2" color="text.secondary">
@@ -467,15 +467,15 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
           <FormControl fullWidth required>
             <InputLabel>Payout Method Type</InputLabel>
             <Select
-              value={formData.typeId}
-              onChange={handleSelectChange('typeId')}
+              value={formData.providerCode}
+              onChange={handleSelectChange('providerCode')}
               label="Payout Method Type"
               disabled={loading}
             >
-              <MenuItem value={0}>Select a payout method</MenuItem>
-              {availableTypes.map((type) => (
-                <MenuItem key={type.id} value={type.id}>
-                  {type.name}
+              <MenuItem value="">Select a payout method</MenuItem>
+              {availableTypes.map((provider) => (
+                <MenuItem key={provider.id} value={provider.code}>
+                  {provider.name}
                 </MenuItem>
               ))}
             </Select>
@@ -490,7 +490,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
             </Box>
           )}
 
-          {formData.typeId > 0 && (
+          {formData.providerCode && (
             <>
               <FormControl fullWidth required>
                 <InputLabel>Currency</InputLabel>
@@ -528,7 +528,7 @@ const AddPayoutMethodDialog: React.FC<AddPayoutMethodDialogProps> = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={loading || !formData.typeId}
+          disabled={loading || !formData.providerCode}
         >
           {loading ? 'Adding...' : 'Add Payout Method'}
         </Button>

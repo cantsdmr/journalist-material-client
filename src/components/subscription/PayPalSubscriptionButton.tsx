@@ -94,7 +94,6 @@ const PayPalSubscriptionButton: React.FC<PayPalSubscriptionButtonProps> = ({
                             await api?.app.subscription.activatePayPalSubscription(channelId, {
                                 tierId,
                                 paypalSubscriptionId: data.subscriptionID,
-                                notificationLevel: 1
                             });
 
                             // Call success callback

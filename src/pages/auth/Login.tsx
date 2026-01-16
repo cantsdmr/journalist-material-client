@@ -1,11 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Box, TextField, Button, Typography, Divider, Link } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Box, TextField, Button, Typography, Divider, Link, Alert } from '@mui/material';
 import { googleProvider } from '@/utils/firebase';
 import { useNavigate } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
-// import XIcon from '@mui/icons-material/X';
-// import FacebookIcon from '@mui/icons-material/Facebook';
-// import AppleIcon from '@mui/icons-material/Apple';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthProvider } from 'firebase/auth';
@@ -20,7 +17,7 @@ interface SocialButtonProps {
 const SocialButton = styled(Button)<SocialButtonProps>(({ theme, bgcolor }) => ({
   color: '#fff',
   backgroundColor: bgcolor,
-  boxShadow: `0 2px 4px 0 ${bgcolor}80`, // Add transparency to the color for the shadow
+  boxShadow: `0 2px 4px 0 ${bgcolor}80`,
   '&:hover': {
     backgroundColor: theme.palette.augmentColor({ color: { main: bgcolor } }).dark,
   },
@@ -29,42 +26,12 @@ const SocialButton = styled(Button)<SocialButtonProps>(({ theme, bgcolor }) => (
   },
 }));
 
-// const GoogleButton = styled(IconButton)(({ theme }) => ({
-//   color: '#DB4437',
-//   boxShadow: '0 2px 4px 0 rgba(219, 68, 55, 0.3)',
-//   '&:hover': {
-//     backgroundColor: 'rgba(219, 68, 55, 0.1)',
-//   },
-// }));
-
-// const TwitterButton = styled(IconButton)(({ theme }) => ({
-//   color: '#1DA1F2',
-//   boxShadow: '0 2px 4px 0 rgba(29, 161, 242, 0.3)',
-//   '&:hover': {
-//     backgroundColor: 'rgba(29, 161, 242, 0.1)',
-//   },
-// }));
-
-// const FacebookButton = styled(IconButton)(({ theme }) => ({
-//   color: '#1877F2',
-//   boxShadow: '0 2px 4px 0 rgba(24, 119, 242, 0.3)',
-//   '&:hover': {
-//     backgroundColor: 'rgba(24, 119, 242, 0.1)',
-//   },
-// }));
-
-// const AppleButton = styled(IconButton)(({ theme }) => ({
-//   color: '#000000',
-//   boxShadow: '0 2px 4px 0 rgba(0, 0, 0, 0.3)',
-//   '&:hover': {
-//     backgroundColor: 'rgba(0, 0, 0, 0.1)',
-//   },
-// }));
-
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const auth = useAuth();
   const { api } = useApiContext();
   const navigate = useNavigate();
@@ -73,48 +40,71 @@ const Login: React.FC = () => {
   const handleEmailLogin = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
-    
+    setIsSubmitting(true);
+
     try {
+      // Step 1: Firebase Auth
       const token = await auth?.signIn(email, password);
       if (token) {
-        await execute(
+        // Step 2: Backend signIn
+        const result = await execute(
           () => api?.auth.signIn({ idToken: token }),
           {
             showSuccessMessage: true,
             successMessage: 'Successfully logged in!'
           }
         );
+
+        if (!result) {
+          // Backend call failed - sign out from Firebase to reset state
+          await auth?.signOut();
+          setError('Failed to connect to server. Please try again.');
+        } else {
+          // Step 3: Navigate to app - Profile will be fetched by PrivateRoute/ProfileContext
+          navigate(PATHS.APP_NEWS_TRENDING);
+        }
       }
-    } catch (error) {
-      setError('Failed to login with email and password');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to login with email and password';
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleProviderLogin = async (provider: AuthProvider) => {
     setError('');
-    
+    setIsSubmitting(true);
+
     try {
+      // Step 1: Firebase Auth with provider
       const token = await auth?.signInWithProvider(provider);
       if (token) {
-        await execute(
+        // Step 2: Backend signIn
+        const result = await execute(
           () => api?.auth.signIn({ idToken: token }),
           {
             showSuccessMessage: true,
             successMessage: 'Successfully logged in!'
           }
         );
+
+        if (!result) {
+          // Backend call failed - sign out from Firebase to reset state
+          await auth?.signOut();
+          setError('Failed to connect to server. Please try again.');
+        } else {
+          // Step 3: Navigate to app - Profile will be fetched by PrivateRoute/ProfileContext
+          navigate(PATHS.APP_NEWS_TRENDING);
+        }
       }
-    } catch (error) {
-      setError('Failed to login with Google');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to login with Google';
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (auth?.user) {
-      navigate(PATHS.APP_NEWS_TRENDING)
-    }
-  }, [auth?.user != null])
-  
 
   return (
     <Container maxWidth="xs" sx={{ mt: 8 }}>
@@ -123,19 +113,24 @@ const Login: React.FC = () => {
           Welcome back!
         </Typography>
       </Box>
+
       {error && (
-        <Typography variant="body2" color="error" gutterBottom>
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error}
-        </Typography>
+        </Alert>
       )}
+
       <Box component="form" onSubmit={handleEmailLogin} sx={{ mb: 2 }}>
         <TextField
           label="Email"
           variant="outlined"
           fullWidth
           margin="normal"
+          type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={isSubmitting}
         />
         <TextField
           label="Password"
@@ -143,57 +138,46 @@ const Login: React.FC = () => {
           fullWidth
           type="password"
           margin="normal"
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          disabled={isSubmitting}
         />
         <Box sx={{ textAlign: 'right', mb: 2 }}>
           <Link href="#" variant="caption">
             Did you forget your password?
           </Link>
         </Box>
-        <Button type="submit" variant="outlined" color="secondary" fullWidth sx={{ mb: 2 }}>
-          Log In
+        <Button
+          type="submit"
+          variant="outlined"
+          color="secondary"
+          fullWidth
+          sx={{ mb: 2 }}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Logging in...' : 'Log In'}
         </Button>
       </Box>
+
       <Divider sx={{ my: 2 }}>OR</Divider>
+
       <Box sx={{ textAlign: 'center', mb: 2 }}>
         <Typography variant="body2" gutterBottom>
           You can sign in or sign up our application with following providers
         </Typography>
       </Box>
+
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <SocialButton
-            variant="contained"
-            startIcon={<GoogleIcon />}
-            bgcolor="#DB4437"
-            onClick={handleProviderLogin.bind(this, googleProvider)}
-          >
-            Sign in with Google
-          </SocialButton>
-{/*           <SocialButton
-            variant="contained"
-            startIcon={<XIcon />}
-            bgcolor="#1DA1F2"
-            onClick={handleProviderLogin.bind(this, twitterProvider)}
-          >
-            Sign in with X
-          </SocialButton>
-          <SocialButton
-            variant="contained"
-            startIcon={<FacebookIcon />}
-            bgcolor="#1877F2"
-            onClick={handleProviderLogin.bind(this, facebookProvider)}
-          >
-            Sign in with Facebook
-          </SocialButton>
-          <SocialButton
-            variant="contained"
-            startIcon={<AppleIcon />}
-            bgcolor="#000000"
-            onClick={handleProviderLogin.bind(this, appleProvider)}
-          >
-            Sign in with Apple
-          </SocialButton> */}
+        <SocialButton
+          variant="contained"
+          startIcon={<GoogleIcon />}
+          bgcolor="#DB4437"
+          onClick={() => handleProviderLogin(googleProvider)}
+          disabled={isSubmitting}
+        >
+          Sign in with Google
+        </SocialButton>
       </Box>
 
       <Divider sx={{ my: 3 }} />
@@ -207,6 +191,7 @@ const Login: React.FC = () => {
             variant="outlined"
             size="small"
             onClick={() => navigate(`${PATHS.SIGNUP}?role=journalist`)}
+            disabled={isSubmitting}
           >
             Sign up as Journalist
           </Button>
@@ -214,6 +199,7 @@ const Login: React.FC = () => {
             variant="outlined"
             size="small"
             onClick={() => navigate(`${PATHS.SIGNUP}?role=reader`)}
+            disabled={isSubmitting}
           >
             Sign up as Reader
           </Button>

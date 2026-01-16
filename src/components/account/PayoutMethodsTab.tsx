@@ -23,7 +23,7 @@ import {
   CreditCard
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
-import { PaymentMethod, PaymentMethodTypeEnum } from '@/types/index';
+import { PaymentMethod, PaymentProviderCode, type PaymentProvider } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
 import PayPalPayoutConnect from './PayPalPayoutConnect';
 import IyzicoPaymentTokens from './IyzicoPaymentTokens';
@@ -31,7 +31,7 @@ import IyzicoPaymentTokens from './IyzicoPaymentTokens';
 const PayoutMethodsTab: React.FC = () => {
   const theme = useTheme();
   const [payoutMethods, setPayoutMethods] = useState<PaymentMethod[]>([]);
-  const [availablePayoutTypes, setAvailablePayoutTypes] = useState<number[]>([]);
+  const [availablePayoutTypes, setAvailablePayoutTypes] = useState<PaymentProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -68,7 +68,7 @@ const PayoutMethodsTab: React.FC = () => {
     }
 
     if (availableTypesResult) {
-      setAvailablePayoutTypes(availableTypesResult.map(e => e.id));
+      setAvailablePayoutTypes(availableTypesResult);
     }
 
     setLoading(false);
@@ -161,9 +161,9 @@ const PayoutMethodsTab: React.FC = () => {
     setShowIyzicoDialog(false);
   };
 
-  const getPayoutMethodLogo = (typeId: number) => {
-    switch (typeId) {
-      case PaymentMethodTypeEnum.PAYPAL:
+  const getPayoutMethodLogo = (providerCode: string) => {
+    switch (providerCode) {
+      case PaymentProviderCode.PAYPAL:
         return (
           <Avatar
             sx={{
@@ -178,7 +178,7 @@ const PayoutMethodsTab: React.FC = () => {
             PayPal
           </Avatar>
         );
-      case PaymentMethodTypeEnum.IYZICO:
+      case PaymentProviderCode.IYZICO:
         return (
           <Avatar
             sx={{
@@ -203,23 +203,26 @@ const PayoutMethodsTab: React.FC = () => {
   };
 
   const getPayoutMethodDetails = (method: PaymentMethod) => {
-    switch (method.typeId) {
-      case PaymentMethodTypeEnum.PAYPAL:
-        return method.details.email;
-      case PaymentMethodTypeEnum.IYZICO: {
+    const providerCode = method.provider?.code;
+    switch (providerCode) {
+      case PaymentProviderCode.PAYPAL:
+        return method.payoutDetails?.email || method.payoutIdentifier;
+      case PaymentProviderCode.IYZICO: {
         // For tokenized Iyzico payouts, show card type and last 4 digits
-        const cardType = method.details.cardAssociation || 'Card';
-        const lastFour = method.details.lastFourDigits || '****';
+        const cardType = method.payoutDetails?.cardAssociation || 'Card';
+        const lastFour = method.payoutDetails?.lastFourDigits || '****';
         return `${cardType} •••• ${lastFour}`;
       }
+      case PaymentProviderCode.BANK_TRANSFER:
+        return method.payoutDetails?.iban || method.payoutDetails?.accountNumber || method.payoutIdentifier;
       default:
-        return 'Payout method';
+        return method.payoutIdentifier || 'Payout method';
     }
   };
 
   // Check if a payout type is available in the region
-  const isPayoutTypeAvailable = (typeId: number) => {
-    return availablePayoutTypes.includes(typeId);
+  const isPayoutTypeAvailable = (providerCode: string) => {
+    return availablePayoutTypes.some(p => p.code === providerCode);
   };
 
   if (loading) {
@@ -263,7 +266,7 @@ const PayoutMethodsTab: React.FC = () => {
         {/* Available Payout Providers */}
         <Stack spacing={0} divider={<Divider />} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
           {/* PayPal Row - Only show if available */}
-          {isPayoutTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && (
+          {isPayoutTypeAvailable(PaymentProviderCode.PAYPAL) && (
             <Box
               sx={{
                 p: 2.5,
@@ -298,7 +301,7 @@ const PayoutMethodsTab: React.FC = () => {
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     PayPal
                   </Typography>
-                  {payoutMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) && (
+                  {payoutMethods.some(m => m.provider?.code === PaymentProviderCode.PAYPAL) && (
                     <Chip
                       label="Connected"
                       size="small"
@@ -330,14 +333,14 @@ const PayoutMethodsTab: React.FC = () => {
                     fontWeight: 500
                   }}
                 >
-                  {payoutMethods.some(m => m.typeId === PaymentMethodTypeEnum.PAYPAL) ? 'Add Another' : 'Connect'}
+                  {payoutMethods.some(m => m.provider?.code === PaymentProviderCode.PAYPAL) ? 'Add Another' : 'Connect'}
                 </Button>
               </Box>
             </Box>
           )}
 
           {/* Iyzico Row - Only show if available */}
-          {isPayoutTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
+          {isPayoutTypeAvailable(PaymentProviderCode.IYZICO) && (
             <Box
               sx={{
                 p: 2.5,
@@ -372,9 +375,9 @@ const PayoutMethodsTab: React.FC = () => {
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     Credit/Debit Card
                   </Typography>
-                  {payoutMethods.some(m => m.typeId === PaymentMethodTypeEnum.IYZICO) && (
+                  {payoutMethods.some(m => m.provider?.code === PaymentProviderCode.IYZICO) && (
                     <Chip
-                      label={`${payoutMethods.filter(m => m.typeId === PaymentMethodTypeEnum.IYZICO).length} Card(s)`}
+                      label={`${payoutMethods.filter(m => m.provider?.code === PaymentProviderCode.IYZICO).length} Card(s)`}
                       size="small"
                       color="success"
                       sx={{
@@ -411,7 +414,7 @@ const PayoutMethodsTab: React.FC = () => {
           )}
 
           {/* Show message if no payout methods are available */}
-          {!isPayoutTypeAvailable(PaymentMethodTypeEnum.PAYPAL) && !isPayoutTypeAvailable(PaymentMethodTypeEnum.IYZICO) && (
+          {!isPayoutTypeAvailable(PaymentProviderCode.PAYPAL) && !isPayoutTypeAvailable(PaymentProviderCode.IYZICO) && (
             <Box sx={{ p: 3, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
                 No payout methods are currently available in your region.
@@ -449,14 +452,14 @@ const PayoutMethodsTab: React.FC = () => {
                 >
                   {/* Logo */}
                   <Box sx={{ flexShrink: 0 }}>
-                    {getPayoutMethodLogo(method.typeId)}
+                    {getPayoutMethodLogo(method.provider?.code || '')}
                   </Box>
 
                   {/* Details */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {method.type.name}
+                        {method.provider?.name || 'Payout Method'}
                       </Typography>
                       {method.isDefault && (
                         <Chip

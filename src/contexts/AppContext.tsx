@@ -1,49 +1,66 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useApiContext } from './ApiContext';
-import { PATHS } from '@/constants/paths';
-import { useLocation } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import { createCtx } from './BaseContext';
 
 export interface AppState {
+  // Loading state - true until Firebase and API are ready
   isLoading: boolean;
-  error: Error | null;
+  // Authentication state - true when Firebase user exists and API is authenticated
+  isAuthenticated: boolean;
+  // Actions
+  actions: {
+    signOut: () => Promise<void>;
+  };
 }
 
 export const [AppContext, useApp] = createCtx<AppState>();
 
-// Define public routes that don't need full initialization
-const PUBLIC_ROUTES = [
-  PATHS.HOME,        // landing page
-  PATHS.LOGIN,       // login page
-  PATHS.SIGNUP,      // signup page
-] as const;
-
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const location = useLocation();
-  const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname as typeof PUBLIC_ROUTES[number]);
-  const { isLoading: apiLoading, isAuthenticated } = useApiContext();
-  const [state, setState] = useState<AppState>({
+  const auth = useAuth();
+  const { isLoading: apiLoading, isAuthenticated: apiAuthenticated } = useApiContext();
+
+  const [state, setState] = useState<Omit<AppState, 'actions'>>({
     isLoading: true,
-    error: null
+    isAuthenticated: false,
   });
 
-  useEffect(() => {
-    // If it's a public route, we don't need to wait for auth loading
-    if (isPublicRoute) {
-      setState(prev => ({
-        ...prev,
-        isLoading: apiLoading,
-      }));
-    } else {
-      // For private routes, we need auth, API, and user info to be ready
-      if(isAuthenticated){
-        setState(prev => ({
-          ...prev,
-          isLoading: false,
-        }));
-      }
-    }
-  }, [apiLoading, isAuthenticated, isPublicRoute]);
+  // Unified sign out - clears Firebase auth which cascades to clear API and Profile
+  const signOut = useCallback(async () => {
+    await auth.signOut();
+  }, [auth]);
 
-  return <AppContext.Provider value={state}>{children}</AppContext.Provider>;
-}; 
+  useEffect(() => {
+    const firebaseReady = !auth.isLoading;
+    const apiReady = !apiLoading;
+
+    // Still loading if Firebase or API is not ready
+    if (!firebaseReady || !apiReady) {
+      setState({
+        isLoading: true,
+        isAuthenticated: false,
+      });
+      return;
+    }
+
+    // Firebase and API are ready
+    setState({
+      isLoading: false,
+      isAuthenticated: !!auth.user && apiAuthenticated,
+    });
+  }, [
+    auth.isLoading,
+    auth.user,
+    apiLoading,
+    apiAuthenticated,
+  ]);
+
+  const value: AppState = {
+    ...state,
+    actions: {
+      signOut,
+    },
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};

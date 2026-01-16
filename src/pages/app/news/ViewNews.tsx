@@ -178,19 +178,6 @@ const ViewNews: React.FC = () => {
   };
 
   const handleOpenFundingModal = async () => {
-    // Check if user has payment methods
-    try {
-      const paymentMethods = await api?.app.account.getPayoutMethods();
-
-      if (!paymentMethods?.items || paymentMethods.items.length === 0) {
-        // Show warning that user needs to add payment method
-        alert('Please add a payment method before funding. You can add payment methods in your account settings.');
-        return;
-      }
-    } catch (error) {
-      console.error('Failed to check payment methods:', error);
-    }
-
     setFundingModalOpen(true);
   };
 

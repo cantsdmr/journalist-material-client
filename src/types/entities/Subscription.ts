@@ -30,6 +30,19 @@ export type Subscription = {
     email: string;
     displayName: string;
   };
+  paymentDetails?: Array<{
+    id: string;
+    subscriptionId: string;
+    providerId: string;
+    providerSubscriptionId: string;
+    providerStatus: string;
+    metadata?: Record<string, any>;
+    provider?: {
+      id: string;
+      code: string;
+      name: string;
+    };
+  }>;
 };
 
 export type AdminSubscription = {

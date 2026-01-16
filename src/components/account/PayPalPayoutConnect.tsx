@@ -27,8 +27,8 @@ const PayPalPayoutConnect: React.FC<PayPalPayoutConnectProps> = ({
   const { api } = useApiContext();
 
   // Get PayPal Client ID and Merchant ID from environment variables
-  const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'AUvVGkHGJD8OKekE_4XxFzzKL8a8yLtJ3ZG1woE3OobNy57zyofuPIiUo-zZag0O_L1KPB_u4TB0tuJp';
-  const PAYPAL_MERCHANT_ID = import.meta.env.VITE_PAYPAL_MERCHANT_ID || '';
+  const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID ;
+  const PAYPAL_MERCHANT_ID = import.meta.env.VITE_PAYPAL_MERCHANT_ID;
   const PAYPAL_ENV = import.meta.env.VITE_PAYPAL_ENV || 'sandbox';
 
   useEffect(() => {
@@ -76,7 +76,6 @@ const PayPalPayoutConnect: React.FC<PayPalPayoutConnectProps> = ({
       window.paypal.PayoutsAAC.render({
         env: PAYPAL_ENV,
         clientId: {
-          production: PAYPAL_CLIENT_ID,
           sandbox: PAYPAL_CLIENT_ID
         },
         merchantId: PAYPAL_MERCHANT_ID,

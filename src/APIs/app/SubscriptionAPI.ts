@@ -127,7 +127,6 @@ export class SubscriptionAPI extends HTTPApi {
     data: {
       tierId: string;
       paypalSubscriptionId: string;
-      notificationLevel?: number;
     }
   ): Promise<AdminSubscription> {
     return this._post<AdminSubscription>(

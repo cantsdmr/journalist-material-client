@@ -72,24 +72,26 @@ const SubscriptionsTab: React.FC = () => {
 
   const handleCancelSubscription = async () => {
     if (!selectedSubscription) return;
-    
+
     setCanceling(true);
     setError(null);
-    
+
+    // Use SDK-based cancellation flow
+    // This will cancel with PayPal SDK for paid subscriptions, or directly for free ones
     const result = await execute(
-      () => api.app.account.cancelSubscription(selectedSubscription.id),
+      () => api.app.subscription.cancelUserSubscription(selectedSubscription.id),
       {
         showSuccessMessage: true,
         successMessage: 'Subscription canceled successfully'
       }
     );
-    
+
     if (result) {
       await fetchSubscriptions();
       setCancelDialogOpen(false);
       setSelectedSubscription(null);
     }
-    
+
     setCanceling(false);
   };
 
@@ -128,6 +130,10 @@ const SubscriptionsTab: React.FC = () => {
 
   const canCancelSubscription = (subscription: Subscription) => {
     return canCancelSubscriptionHelper(subscription.statusId);
+  };
+
+  const hasPayPalSubscription = (subscription: Subscription) => {
+    return subscription.paymentDetails?.some(detail => detail.provider?.code === 'paypal');
   };
 
   if (loading) {
@@ -407,14 +413,27 @@ const SubscriptionsTab: React.FC = () => {
                         </Stack>
 
                         <Stack direction="row" spacing={1} mb={2} flexWrap="wrap">
-                          <Chip 
+                          <Chip
                             label={getStatusLabel(subscription.statusId)}
                             color={getStatusColor(subscription.statusId) as any}
                             size="small"
                             sx={{ borderRadius: 1 }}
                           />
+                          {hasPayPalSubscription(subscription) && (
+                            <Chip
+                              label="PayPal"
+                              variant="outlined"
+                              size="small"
+                              sx={{
+                                borderRadius: 1,
+                                borderColor: '#0070BA',
+                                color: '#0070BA',
+                                fontWeight: 600
+                              }}
+                            />
+                          )}
                           {subscription.autoContribute && (
-                            <Chip 
+                            <Chip
                               label="Auto-contribute"
                               variant="outlined"
                               size="small"
@@ -508,10 +527,28 @@ const SubscriptionsTab: React.FC = () => {
                   {selectedSubscription?.channel.name}
                 </Typography>?
               </Typography>
-              
-              <Paper 
-                sx={{ 
-                  p: 2, 
+
+              {selectedSubscription && hasPayPalSubscription(selectedSubscription) && (
+                <Paper
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: alpha(theme.palette.info.main, 0.05),
+                    border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    <Typography component="span" sx={{ fontWeight: 600, color: 'info.main' }}>
+                      PayPal Subscription:
+                    </Typography>
+                    {' '}This will cancel your PayPal subscription automatically. Your PayPal recurring payment will be stopped.
+                  </Typography>
+                </Paper>
+              )}
+
+              <Paper
+                sx={{
+                  p: 2,
                   borderRadius: 2,
                   bgcolor: alpha(theme.palette.warning.main, 0.05),
                   border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`

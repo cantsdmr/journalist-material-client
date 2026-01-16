@@ -59,7 +59,6 @@ import CreateChannelStudio from '@/pages/studio/channel/CreateChannel.studio';
 import NotFound from './pages/NotFound';
 import ViewChannelStudio from './pages/studio/channel/ViewChannel.studio';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import ErrorScreen from '@/components/common/ErrorScreen';
 import EditChannel from './pages/studio/channel/EditChannel.studio';
 import ListPollsStudio from '@/pages/studio/poll/ListPolls.studio';
 import CreatePollStudio from '@/pages/studio/poll/CreatePoll.studio';
@@ -94,13 +93,10 @@ import UserAdmin from '@/pages/admin/UserAdmin';
 import TagAdmin from '@/pages/admin/TagAdmin';
 
 const App: React.FC = () => {
-  const { isLoading, error } = useApp();
+  const { isLoading } = useApp();
+
   if (isLoading) {
     return <LoadingScreen />;
-  }
-
-  if (error) {
-    return <ErrorScreen error={error} />;
   }
 
   return (

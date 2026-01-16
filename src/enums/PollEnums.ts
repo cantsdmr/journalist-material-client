@@ -1,8 +1,13 @@
 export const POLL_STATUS = {
     ACTIVE: 1,
-    INACTIVE: 2,
-    COMPLETED: 3,
-    CANCELLED: 4
+    TRENDING: 2,
+    CLAIMED: 3,
+    CONVERTED: 4,
+    CLOSED: 5,
+    EXPIRED: 6,
+    FUNDED: 7,
+    CANCELLED: 8,
+    ARCHIVED: 9
 } as const;
 
 export const POLL_MEDIA_TYPE = {

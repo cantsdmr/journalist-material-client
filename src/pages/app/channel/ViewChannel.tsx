@@ -136,8 +136,7 @@ const ViewChannel: React.FC = () => {
             setSubscriptionLoading(true);
             try {
                 const result = await api?.app.subscription?.createDirectSubscription(channel.id, {
-                    tierId,
-                    notificationLevel: 1
+                    tierId
                 });
 
                 if (result) {
@@ -204,9 +203,18 @@ const ViewChannel: React.FC = () => {
     const handleCancelMembership = async () => {
         if (!channel) return;
 
-        // Always use legacy API for cancellation (for now)
+        // Get the user's current subscription for this channel
+        const currentSubscription = profile?.subscriptions?.find(s => s.channelId === channel.id);
+
+        if (!currentSubscription) {
+            console.error('No active subscription found for this channel');
+            return;
+        }
+
+        // Use SDK-based cancellation flow via SubscriptionAPI
+        // This will cancel with PayPal SDK for paid subscriptions, or directly for free ones
         const result = await execute(
-            () => api?.app.channel.unsubscribeFromChannel(channel.id),
+            () => api?.app.subscription.cancelUserSubscription(currentSubscription.id),
             {
                 showSuccessMessage: true,
                 successMessage: 'Membership cancelled successfully!'

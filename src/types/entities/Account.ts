@@ -1,5 +1,18 @@
 import { ChannelStaff, ChannelSubscription } from "./Channel";
 
+// Payment Provider Codes (matches backend)
+export const PaymentProviderCode = {
+  PAYPAL: 'paypal',
+  STRIPE: 'stripe',
+  IYZICO: 'iyzico',
+  BANK_TRANSFER: 'bank_transfer',
+  CREDIT_CARD: 'credit_card',
+  OTHER: 'other'
+} as const;
+
+export type PaymentProviderCodeType = typeof PaymentProviderCode[keyof typeof PaymentProviderCode];
+
+// Legacy enum for backward compatibility (deprecated - use PaymentProviderCode instead)
 export const PaymentMethodTypeEnum = {
   CREDIT_CARD: 1,
   BANK_TRANSFER: 2,
@@ -28,6 +41,19 @@ export type UserProfile = {
   staffChannels?: ChannelStaff[];
 };
 
+// Payment Provider (replaces PaymentMethodType)
+export type PaymentProvider = {
+  id: string;
+  code: PaymentProviderCodeType;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  supportsSubscriptions: boolean;
+  supportsPayouts: boolean;
+  displayOrder: number;
+};
+
+// Legacy type for backward compatibility
 export type PaymentMethodType = {
   id: number;
   name: string;
@@ -37,19 +63,31 @@ export type PaymentMethodType = {
 
 export type PaymentMethod = {
   id: string;
-  typeId: number;
-  type: PaymentMethodType;
+  providerId: string;
+  provider: PaymentProvider;
   currency: string;
   isDefault: boolean;
   expiresAt?: string;
   lastUsedAt?: string;
-  details: {
+  payoutIdentifier?: string;
+  payoutDetails?: {
     email?: string; // PayPal
-    cardNumber?: string; // iyzico (masked)
-    expiryMonth?: number; // iyzico
-    expiryYear?: number; // iyzico
-    cardHolderName?: string; // iyzico
+    type?: string;
+    accountHolderName?: string; // Bank transfer
+    iban?: string;
+    swiftCode?: string;
+    accountNumber?: string;
+    routingNumber?: string;
+    bankName?: string;
+    recipientName?: string; // Iyzico
+    identityNumber?: string;
+    phoneNumber?: string;
+    memberId?: string;
     [key: string]: any;
   };
+  // Legacy fields for backward compatibility (deprecated)
+  typeId?: number;
+  type?: PaymentMethodType;
+  details?: any;
 };
 

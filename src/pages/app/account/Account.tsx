@@ -133,7 +133,7 @@ const Account: React.FC = () => {
 
   const menuItems = [
     { id: 'profile' as SettingSection, icon: <AccountCircle />, label: 'Profile', divider: false },
-    { id: 'payment' as SettingSection, icon: <Payment />, label: 'Payment Methods', divider: false },
+    { id: 'payment' as SettingSection, icon: <Payment />, label: 'Payout Methods', divider: false },
     { id: 'subscriptions' as SettingSection, icon: <SubscriptionsIcon />, label: 'Subscriptions', divider: true },
     { id: 'appearance' as SettingSection, icon: <Palette />, label: 'Appearance', divider: false },
     { id: 'notifications' as SettingSection, icon: <Notifications />, label: 'Notifications', divider: false },
