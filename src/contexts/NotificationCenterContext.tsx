@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useApiContext } from "./ApiContext";
 import { useAuth } from "./AuthContext";
 import { useApp } from "./AppContext";
-import { Notification, GetNotificationFeedParams } from "@/types";
+import { Notification, GetNotificationFeedParams } from "@/types/index";
 import { createCtx } from "./BaseContext";
 import { useApiCall } from "@/hooks/useApiCall";
-import { useCursorPagination, CursorPaginatedResponse } from "@/hooks/useCursorPagination";
+import { useCursorPagination } from "@/hooks/useCursorPagination";
+import { CursorPaginatedResponse } from "@/types/ApiTypes";
 
 interface NotificationCenterState {
   notifications: Notification[];

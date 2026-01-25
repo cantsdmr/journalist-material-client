@@ -12,7 +12,7 @@ import SubscriptionsIcon from '@mui/icons-material/Subscriptions';
 import PaymentIcon from '@mui/icons-material/Payment';
 import InfoIcon from '@mui/icons-material/Info';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { Notification } from '@/types';
+import { Notification } from '@/types/index';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationCenter } from '@/contexts/NotificationCenterContext';

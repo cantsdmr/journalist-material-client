@@ -6,7 +6,7 @@ import {
     UnreadCountResponse,
     GetNotificationsParams,
     GetNotificationFeedParams
-} from "@/types";
+} from "@/types/index";
 
 const API_PATH = '/api/notifications';
 const DEVICE_TOKENS_PATH = '/api/notifications/device-tokens';
