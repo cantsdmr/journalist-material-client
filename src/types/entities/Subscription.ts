@@ -4,7 +4,6 @@ export type Subscription = {
   channelId: string;
   tierId: string;
   statusId: number;
-  notificationLevelId: number;
   subscribedAt: string;
   expiresAt?: string;
   renewalDate?: string;
@@ -51,7 +50,6 @@ export type AdminSubscription = {
   channelId: string;
   tierId: string;
   statusId: number;
-  notificationLevelId: number;
   subscribedAt: string;
   expiresAt?: string;
   renewalDate?: string;
@@ -108,4 +106,26 @@ export type BulkUpdateResult = {
   success: number;
   failed: number;
   errors: string[];
+};
+
+export type SubscriptionBillingCycle = {
+  id: string;
+  subscriptionId: string;
+  cycleNumber: number;
+  periodStart: Date;
+  periodEnd: Date;
+  amount: number;
+  currency: string;
+  statusId: number;
+  chargedAt?: Date;
+  transactionId?: string;
+  providerBillingId?: string;
+  errorMessage?: string;
+  retryCount: number;
+  nextRetryAt?: Date;
+  metadata?: Record<string, any>;
+  createdAt: Date;
+  updatedAt: Date;
+  subscription?: Subscription;
+  transaction?: any; // Import from Transaction.ts when needed
 }; 

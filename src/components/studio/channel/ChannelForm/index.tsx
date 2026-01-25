@@ -7,6 +7,7 @@ import {
 import { CreateChannelData, EditChannelData } from '@/types/index';
 import ImageUpload from '@/components/common/ImageUpload';
 import { CHANNEL_STATUS } from '@/enums/ChannelEnums';
+import { POPULAR_CURRENCIES, getAllSupportedCurrencies } from '@/constants/currencies';
 
 interface ChannelFormProps {
   initialData?: Nullable<CreateChannelData> | Nullable<EditChannelData>;
@@ -27,7 +28,8 @@ const ChannelForm: React.FC<ChannelFormProps> = ({
     status: initialData?.status || CHANNEL_STATUS.ACTIVE,
     logoUrl: initialData?.logoUrl || '',
     bannerUrl: initialData?.bannerUrl || '',
-    tags: initialData?.tags || []
+    tags: initialData?.tags || [],
+    defaultCurrency: initialData?.defaultCurrency || 'USD'
   }));
 
   const [logo, setLogo] = useState<Nullable<string>>(initialData?.logoUrl || undefined);
@@ -42,7 +44,8 @@ const ChannelForm: React.FC<ChannelFormProps> = ({
         ...formData,
         logoUrl: logo || '',
         bannerUrl: banner || '',
-        tags: []
+        tags: [],
+        defaultCurrency: formData.defaultCurrency
       });
     } catch (error) {
       console.error('Failed to submit channel:', error);
@@ -169,6 +172,47 @@ const ChannelForm: React.FC<ChannelFormProps> = ({
             Channel Settings
           </Typography>
           <Stack spacing={4}>
+            {/* Currency */}
+            <Box>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Default Currency
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Choose your channel's currency. All tiers, subscriptions, and transactions will use this currency. This cannot be changed later.
+              </Typography>
+              <FormControl fullWidth>
+                <Select
+                  value={formData.defaultCurrency}
+                  onChange={(e) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      defaultCurrency: e.target.value,
+                    }));
+                  }}
+                  disabled={!!initialData}
+                >
+                  {/* Popular Currencies */}
+                  {POPULAR_CURRENCIES.map((currency) => (
+                    <MenuItem key={currency.code} value={currency.code}>
+                      {currency.symbol} {currency.code} - {currency.name}
+                    </MenuItem>
+                  ))}
+
+                  {/* Divider for other currencies */}
+                  <MenuItem disabled>──────────</MenuItem>
+
+                  {/* All Other Currencies */}
+                  {getAllSupportedCurrencies()
+                    .filter(currency => !POPULAR_CURRENCIES.find(pc => pc.code === currency.code))
+                    .map((currency) => (
+                      <MenuItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </Box>
+
             {/* Visibility */}
             <Box>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>

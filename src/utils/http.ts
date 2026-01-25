@@ -1,18 +1,20 @@
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { AxiosJournalist } from './axios';
-import { PaginatedResponse } from '../types/ApiTypes';
+import { PaginatedResponse, CursorPaginatedResponse } from '../types/ApiTypes';
 
 // Re-export commonly used types for convenience
-export type { 
-  PaginatedResponse, 
-  ListResponse, 
-  Meta, 
-  PaginatedCollection, 
-  Collection, 
-  PaginationObject, 
-} from '../types/ApiTypes';
+export type {
+  PaginatedResponse,
+  CursorPaginatedResponse,
+  CursorPaginationMetadata,
+  ListResponse,
+  Meta,
+  PaginatedCollection,
+  Collection,
+  PaginationObject,
+} from '@/types/ApiTypes';
 
-export { DEFAULT_PAGINATION } from '../types/ApiTypes';
+export { DEFAULT_PAGINATION } from '@/types/ApiTypes';
 
 // ============================================================================
 // HTTP CLIENT CLASS
@@ -30,9 +32,10 @@ export class HTTPApi {
   // Base HTTP methods with generics
   protected _list = async <T>(url: string, query?: Record<string, any>, config?: AxiosRequestConfig): Promise<PaginatedResponse<T>> => {
     try {
-      const params = new URLSearchParams(query);
-      const paramString = params.size === 0 ? '' : `?${params.toString()}`
-      const response: AxiosResponse<PaginatedResponse<T>> = await this.axiosJ.axiosInstance.get(`${url}${paramString}`, config);
+      const response: AxiosResponse<PaginatedResponse<T>> = await this.axiosJ.axiosInstance.get(url, {
+        ...config,
+        params: query
+      });
       return response.data;
     } catch (error) {
       throw this.axiosJ.handleAxiosError(error as AxiosError);
@@ -41,9 +44,22 @@ export class HTTPApi {
 
   protected _listAll = async <T>(url: string, query?: Record<string, any>, config?: AxiosRequestConfig): Promise<PaginatedResponse<T>> => {
     try {
-      const params = new URLSearchParams(query);
-      const paramString = params.size === 0 ? '' : `?${params.toString()}`
-      const response: AxiosResponse<PaginatedResponse<T>> = await this.axiosJ.axiosInstance.get(`${url}${paramString}`, config);
+      const response: AxiosResponse<PaginatedResponse<T>> = await this.axiosJ.axiosInstance.get(url, {
+        ...config,
+        params: query
+      });
+      return response.data;
+    } catch (error) {
+      throw this.axiosJ.handleAxiosError(error as AxiosError);
+    }
+  };
+
+  protected _listWithCursor = async <T>(url: string, query?: Record<string, any>, config?: AxiosRequestConfig): Promise<CursorPaginatedResponse<T>> => {
+    try {
+      const response: AxiosResponse<CursorPaginatedResponse<T>> = await this.axiosJ.axiosInstance.get(url, {
+        ...config,
+        params: query
+      });
       return response.data;
     } catch (error) {
       throw this.axiosJ.handleAxiosError(error as AxiosError);

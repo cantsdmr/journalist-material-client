@@ -12,6 +12,7 @@ import { FundingAPI } from "./FundingAPI";
 import { PaymentTokenAPI } from "./PaymentTokenAPI";
 import { IyzicoTokenAPI } from "./IyzicoTokenAPI";
 import { PayoutAPI } from "./PayoutAPI";
+import { NotificationAPI } from "./NotificationAPI";
 
 /**
  * Main App API class that combines all regular application endpoints
@@ -31,6 +32,7 @@ export class AppAPI {
     public paymentToken: PaymentTokenAPI;
     public iyzicoToken: IyzicoTokenAPI;
     public payout: PayoutAPI;
+    public notification: NotificationAPI;
 
     constructor(axiosJ: AxiosJournalist) {
         this.user = new UserAPI(axiosJ);
@@ -46,6 +48,7 @@ export class AppAPI {
         this.paymentToken = new PaymentTokenAPI(axiosJ);
         this.iyzicoToken = new IyzicoTokenAPI(axiosJ);
         this.payout = new PayoutAPI(axiosJ);
+        this.notification = new NotificationAPI(axiosJ);
     }
 }
 
@@ -63,3 +66,4 @@ export * from "./FundingAPI";
 export * from "./PaymentTokenAPI";
 export * from "./IyzicoTokenAPI";
 export * from "./PayoutAPI";
+export * from "./NotificationAPI";

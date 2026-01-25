@@ -6,6 +6,7 @@ export type CreateChannelData = {
     bannerUrl: string;
     status: number;
     tags: string[];
+    defaultCurrency: string;
 };
 
 export type EditChannelData = {
@@ -16,6 +17,7 @@ export type EditChannelData = {
     bannerUrl?: string;
     status?: number;
     tags?: string[];
+    defaultCurrency?: string;
 };
 
 export type CreateChannelTierData = {

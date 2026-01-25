@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useApiContext } from './ApiContext';
 import { useAuth } from './AuthContext';
 import { createCtx } from './BaseContext';
+import { useFCM } from '@/hooks/useFCM';
 
 export interface AppState {
   // Loading state - true until Firebase and API are ready
@@ -19,6 +20,7 @@ export const [AppContext, useApp] = createCtx<AppState>();
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useAuth();
   const { isLoading: apiLoading, isAuthenticated: apiAuthenticated } = useApiContext();
+  const { requestPermission } = useFCM();
 
   const [state, setState] = useState<Omit<AppState, 'actions'>>({
     isLoading: true,
@@ -44,15 +46,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     // Firebase and API are ready
+    const isAuthenticated = !!auth.user && apiAuthenticated;
     setState({
       isLoading: false,
-      isAuthenticated: !!auth.user && apiAuthenticated,
+      isAuthenticated,
     });
+
+    // Auto-request FCM permission when user is authenticated
+    if (isAuthenticated) {
+      requestPermission();
+    }
   }, [
     auth.isLoading,
     auth.user,
     apiLoading,
     apiAuthenticated,
+    requestPermission,
   ]);
 
   const value: AppState = {

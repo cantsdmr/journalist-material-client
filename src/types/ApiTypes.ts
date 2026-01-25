@@ -1,14 +1,3 @@
-// ============================================================================
-// SHARED API TYPES (Auto-generated from backend)
-// ============================================================================
-// 
-// This file is automatically copied from the backend project.
-// DO NOT EDIT DIRECTLY - Edit the backend file instead:
-// backend/src/common/types/ApiTypes.ts
-//
-// To regenerate this file, run: npm run sync-types
-//
-
 /**
  * Pagination metadata returned by koa-pagination-v2 middleware
  * This matches both backend PaginationMetadata and frontend Meta interfaces
@@ -30,6 +19,25 @@ export interface PaginationMetadata {
 export interface PaginatedResponse<T> {
   items: T[];
   metadata: PaginationMetadata;
+}
+
+/**
+ * Cursor pagination metadata for infinite scroll
+ */
+export interface CursorPaginationMetadata {
+  limit: number;
+  hasMore: boolean;
+  nextCursor?: string;
+  prevCursor?: string;
+}
+
+/**
+ * Cursor-based paginated response structure
+ * Used for infinite scroll and real-time feeds
+ */
+export interface CursorPaginatedResponse<T> {
+  items: T[];
+  metadata: CursorPaginationMetadata;
 }
 
 /**

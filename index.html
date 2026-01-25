@@ -10,5 +10,17 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register Firebase Cloud Messaging service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then(registration => {
+            console.log('[SW] Firebase Messaging service worker registered:', registration);
+          })
+          .catch(err => {
+            console.error('[SW] Service worker registration failed:', err);
+          });
+      }
+    </script>
   </body>
 </html>

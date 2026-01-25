@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
+import {
   Box, AppBar, Toolbar, IconButton, Typography,
   Menu, MenuItem, useTheme as useMuiTheme,
-  ListItemIcon, ListItemText
+  ListItemIcon, ListItemText, CircularProgress
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -13,6 +13,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useTheme as useAppTheme } from '@/contexts/ThemeContext';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import AdminSidebar from './AdminSidebar';
 import { PATHS } from '@/constants/paths';
 
@@ -22,7 +23,8 @@ const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
   const muiTheme = useMuiTheme();
   const { isDarkMode, toggleTheme } = useAppTheme();
-  const { isLoading } = useApp();
+  const { isLoading, isAuthenticated } = useApp();
+  const { user } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -43,6 +45,21 @@ const AdminLayout: React.FC = () => {
 
   if (isLoading) {
     return null;
+  }
+
+  // Guard: Don't render authenticated components until API token is set
+  if (user && !isAuthenticated) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        bgcolor: 'background.default'
+      }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (

@@ -8,6 +8,7 @@ export * from './entities/Account';
 export * from './entities/ExpenseOrder';
 export * from './entities/Subscription';
 export * from './entities/Funding';
+export * from './entities/Notification';
 
 // Requests
 export * from './requests/NewsRequests';
@@ -19,10 +20,12 @@ export * from './requests/AuthRequests';
 export * from './requests/ExpenseOrderRequests';
 export * from './requests/SubscriptionRequests';
 export * from './requests/FundingRequests';
+export * from './requests/NotificationRequests';
 
 // Responses
 export * from './responses/NewsResponses';
 export * from './responses/TagResponses';
+export * from './responses/NotificationResponses';
 
 // Filters
 export * from './filters/NewsFilters';

@@ -12,6 +12,7 @@ export type Channel = {
     logoUrl?: string;
     bannerUrl?: string;
     status: number;
+    defaultCurrency: string;
     tags?: string[];
     tiers?: ChannelTier[];
     stats?: ChannelStats;

@@ -31,7 +31,6 @@ const ListChannels: React.FC = () => {
       // Use direct subscription API for all tiers
       const result = await api?.app.subscription?.createDirectSubscription(channelId, {
         tierId,
-        notificationLevel: 1,
         paymentMethodId: 'paypal_default' // Will be used for paid subscriptions
       });
 

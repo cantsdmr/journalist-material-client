@@ -22,7 +22,7 @@ const StudioLayout: React.FC = () => {
   const navigate = useNavigate();
   const muiTheme = useMuiTheme();
   const { isDarkMode, toggleTheme } = useAppTheme();
-  const { isLoading } = useApp();
+  const { isLoading, isAuthenticated } = useApp();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -49,7 +49,7 @@ const StudioLayout: React.FC = () => {
     navigate(`${PATHS.STUDIO_SEARCH}?q=${encodeURIComponent(suggestion.text)}`);
   };
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return null;
   }
 

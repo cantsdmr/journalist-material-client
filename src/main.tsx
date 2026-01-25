@@ -9,6 +9,7 @@ import { ApiProvider } from '@/contexts/ApiContext';
 import { ProfileProvider } from '@/contexts/ProfileContext';
 import { AppProvider } from './contexts/AppContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
+import { NotificationCenterProvider } from '@/contexts/NotificationCenterContext';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
@@ -24,9 +25,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             <ProfileProvider>
               <ThemeProvider>
                 <AppProvider>
-                  <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <App />
-                  </LocalizationProvider>
+                  <NotificationCenterProvider>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <App />
+                    </LocalizationProvider>
+                  </NotificationCenterProvider>
                 </AppProvider>
               </ThemeProvider>
             </ProfileProvider>

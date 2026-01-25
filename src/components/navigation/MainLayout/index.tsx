@@ -13,7 +13,8 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Divider
+  Divider,
+  CircularProgress
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -29,12 +30,14 @@ import { useApp } from '@/contexts/AppContext';
 import { useAuth } from '@/contexts/AuthContext';
 import SearchBar from '@/components/search/SearchBar';
 import { VERSION } from '@/constants/values';
+import NotificationBell from '@/components/notification-center/NotificationBell';
+import NotificationCenter from '@/components/notification-center/NotificationCenter';
 
 const MainLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const muiTheme = useMuiTheme();
-  const { isLoading } = useApp();
+  const { isLoading, isAuthenticated } = useApp();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [profileMenuAnchor, setProfileMenuAnchor] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
@@ -89,6 +92,21 @@ const MainLayout: React.FC = () => {
 
   if (isLoading) {
     return null;
+  }
+
+  // Guard: Don't render authenticated components until API token is set
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        bgcolor: 'background.default'
+      }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   return (
@@ -213,7 +231,7 @@ const MainLayout: React.FC = () => {
               {/* Spacer */}
               <Box sx={{ flexGrow: 1 }} />
 
-              {/* Right Section - Search Icon (Mobile) + Account Button */}
+              {/* Right Section - Search Icon (Mobile) + Notifications + Account Button */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {/* Search Icon for Mobile */}
                 <IconButton
@@ -223,6 +241,9 @@ const MainLayout: React.FC = () => {
                 >
                   <SearchIcon />
                 </IconButton>
+
+                {/* Notification Bell */}
+                <NotificationBell />
 
                 {/* Account Button with Dropdown */}
                 <IconButton
@@ -239,6 +260,9 @@ const MainLayout: React.FC = () => {
           )}
         </Toolbar>
       </AppBar>
+
+      {/* Notification Center Drawer */}
+      <NotificationCenter />
 
       {/* Profile Dropdown Menu */}
       <Menu

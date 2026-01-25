@@ -101,7 +101,6 @@ export class SubscriptionAPI extends HTTPApi {
     channelId: string, 
     data: { 
       tierId: string; 
-      notificationLevel?: number; 
       paymentMethodId?: string; 
     }
   ): Promise<{ 
