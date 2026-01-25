@@ -6,15 +6,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meta Journo</title>
-    <script type="module" crossorigin src="/journalist-material-client/assets/index-CayhUdhf.js"></script>
-    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-mui-C8IoGBw0.js">
-    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-firebase-DaqPSQOy.js">
-    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-core-DxbnwfQO.js">
+    <script type="module" crossorigin src="/journalist-material-client/assets/index-Bi1ghEUK.js"></script>
+    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-mui-COQdHzF0.js">
+    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-firebase-DMTI5dsU.js">
+    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-core-BK3496kz.js">
     <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-editor-D13Gvn5f.js">
-    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-charts-CTsDP8Qs.js">
+    <link rel="modulepreload" crossorigin href="/journalist-material-client/assets/vendor-charts-BXZysh_y.js">
     <link rel="stylesheet" crossorigin href="/journalist-material-client/assets/index-B9zGiQnV.css">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Register Firebase Cloud Messaging service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then(registration => {
+            console.log('[SW] Firebase Messaging service worker registered:', registration);
+          })
+          .catch(err => {
+            console.error('[SW] Service worker registration failed:', err);
+          });
+      }
+    </script>
   </body>
 </html>
