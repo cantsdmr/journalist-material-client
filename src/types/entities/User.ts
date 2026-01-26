@@ -13,3 +13,13 @@ export type User = {
     lastLogin?: string;
     channelSubscriptions?: ChannelSubscription[];
 };
+
+export interface UserPreference {
+    id: string | null;
+    userId: string;
+    themeInfo?: {
+        mode: 'light' | 'dark';
+    };
+    createdAt: Date | string | null;
+    updatedAt: Date | string | null;
+}

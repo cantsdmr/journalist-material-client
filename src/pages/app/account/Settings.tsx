@@ -8,18 +8,16 @@ import {
   styled
 } from '@mui/material';
 import {
-  AccountCircle,
-  Payment,
-  Subscriptions as SubscriptionsIcon,
+  Palette,
+  Notifications,
   ArrowForward,
   ArrowBack
 } from '@mui/icons-material';
-import ProfileTab from '@/components/account/ProfileTab';
-import PayoutMethodsTab from '@/components/account/PayoutMethodsTab';
-import SubscriptionsTab from '@/components/account/SubscriptionsTab';
+import AppearanceSettingsTab from '@/components/account/AppearanceSettingsTab';
+import NotificationPreferencesTab from '@/components/account/NotificationPreferencesTab';
 import { useAuth } from '@/contexts/AuthContext';
 
-type SettingSection = 'profile' | 'payment' | 'subscriptions';
+type SettingSection = 'appearance' | 'notifications';
 
 const ArrowButton = styled(IconButton)(({ theme }) => ({
   position: 'absolute',
@@ -38,17 +36,16 @@ const ArrowButton = styled(IconButton)(({ theme }) => ({
   }
 }));
 
-const Account: React.FC = () => {
-  const [activeSection, setActiveSection] = useState<SettingSection>('profile');
+const Settings: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<SettingSection>('appearance');
   const { user } = useAuth();
   const tabsRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
 
   const menuItems = [
-    { id: 'profile' as SettingSection, icon: <AccountCircle />, label: 'Profile' },
-    { id: 'payment' as SettingSection, icon: <Payment />, label: 'Payout Methods' },
-    { id: 'subscriptions' as SettingSection, icon: <SubscriptionsIcon />, label: 'Subscriptions' },
+    { id: 'appearance' as SettingSection, icon: <Palette />, label: 'Appearance' },
+    { id: 'notifications' as SettingSection, icon: <Notifications />, label: 'Notifications' },
   ];
 
   const checkScroll = () => {
@@ -89,12 +86,10 @@ const Account: React.FC = () => {
 
   const renderContent = () => {
     switch (activeSection) {
-      case 'profile':
-        return <ProfileTab />;
-      case 'payment':
-        return <PayoutMethodsTab />;
-      case 'subscriptions':
-        return <SubscriptionsTab />;
+      case 'appearance':
+        return <AppearanceSettingsTab />;
+      case 'notifications':
+        return <NotificationPreferencesTab />;
       default:
         return null;
     }
@@ -106,14 +101,11 @@ const Account: React.FC = () => {
       <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            {user?.displayName || 'Account'}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            ({user?.email || 'user'})
+            Settings
           </Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">
-          Your personal account
+          Manage your application preferences
         </Typography>
       </Box>
 
@@ -193,4 +185,4 @@ const Account: React.FC = () => {
   );
 };
 
-export default Account; 
+export default Settings;

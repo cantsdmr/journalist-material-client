@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ApiProvider } from '@/contexts/ApiContext';
 import { ProfileProvider } from '@/contexts/ProfileContext';
+import { UserPreferencesProvider } from '@/contexts/UserPreferencesContext';
 import { AppProvider } from './contexts/AppContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { NotificationCenterProvider } from '@/contexts/NotificationCenterContext';
@@ -22,17 +23,19 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <NotificationProvider>
         <AuthProvider>
           <ApiProvider>
-            <ProfileProvider>
-              <ThemeProvider>
-                <AppProvider>
-                  <NotificationCenterProvider>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                      <App />
-                    </LocalizationProvider>
-                  </NotificationCenterProvider>
-                </AppProvider>
-              </ThemeProvider>
-            </ProfileProvider>
+            <AppProvider>
+              <ProfileProvider>
+                <UserPreferencesProvider>
+                  <ThemeProvider>
+                    <NotificationCenterProvider>
+                      <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <App />
+                      </LocalizationProvider>
+                    </NotificationCenterProvider>
+                  </ThemeProvider>
+                </UserPreferencesProvider>
+              </ProfileProvider>
+            </AppProvider>
           </ApiProvider>
         </AuthProvider>
       </NotificationProvider>

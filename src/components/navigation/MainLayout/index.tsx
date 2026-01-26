@@ -23,6 +23,7 @@ import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PersonIcon from '@mui/icons-material/Person';
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
@@ -73,6 +74,11 @@ const MainLayout: React.FC = () => {
   const handleProfileClick = () => {
     handleProfileMenuClose();
     navigate(PATHS.APP_ACCOUNT);
+  };
+
+  const handleSettingsClick = () => {
+    handleProfileMenuClose();
+    navigate(PATHS.APP_ACCOUNT_SETTINGS);
   };
 
   const handleCreatorStudioClick = () => {
@@ -296,7 +302,13 @@ const MainLayout: React.FC = () => {
           <ListItemIcon>
             <PersonIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Profile</ListItemText>
+          <ListItemText>Account</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleSettingsClick}>
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Settings</ListItemText>
         </MenuItem>
         <MenuItem onClick={handleCreatorStudioClick}>
           <ListItemIcon>

@@ -5,7 +5,8 @@ import {
     NotificationFeedResponse,
     UnreadCountResponse,
     GetNotificationsParams,
-    GetNotificationFeedParams
+    GetNotificationFeedParams,
+    NotificationTypeMetadata
 } from "@/types/index";
 
 const API_PATH = '/api/notifications';
@@ -118,5 +119,14 @@ export class NotificationAPI extends HTTPApi {
         const response = await this._listWithCursor<Notification>(FEED_PATH, queryParams);
 
         return response;
+    }
+
+    /**
+     * Get notification type metadata for building settings UI
+     * Returns human-readable names, descriptions, and categories for all notification types
+     */
+    public async getNotificationTypeMetadata(): Promise<NotificationTypeMetadata[]> {
+        const response = await this._get<{ notificationTypes: NotificationTypeMetadata[] }>(`${API_PATH}/types`);
+        return response.notificationTypes;
     }
 }

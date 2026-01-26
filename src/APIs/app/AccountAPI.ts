@@ -9,7 +9,9 @@ import {
     AddPaymentMethodData,
     UpdatePaymentMethodData,
     SubscribeData,
-    Channel
+    Channel,
+    NotificationPreference,
+    UserPreference
 } from "../../types";
 
 const API_PATH = '/api/account';
@@ -83,5 +85,40 @@ export class AccountAPI extends HTTPApi {
 
   public async savePayPalPayoutMethod(data: { payerId: string; email: string }) {
     return this._post<PaymentMethod>(`${API_PATH}/paypal/save-payout-method`, data);
+  }
+
+  // Notification Preferences endpoints
+  public async getNotificationPreferences() {
+    return this._get<{ preferences: NotificationPreference[] }>(`${API_PATH}/notification-preferences`);
+  }
+
+  public async getNotificationPreference(notificationTypeId: number) {
+    return this._get<NotificationPreference>(`${API_PATH}/notification-preferences/${notificationTypeId}`);
+  }
+
+  public async updateNotificationPreference(
+    notificationTypeId: number,
+    data: { pushEnabled?: boolean; inAppEnabled?: boolean }
+  ) {
+    return this._patch<NotificationPreference>(`${API_PATH}/notification-preferences/${notificationTypeId}`, data);
+  }
+
+  public async bulkUpdateNotificationPreferences(
+    preferences: Array<{
+      notificationTypeId: number;
+      pushEnabled?: boolean;
+      inAppEnabled?: boolean;
+    }>
+  ) {
+    return this._patch<{ preferences: NotificationPreference[] }>(`${API_PATH}/notification-preferences/bulk`, { preferences });
+  }
+
+  // User Preferences endpoints (theme settings, etc.)
+  public async getUserPreference() {
+    return this._get<UserPreference>(`${API_PATH}/preference`);
+  }
+
+  public async updateUserPreference(data: { themeInfo?: { mode: 'light' | 'dark' } }) {
+    return this._patch<UserPreference>(`${API_PATH}/preference`, data);
   }
 } 
