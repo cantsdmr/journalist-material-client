@@ -15,7 +15,6 @@ import {
 } from '@mui/icons-material';
 import AppearanceSettingsTab from '@/components/account/AppearanceSettingsTab';
 import NotificationPreferencesTab from '@/components/account/NotificationPreferencesTab';
-import { useAuth } from '@/contexts/AuthContext';
 
 type SettingSection = 'appearance' | 'notifications';
 
