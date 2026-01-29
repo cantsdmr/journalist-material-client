@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT, SEARCH, EXPENSE_ORDER, ADMIN, SUBSCRIPTION } from '@/constants/paths';
+import { PATHS, NEWS, CHANNEL, POLL, ACCOUNT, SEARCH, BOOKMARKS, EXPENSE_ORDER, ADMIN, SUBSCRIPTION } from '@/constants/paths';
 import { useApp } from '@/contexts/AppContext';
 
 // Layouts
@@ -38,6 +38,9 @@ import ViewPoll from '@/pages/app/poll/ViewPoll';
 // Account pages
 import Account from '@/pages/app/account/Account';
 import Settings from '@/pages/app/account/Settings';
+
+// Bookmarks pages
+import MyBookmarks from '@/pages/app/bookmarks/MyBookmarks';
 
 // Expense Order pages
 import ListExpenseOrders from '@/pages/app/expense-order/ListExpenseOrders';
@@ -134,6 +137,7 @@ const App: React.FC = () => {
           <Route index element={<ListExpenseOrders />} />
           <Route path={`${EXPENSE_ORDER.VIEW}`} element={<ViewExpenseOrder />} />
         </Route>
+        <Route path={BOOKMARKS.ROOT} element={<MyBookmarks />} />
         <Route path={SEARCH.ROOT} element={<SearchPage />} />
       </Route>
 

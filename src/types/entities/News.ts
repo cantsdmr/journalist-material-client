@@ -26,6 +26,9 @@ export type News = {
 
     // access control
     accessInfo?: AccessInfo;
+
+    // bookmark status
+    isBookmarked?: boolean;
 };
 
 export type QualityMetrics = {

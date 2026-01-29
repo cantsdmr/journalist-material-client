@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -8,7 +8,9 @@ import {
   alpha,
   useTheme,
   Button,
-  Paper
+  Paper,
+  IconButton,
+  CircularProgress
 } from '@mui/material';
 import { Poll } from '@/types/index';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,9 +18,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import LockIcon from '@mui/icons-material/Lock';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import { POLL_MEDIA_FORMAT } from '@/enums/PollEnums';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
+import { useApiCall } from '@/hooks/useApiCall';
+import { useApiContext } from '@/contexts/ApiContext';
+import { useNotification } from '@/contexts/NotificationContext';
 
 interface PollCardProps {
   poll: Poll;
@@ -34,8 +41,51 @@ interface PollCardProps {
 const PollCard: React.FC<PollCardProps> = ({ poll, onVote, userVote, showResults = false, disabled = false, showAsPreview = false, mode = 'scroll' }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { api } = useApiContext();
+  const { showNotification } = useNotification();
+  const { execute: executeBookmark } = useApiCall();
+
   const [hoveredOption, setHoveredOption] = useState<string | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(poll.isBookmarked || false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const totalVotes = poll.stats?.totalVotes || 0;
+
+  // Update local state when poll.isBookmarked prop changes
+  useEffect(() => {
+    setIsBookmarked(poll.isBookmarked || false);
+  }, [poll.isBookmarked]);
+
+  // Handle bookmark toggle
+  const handleBookmarkToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (bookmarkLoading) return;
+
+    const previousState = isBookmarked;
+    setIsBookmarked(!isBookmarked);
+    setBookmarkLoading(true);
+
+    try {
+      if (previousState) {
+        await executeBookmark(
+          () => api.app.bookmark.unbookmarkPoll(String(poll.id)),
+          { showErrorToast: true }
+        );
+        showNotification('Bookmark removed', 'success');
+      } else {
+        await executeBookmark(
+          () => api.app.bookmark.bookmarkPoll(String(poll.id)),
+          { showErrorToast: true }
+        );
+        showNotification('Poll bookmarked', 'success');
+      }
+    } catch (error) {
+      setIsBookmarked(previousState);
+      showNotification('Failed to update bookmark', 'error');
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
 
   // Check if user has limited access to premium content
   const hasLimitedAccess = poll.accessInfo && !poll.accessInfo.canAccess;
@@ -172,7 +222,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, userVote, showResults
       >
         {/* Top Section - Creator Info */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Avatar
               sx={{
                 width: 40,
@@ -184,7 +234,7 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, userVote, showResults
             >
               {poll.creator?.displayName?.charAt(0).toUpperCase()}
             </Avatar>
-            <Box sx={{ ml: 1.5 }}>
+            <Box sx={{ ml: 0.5 }}>
               <Typography
                 variant="body2"
                 sx={{
@@ -207,10 +257,45 @@ const PollCard: React.FC<PollCardProps> = ({ poll, onVote, userVote, showResults
                 {formatDistanceToNow(new Date(poll.createdAt), { addSuffix: true })}
               </Typography>
             </Box>
+
+            {/* Left side action buttons */}
+            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ ml: 1 }}>
+              {/* Bookmark Button */}
+              <IconButton
+                className="action-button"
+                size="small"
+                onClick={handleBookmarkToggle}
+                disabled={bookmarkLoading}
+                sx={{
+                  bgcolor: alpha('#fff', 0.2),
+                  backdropFilter: 'blur(10px)',
+                  color: 'white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                  width: 32,
+                  height: 32,
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.8),
+                    transform: 'scale(1.1)'
+                  },
+                  '&:disabled': {
+                    bgcolor: alpha('#fff', 0.1)
+                  },
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {bookmarkLoading ? (
+                  <CircularProgress size={16} sx={{ color: 'white' }} />
+                ) : isBookmarked ? (
+                  <BookmarkIcon sx={{ fontSize: '1rem', color: theme.palette.primary.light }} />
+                ) : (
+                  <BookmarkBorderIcon sx={{ fontSize: '1rem' }} />
+                )}
+              </IconButton>
+            </Stack>
           </Box>
 
           {/* Tags and Status */}
-          <Stack direction="row" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} alignItems="center">
             {poll.accessInfo?.requiresPremium && (
               <Chip
                 icon={<LockIcon sx={{ fontSize: '0.875rem' }} />}

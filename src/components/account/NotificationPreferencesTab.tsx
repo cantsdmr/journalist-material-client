@@ -10,7 +10,6 @@ import {
   Button,
   Skeleton,
   Alert,
-  Chip
 } from '@mui/material';
 import { Save, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -33,7 +32,6 @@ const categoryOrder = ['subscription', 'payout', 'funding', 'channel', 'system']
 
 const NotificationPreferencesTab: React.FC = () => {
   const [preferences, setPreferences] = useState<PreferenceWithMetadata[]>([]);
-  const [metadata, setMetadata] = useState<NotificationTypeMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +61,6 @@ const NotificationPreferencesTab: React.FC = () => {
           metadata: metadataMap.get(pref.notificationTypeId)
         }));
         setPreferences(prefsWithMeta);
-        setMetadata(metadataResult);
       } else {
         setError('Failed to load notification preferences');
       }

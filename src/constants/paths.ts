@@ -53,6 +53,10 @@ export const SEARCH = {
   ROOT: 'search'
 } as const;
 
+export const BOOKMARKS = {
+  ROOT: 'bookmarks'
+} as const;
+
 // Admin feature bases
 export const ADMIN = {
   ROOT: 'admin',
@@ -118,6 +122,7 @@ export const PATHS = {
   APP_SUBSCRIPTIONS: `${ENV_BASE}${BASE.APP}/subscriptions`,
   APP_POLLS: `${ENV_BASE}${BASE.APP}/${POLL.ROOT}`,
   APP_SEARCH: `${ENV_BASE}${BASE.APP}/${SEARCH.ROOT}`,
+  APP_BOOKMARKS: `${ENV_BASE}${BASE.APP}/${BOOKMARKS.ROOT}`,
   APP_ACCOUNT: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}`,
   APP_ACCOUNT_PROFILE: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}/${ACCOUNT.PROFILE}`,
   APP_ACCOUNT_PAYMENT_METHODS: `${ENV_BASE}${BASE.APP}/${ACCOUNT.ROOT}/${ACCOUNT.PAYMENT_METHODS}`,

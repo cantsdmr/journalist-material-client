@@ -38,7 +38,6 @@ const ArrowButton = styled(IconButton)(({ theme }) => ({
 
 const Settings: React.FC = () => {
   const [activeSection, setActiveSection] = useState<SettingSection>('appearance');
-  const { user } = useAuth();
   const tabsRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);

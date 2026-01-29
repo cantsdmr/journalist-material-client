@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -7,7 +7,8 @@ import {
   IconButton,
   Avatar,
   Chip,
-  useTheme
+  useTheme,
+  CircularProgress
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { News } from '@/types/index';
@@ -16,8 +17,13 @@ import DefaultNewsAvatar from '@/assets/BG_journo.png';
 import FavoriteIcon from '@mui/icons-material/FavoriteBorder';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import { PATHS } from '@/constants/paths';
 import { formatDistanceToNow } from 'date-fns';
+import { useApiCall } from '@/hooks/useApiCall';
+import { useApiContext } from '@/contexts/ApiContext';
+import { useNotification } from '@/contexts/NotificationContext';
 
 interface NewsEntryProps {
   news: News;
@@ -27,7 +33,18 @@ interface NewsEntryProps {
 const NewsEntry: React.FC<NewsEntryProps> = ({ news, mode = 'scroll' }) => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { api } = useApiContext();
+  const { showNotification } = useNotification();
+  const { execute: executeBookmark } = useApiCall();
   const coverMedia = news.media?.find(m => m.type === NEWS_MEDIA_TYPE.COVER);
+
+  const [isBookmarked, setIsBookmarked] = useState(news.isBookmarked || false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
+  // Update local state when news.isBookmarked prop changes
+  useEffect(() => {
+    setIsBookmarked(news.isBookmarked || false);
+  }, [news.isBookmarked]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (!(e.target as HTMLElement).closest('.action-button')) {
@@ -38,6 +55,37 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news, mode = 'scroll' }) => {
   const handleChannelClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(PATHS.APP_CHANNEL_VIEW.replace(':channelId', news.channel.id));
+  };
+
+  const handleBookmarkToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (bookmarkLoading) return;
+
+    const previousState = isBookmarked;
+    setIsBookmarked(!isBookmarked);
+    setBookmarkLoading(true);
+
+    try {
+      if (previousState) {
+        await executeBookmark(
+          () => api.app.bookmark.unbookmarkNews(String(news.id)),
+          { showErrorToast: true }
+        );
+        showNotification('Bookmark removed', 'success');
+      } else {
+        await executeBookmark(
+          () => api.app.bookmark.bookmarkNews(String(news.id)),
+          { showErrorToast: true }
+        );
+        showNotification('News bookmarked', 'success');
+      }
+    } catch (error) {
+      setIsBookmarked(previousState);
+      showNotification('Failed to update bookmark', 'error');
+    } finally {
+      setBookmarkLoading(false);
+    }
   };
 
   return (
@@ -213,28 +261,58 @@ const NewsEntry: React.FC<NewsEntryProps> = ({ news, mode = 'scroll' }) => {
                   </Typography>
                 </Box>
 
-                {/* Favorite Button */}
-                <IconButton
-                  className="action-button"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Handle like
-                  }}
-                  sx={{
-                    bgcolor: alpha('#fff', 0.2),
-                    backdropFilter: 'blur(10px)',
-                    color: 'white',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                    '&:hover': {
-                      bgcolor: alpha(theme.palette.error.main, 0.8),
-                      transform: 'scale(1.1)'
-                    },
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <FavoriteIcon sx={{ fontSize: '1rem' }} />
-                </IconButton>
+                {/* Action Buttons */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  {/* Bookmark Button */}
+                  <IconButton
+                    className="action-button"
+                    size="small"
+                    onClick={handleBookmarkToggle}
+                    disabled={bookmarkLoading}
+                    sx={{
+                      bgcolor: alpha('#fff', 0.2),
+                      backdropFilter: 'blur(10px)',
+                      color: 'white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      '&:hover': {
+                        bgcolor: alpha(theme.palette.primary.main, 0.8),
+                        transform: 'scale(1.1)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {bookmarkLoading ? (
+                      <CircularProgress size={16} sx={{ color: 'white' }} />
+                    ) : isBookmarked ? (
+                      <BookmarkIcon sx={{ fontSize: '1rem', color: theme.palette.primary.light }} />
+                    ) : (
+                      <BookmarkBorderIcon sx={{ fontSize: '1rem' }} />
+                    )}
+                  </IconButton>
+
+                  {/* Favorite Button */}
+                  <IconButton
+                    className="action-button"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle like
+                    }}
+                    sx={{
+                      bgcolor: alpha('#fff', 0.2),
+                      backdropFilter: 'blur(10px)',
+                      color: 'white',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      '&:hover': {
+                        bgcolor: alpha(theme.palette.error.main, 0.8),
+                        transform: 'scale(1.1)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <FavoriteIcon sx={{ fontSize: '1rem' }} />
+                  </IconButton>
+                </Box>
               </Box>
             </Box>
           </>

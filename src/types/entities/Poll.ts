@@ -51,6 +51,9 @@ export type Poll = {
 
     // access control
     accessInfo?: AccessInfo;
+
+    // bookmark status
+    isBookmarked?: boolean;
 };
 
 export type PollOption = {

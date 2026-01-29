@@ -8,6 +8,7 @@ import ExploreIcon from '@mui/icons-material/Explore';
 import RssFeedIcon from '@mui/icons-material/RssFeed';
 import HomeIcon from '@mui/icons-material/Home';
 import PollIcon from '@mui/icons-material/Poll';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { PATHS } from '@/constants/paths';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
@@ -30,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     { path: `${PATHS.APP_NEWS_DISCOVER}`, icon: <ExploreIcon />, label: 'Discover' },
     { path: `${PATHS.APP_POLLS}`, icon: <PollIcon />, label: 'Polls' },
     { path: `${PATHS.APP_CHANNELS}`, icon: <RssFeedIcon />, label: 'Channels' },
+    { path: `${PATHS.APP_BOOKMARKS}`, icon: <BookmarkIcon />, label: 'Bookmarks' },
   ];
 
   const exploreCategories = [

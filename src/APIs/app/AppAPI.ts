@@ -2,6 +2,7 @@ import { AxiosJournalist } from "@/utils/axios";
 import { ChannelAPI } from "./ChannelAPI";
 import { NewsAPI } from "./NewsAPI";
 import { PollAPI } from "./PollAPI";
+import { BookmarkAPI } from "./BookmarkAPI";
 import { UserAPI } from "./UserAPI";
 import { AccountAPI } from "./AccountAPI";
 import { ExpenseOrderAPI } from "./ExpenseOrderAPI";
@@ -22,6 +23,7 @@ export class AppAPI {
     public user: UserAPI;
     public poll: PollAPI;
     public news: NewsAPI;
+    public bookmark: BookmarkAPI;
     public channel: ChannelAPI;
     public account: AccountAPI;
     public expenseOrder: ExpenseOrderAPI;
@@ -38,6 +40,7 @@ export class AppAPI {
         this.user = new UserAPI(axiosJ);
         this.poll = new PollAPI(axiosJ);
         this.news = new NewsAPI(axiosJ);
+        this.bookmark = new BookmarkAPI(axiosJ);
         this.channel = new ChannelAPI(axiosJ);
         this.account = new AccountAPI(axiosJ);
         this.expenseOrder = new ExpenseOrderAPI(axiosJ);
@@ -56,6 +59,7 @@ export class AppAPI {
 export * from "./ChannelAPI";
 export * from "./NewsAPI";
 export * from "./PollAPI";
+export * from "./BookmarkAPI";
 export * from "./UserAPI";
 export * from "./AccountAPI";
 export * from "./ExpenseOrderAPI";

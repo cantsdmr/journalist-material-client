@@ -53,21 +53,14 @@ export const useFirebaseAuth = (firebaseAuth: Auth): AuthState => {
     }
 
     if (user) {
-      // Immediately refresh token to ensure it's valid
-      user.getIdToken(true).catch(err => {
-        console.error('Error refreshing token on mount:', err);
-      });
-
       // Set up periodic refresh (every 50 minutes)
       tokenRefreshInterval.current = setInterval(async () => {
         try {
-          await user.getIdToken(true); // Force refresh
-          console.log('Token refreshed automatically');
-
           // Notify all subscribers about token refresh
           tokenRefreshCallbacks.current.forEach(callback => {
             try {
               callback();
+              console.log('Token refresh callback called automatically');
             } catch (error) {
               console.error('Error in token refresh callback:', error);
             }
