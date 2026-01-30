@@ -1,3 +1,4 @@
+import { PollStatus, PollMediaType, PollMediaFormat } from "@/enums/PollEnums";
 import { AccessInfo } from "../ApiTypes";
 
 export type Poll = {
@@ -6,7 +7,7 @@ export type Poll = {
     description?: string;
     channelId: string;
     creatorId: string;
-    statusId: number;
+    statusId: PollStatus;
     createdAt: string;
     updatedAt: string;
     deletedAt?: string | null;
@@ -37,10 +38,6 @@ export type Poll = {
         price: number;
         order: number;
     };
-    status?: {
-        id: number;
-        name: string;
-    };
     stats: PollStatistics;
     tags: PollTag[];
     funding?: PollFunding;
@@ -65,15 +62,10 @@ export type PollOption = {
 export type PollMedia = {
     id: string;
     pollId: string;
-    type: number;
-    format: number;
+    type: PollMediaType;
+    format: PollMediaFormat;
     url: string;
     caption?: string;
-};
-
-export type PollStatus = {
-    id: number;
-    name: string;
 };
 
 export type PollTag = {
@@ -104,10 +96,7 @@ export type PollFunding = {
     id: string;
     currentAmount: number;
     goalAmount: number;
-    status: {
-        id: number;
-        name: string;
-    };
+    status: PollStatus;
     contributions: Array<{
         id: string;
         amount: number;

@@ -15,6 +15,7 @@ import { Save, Notifications as NotificationsIcon } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { NotificationPreference, NotificationTypeMetadata } from '@/types/index';
 import { useApiCall } from '@/hooks/useApiCall';
+import { NotificationType } from '@/enums/NotificationEnums';
 
 interface PreferenceWithMetadata extends NotificationPreference {
   metadata?: NotificationTypeMetadata;
@@ -72,7 +73,7 @@ const NotificationPreferencesTab: React.FC = () => {
   };
 
   const handleToggle = (
-    notificationTypeId: number,
+    notificationTypeId: NotificationType,
     field: 'pushEnabled' | 'inAppEnabled',
     value: boolean
   ) => {

@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { Box, Tabs, Tab, Typography } from '@mui/material';
 import ImageUpload from '../ImageUpload';
 import VideoUpload from '../VideoUpload';
-import { NEWS_MEDIA_FORMAT } from '@/enums/NewsEnums';
-import { POLL_MEDIA_FORMAT } from '@/enums/PollEnums';
+import { NEWS_MEDIA_FORMAT, type NewsMediaFormat, type NewsMediaType } from '@/enums/NewsEnums';
+import { POLL_MEDIA_FORMAT, type PollMediaFormat, type PollMediaType } from '@/enums/PollEnums';
 
 interface MediaItem {
   id: string;
   url: string;
-  type: number;
-  format: number;
+  type: NewsMediaType | PollMediaType;
+  format: NewsMediaFormat | PollMediaFormat;
   caption?: string;
 }
 
 interface MediaUploadProps {
   value: MediaItem | null;
   onChange: (media: MediaItem | null) => void;
-  mediaTypeId: number;
+  mediaTypeId: NewsMediaType | PollMediaType;
   title?: string;
   description?: string;
   useNewsFormats?: boolean; // Flag to determine which enum to use

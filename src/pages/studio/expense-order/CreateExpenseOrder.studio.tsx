@@ -12,7 +12,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
-import { getExpenseTypeOptions } from '@/enums/ExpenseTypeEnums';
+import { ALL_EXPENSE_TYPES } from '@/enums/ExpenseTypeEnums';
 
 const CreateExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
@@ -22,9 +22,9 @@ const CreateExpenseOrderStudio: React.FC = () => {
 
   // Get channels from profile context
   const channels = profile?.staffChannels?.map(staffChannel => staffChannel.channel) || [];
-  
+
   // Get expense types from static enum
-  const expenseTypes = getExpenseTypeOptions();
+  const expenseTypes = ALL_EXPENSE_TYPES;
 
   const handleSave = async (data: CreateExpenseOrderData) => {
     const result = await execute(

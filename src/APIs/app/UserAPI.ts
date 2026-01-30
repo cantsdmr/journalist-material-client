@@ -7,8 +7,8 @@ export type CreateUserData = {
     externalId: string;
     displayName: string;
     photoUrl: string;
-    roleId: number;
-    statusId: number;
+    roleId: string;
+    statusId: string;
 };
 
 const API_PATH = '/api/users';

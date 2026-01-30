@@ -37,6 +37,7 @@ import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Channel } from '@/types/entities/Channel';
 import { PaginatedResponse } from '@/utils/http';
 import { PATHS } from '@/constants/paths';
+import { CHANNEL_STATUS, getChannelStatusLabel, getChannelStatusColor, ALL_CHANNEL_STATUSES, ChannelStatus } from '@/enums/ChannelEnums';
 
 const ChannelAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -127,25 +128,6 @@ const ChannelAdmin: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-    switch (status) {
-      case 1: return 'success'; // Active
-      case 2: return 'warning'; // Pending
-      case 3: return 'error';   // Suspended
-      case 4: return 'default'; // Inactive
-      default: return 'default';
-    }
-  };
-
-  const getStatusName = (status: number): string => {
-    switch (status) {
-      case 1: return 'Active';
-      case 2: return 'Pending';
-      case 3: return 'Suspended';
-      case 4: return 'Inactive';
-      default: return 'Unknown';
-    }
-  };
 
   const columns: Column[] = [
     {
@@ -189,8 +171,8 @@ const ChannelAdmin: React.FC = () => {
       sortable: true,
       format: (value) => (
         <Chip
-          label={getStatusName(value)}
-          color={getStatusColor(value)}
+          label={getChannelStatusLabel(value)}
+          color={getChannelStatusColor(value)}
           size="small"
         />
       ),
@@ -260,12 +242,7 @@ const ChannelAdmin: React.FC = () => {
     },
   ];
 
-  const statusOptions = [
-    { value: 1, label: 'Active' },
-    { value: 2, label: 'Pending' },
-    { value: 3, label: 'Suspended' },
-    { value: 4, label: 'Inactive' }
-  ];
+  const statusOptions = ALL_CHANNEL_STATUSES;
 
   const filters = (
     <Stack direction="row" spacing={1}>
@@ -437,7 +414,7 @@ const ChannelAdmin: React.FC = () => {
                 <Select
                   value={selectedChannel.status}
                   label="Status"
-                  onChange={(e) => setSelectedChannel({ ...selectedChannel, status: e.target.value as number })}
+                  onChange={(e) => setSelectedChannel({ ...selectedChannel, status: e.target.value as ChannelStatus })}
                 >
                   {statusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>

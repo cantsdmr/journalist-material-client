@@ -1,4 +1,5 @@
 import { ChannelSubscription } from "./Channel";
+import { UserRole, UserStatus } from "@/enums/UserEnums";
 
 export type User = {
     id: string;
@@ -6,8 +7,8 @@ export type User = {
     email: string;
     displayName: string;
     photoUrl?: string;
-    roleId: number;
-    statusId: number;
+    roleId: UserRole;
+    statusId: UserStatus;
     createdAt: string;
     updatedAt: string;
     lastLogin?: string;

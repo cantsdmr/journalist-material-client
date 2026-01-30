@@ -1,12 +1,13 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from "@/utils/http";
+import { SearchType, SearchSort } from "@/enums/SearchEnums";
 
 export interface SearchFilters {
-  type?: number;
+  type?: SearchType;
   tags?: string[];
   dateFrom?: Date;
   dateTo?: Date;
-  sortBy?: number;
+  sortBy?: SearchSort;
   onlyPremium?: boolean;
   channelId?: string;
 }
@@ -24,8 +25,8 @@ export interface SearchResult {
   endDate?: string;
   voteCount?: number;
   usageCount?: number;
-  typeId?: number;
-  statusId?: number;
+  typeId?: string;
+  statusId?: string;
   tags?: string[];
   channel?: {
     id: string;

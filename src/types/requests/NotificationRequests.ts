@@ -1,9 +1,11 @@
+import { NotificationType, NotificationCategory } from "@/enums/NotificationEnums";
+
 /**
  * Query parameters for fetching notifications (offset-based pagination)
  */
 export interface GetNotificationsParams {
-  typeId?: number;
-  categoryId?: number;
+  typeId?: NotificationType;
+  categoryId?: NotificationCategory;
   isRead?: boolean;
   limit?: number;
   offset?: number;
@@ -14,8 +16,8 @@ export interface GetNotificationsParams {
  * Cursors are self-describing (contain field and direction metadata)
  */
 export interface GetNotificationFeedParams {
-  typeId?: number;
-  categoryId?: number;
+  typeId?: NotificationType;
+  categoryId?: NotificationCategory;
   isRead?: boolean;
   limit?: number;
   after?: string;  // Opaque cursor string (self-describing)

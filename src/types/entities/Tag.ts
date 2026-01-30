@@ -1,9 +1,11 @@
+import { TagType, TagStatus } from "@/enums/TagEnums";
+
 export type Tag = {
     id: string;
     name: string;
     slug: string;
-    typeId: number;
-    statusId: number;
+    typeId: TagType;
+    statusId: TagStatus;
     isVerified: boolean;
     isTrending: boolean;
     createdBy?: string;

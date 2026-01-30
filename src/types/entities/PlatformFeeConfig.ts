@@ -1,8 +1,9 @@
 import { Channel, ChannelTier } from './Channel';
+import { PlatformFeeEntityType } from "@/enums/PlatformFeeEnums";
 
 export type PlatformFeeConfig = {
   id: string;
-  entityTypeId: number;
+  entityTypeId: PlatformFeeEntityType;
   entityId?: string;
   feePercentage: number;
   effectiveFrom: Date;

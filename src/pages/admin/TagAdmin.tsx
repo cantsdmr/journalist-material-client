@@ -39,6 +39,16 @@ import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Tag } from '@/types/entities/Tag';
 import { PaginatedResponse } from '@/utils/http';
+import {
+  TAG_STATUS,
+  TAG_TYPE,
+  getTagStatusLabel,
+  getTagStatusColor,
+  getTagTypeLabel,
+  getTagTypeColor,
+  ALL_TAG_STATUSES,
+  ALL_TAG_TYPES
+} from '@/enums/TagEnums';
 
 const TagAdmin: React.FC = () => {
   const { api } = useApiContext();
@@ -156,45 +166,6 @@ const TagAdmin: React.FC = () => {
     }
   };
 
-  const getStatusColor = (statusId: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-    switch (statusId) {
-      case 1: return 'warning';  // Pending
-      case 2: return 'success';  // Approved
-      case 3: return 'error';    // Rejected
-      case 4: return 'default';  // Inactive
-      default: return 'default';
-    }
-  };
-
-  const getStatusName = (statusId: number): string => {
-    switch (statusId) {
-      case 1: return 'Pending';
-      case 2: return 'Approved';
-      case 3: return 'Rejected';
-      case 4: return 'Inactive';
-      default: return 'Unknown';
-    }
-  };
-
-  const getTypeColor = (typeId: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-    switch (typeId) {
-      case 1: return 'primary';    // News
-      case 2: return 'secondary';  // Poll
-      case 3: return 'info';       // Channel
-      case 4: return 'success';    // General
-      default: return 'default';
-    }
-  };
-
-  const getTypeName = (typeId: number): string => {
-    switch (typeId) {
-      case 1: return 'News';
-      case 2: return 'Poll';
-      case 3: return 'Channel';
-      case 4: return 'General';
-      default: return 'Unknown';
-    }
-  };
 
   const columns: Column[] = [
     {
@@ -225,8 +196,8 @@ const TagAdmin: React.FC = () => {
       sortable: true,
       format: (value) => (
         <Chip
-          label={getTypeName(value)}
-          color={getTypeColor(value)}
+          label={getTagTypeLabel(value)}
+          color={getTagTypeColor(value)}
           size="small"
         />
       ),
@@ -238,8 +209,8 @@ const TagAdmin: React.FC = () => {
       sortable: true,
       format: (value) => (
         <Chip
-          label={getStatusName(value)}
-          color={getStatusColor(value)}
+          label={getTagStatusLabel(value)}
+          color={getTagStatusColor(value)}
           size="small"
         />
       ),
@@ -296,19 +267,8 @@ const TagAdmin: React.FC = () => {
     },
   ];
 
-  const statusOptions = [
-    { value: 1, label: 'Pending' },
-    { value: 2, label: 'Approved' },
-    { value: 3, label: 'Rejected' },
-    { value: 4, label: 'Inactive' }
-  ];
-
-  const typeOptions = [
-    { value: 1, label: 'News' },
-    { value: 2, label: 'Poll' },
-    { value: 3, label: 'Channel' },
-    { value: 4, label: 'General' }
-  ];
+  const statusOptions = ALL_TAG_STATUSES;
+  const typeOptions = ALL_TAG_TYPES;
 
   const filters = (
     <Stack direction="row" spacing={1}>
@@ -398,7 +358,7 @@ const TagAdmin: React.FC = () => {
         </IconButton>
       </Tooltip>
 
-      {row.statusId === 1 && ( // Pending
+      {row.statusId === TAG_STATUS.PENDING && (
         <>
           <Tooltip title="Approve">
             <IconButton
@@ -411,7 +371,7 @@ const TagAdmin: React.FC = () => {
               <ApproveIcon fontSize="small" color="success" />
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Reject">
             <IconButton
               size="small"

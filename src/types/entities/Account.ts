@@ -1,4 +1,5 @@
 import { ChannelStaff, ChannelSubscription } from "./Channel";
+import { UserRole, UserStatus } from "@/enums/UserEnums";
 
 // Payment Provider Codes (matches backend)
 export const PaymentProviderCode = {
@@ -32,8 +33,8 @@ export type UserProfile = {
   email: string;
   displayName: string;
   photoUrl?: string;
-  roleId: number;
-  statusId: number;
+  roleId: UserRole;
+  statusId: UserStatus;
   createdAt: string;
   updatedAt: string;
   lastLogin?: string;

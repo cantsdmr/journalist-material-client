@@ -17,6 +17,7 @@ import {
   AccountBalance as PayPalIcon,
   Add as AddIcon
 } from '@mui/icons-material';
+import { PAYMENT_METHOD_TYPE_ID } from '@/enums/PaymentMethodEnums';
 
 interface PaymentMethod {
   id: string;
@@ -51,9 +52,9 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 }) => {
   const getPaymentMethodIcon = (typeId: number) => {
     switch (typeId) {
-      case 3: // PayPal
+      case PAYMENT_METHOD_TYPE_ID.PAYPAL:
         return <PayPalIcon color="primary" />;
-      case 4: // iyzico/Credit Card
+      case PAYMENT_METHOD_TYPE_ID.IYZICO:
         return <CreditCardIcon color="primary" />;
       default:
         return <CreditCardIcon color="primary" />;
@@ -67,13 +68,13 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const getPaymentMethodDisplay = (method: PaymentMethod) => {
     switch (method.type_id) {
-      case 3: // PayPal
+      case PAYMENT_METHOD_TYPE_ID.PAYPAL:
         return {
           title: 'PayPal',
           subtitle: method.details.email || 'PayPal Account',
           description: `PayPal account`
         };
-      case 4: // iyzico/Credit Card
+      case PAYMENT_METHOD_TYPE_ID.IYZICO:
         return {
           title: 'Credit Card',
           subtitle: formatCardNumber(method.details.cardNumber),

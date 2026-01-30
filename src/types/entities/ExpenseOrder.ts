@@ -1,9 +1,10 @@
 import { ExpenseOrderStatus } from "@/enums/ExpenseOrderEnums";
+import { ExpenseType as ExpenseTypeEnum } from "@/enums/ExpenseTypeEnums";
 import { User } from "./User";
 import { Channel } from "./Channel";
 
 export type ExpenseType = {
-  id: number;
+  id: ExpenseTypeEnum;
   name: string;
 };
 

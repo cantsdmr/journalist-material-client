@@ -185,10 +185,10 @@ export class TagAPI extends HTTPApi {
     /**
      * Moderate tag (approve/reject)
      */
-    public async moderateTag(tagId: string, statusId: number): Promise<Tag> {
+    public async moderateTag(tagId: string, status: string): Promise<Tag> {
         return this._patch<Tag>(
             `${API_PATH}/${tagId}/moderate`,
-            { statusId }
+            { status }
         );
     }
 
@@ -196,14 +196,14 @@ export class TagAPI extends HTTPApi {
      * Approve tag
      */
     public async approveTag(tagId: string): Promise<Tag> {
-        return this.moderateTag(tagId, 2); // Assuming 2 is APPROVED status
+        return this.moderateTag(tagId, 'APPROVED');
     }
 
     /**
      * Reject tag
      */
     public async rejectTag(tagId: string): Promise<Tag> {
-        return this.moderateTag(tagId, 3); // Assuming 3 is REJECTED status
+        return this.moderateTag(tagId, 'REJECTED');
     }
 
     // ==================== CONVENIENCE METHODS ====================

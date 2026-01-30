@@ -1,62 +1,78 @@
+// Search Type Enum
 export const SEARCH_TYPE = {
-  ALL: 0,
-  NEWS: 1,
-  CHANNELS: 2,
-  USERS: 3,
-  POLLS: 4,
-  TAGS: 5
+  ALL: "ALL",
+  NEWS: "NEWS",
+  CHANNELS: "CHANNELS",
+  USERS: "USERS",
+  POLLS: "POLLS",
+  TAGS: "TAGS"
 } as const;
 
-export const SEARCH_SORT = {
-  RELEVANCE: 0,
-  DATE: 1,
-  POPULARITY: 2
-} as const;
-
-// String mappings for UI display
-export const SearchTypeStrings = {
-  [SEARCH_TYPE.ALL]: 'all',
-  [SEARCH_TYPE.NEWS]: 'news',
-  [SEARCH_TYPE.CHANNELS]: 'channels',
-  [SEARCH_TYPE.USERS]: 'users',
-  [SEARCH_TYPE.POLLS]: 'polls',
-  [SEARCH_TYPE.TAGS]: 'tags'
-} as const;
-
-export const SearchSortStrings = {
-  [SEARCH_SORT.RELEVANCE]: 'relevance',
-  [SEARCH_SORT.DATE]: 'date',
-  [SEARCH_SORT.POPULARITY]: 'popularity'
-} as const;
-
-// Reverse mappings for converting from strings to numbers
-export const StringToSearchType: Record<string, number> = {
-  'all': SEARCH_TYPE.ALL,
-  'news': SEARCH_TYPE.NEWS,
-  'channels': SEARCH_TYPE.CHANNELS,
-  'users': SEARCH_TYPE.USERS,
-  'polls': SEARCH_TYPE.POLLS,
-  'tags': SEARCH_TYPE.TAGS
-};
-
-export const StringToSearchSort: Record<string, number> = {
-  'relevance': SEARCH_SORT.RELEVANCE,
-  'date': SEARCH_SORT.DATE,
-  'popularity': SEARCH_SORT.POPULARITY
-};
-
-// Type definitions
 export type SearchType = typeof SEARCH_TYPE[keyof typeof SEARCH_TYPE];
+
+// Search Sort Enum
+export const SEARCH_SORT = {
+  RELEVANCE: "RELEVANCE",
+  DATE: "DATE",
+  POPULARITY: "POPULARITY"
+} as const;
+
 export type SearchSort = typeof SEARCH_SORT[keyof typeof SEARCH_SORT];
-export type SearchTypeString = 'all' | 'news' | 'channels' | 'users' | 'polls' | 'tags';
-export type SearchSortString = 'relevance' | 'date' | 'popularity';
 
-// Search suggestion types (for SearchBar component)
-export type SearchSuggestionType = 'news' | 'channel' | 'user' | 'tag' | 'poll';
+// Helper Functions for Search Type
+export function getSearchTypeLabel(type: SearchType): string {
+  switch (type) {
+  case SEARCH_TYPE.ALL:
+    return "All";
+  case SEARCH_TYPE.NEWS:
+    return "News";
+  case SEARCH_TYPE.CHANNELS:
+    return "Channels";
+  case SEARCH_TYPE.USERS:
+    return "Users";
+  case SEARCH_TYPE.POLLS:
+    return "Polls";
+  case SEARCH_TYPE.TAGS:
+    return "Tags";
+  default:
+    return type;
+  }
+}
 
-// Search filter types (for SearchBar component)
-export type SearchFilterType = 'news' | 'channels' | 'users' | 'all';
-export type SearchDateRange = 'day' | 'week' | 'month' | 'year';
+// Helper Functions for Search Sort
+export function getSearchSortLabel(sort: SearchSort): string {
+  switch (sort) {
+  case SEARCH_SORT.RELEVANCE:
+    return "Relevance";
+  case SEARCH_SORT.DATE:
+    return "Date";
+  case SEARCH_SORT.POPULARITY:
+    return "Popularity";
+  default:
+    return sort;
+  }
+}
+
+// Dropdown Options
+export const ALL_SEARCH_TYPES = [
+  { value: SEARCH_TYPE.ALL, label: "All" },
+  { value: SEARCH_TYPE.NEWS, label: "News" },
+  { value: SEARCH_TYPE.CHANNELS, label: "Channels" },
+  { value: SEARCH_TYPE.USERS, label: "Users" },
+  { value: SEARCH_TYPE.POLLS, label: "Polls" },
+  { value: SEARCH_TYPE.TAGS, label: "Tags" }
+] as const;
+
+export const ALL_SEARCH_SORTS = [
+  { value: SEARCH_SORT.RELEVANCE, label: "Relevance" },
+  { value: SEARCH_SORT.DATE, label: "Date" },
+  { value: SEARCH_SORT.POPULARITY, label: "Popularity" }
+] as const;
+
+// Additional type definitions
+export type SearchSuggestionType = "news" | "channel" | "user" | "tag" | "poll";
+export type SearchFilterType = "news" | "channels" | "users" | "all";
+export type SearchDateRange = "day" | "week" | "month" | "year";
 
 // Interface definitions for search functionality
 export interface SearchSuggestion {
@@ -74,4 +90,4 @@ export interface SearchFilters {
   type?: SearchFilterType;
   tags?: string[];
   dateRange?: SearchDateRange;
-} 
+}

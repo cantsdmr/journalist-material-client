@@ -1,10 +1,12 @@
+import { ChannelStatus } from "@/enums/ChannelEnums";
+
 export type CreateChannelData = {
     name: string;
     description: string;
     handle: string;
     logoUrl: string;
     bannerUrl: string;
-    status: number;
+    status: ChannelStatus;
     tags: string[];
     defaultCurrency: string;
 };
@@ -15,7 +17,7 @@ export type EditChannelData = {
     handle?: string;
     logoUrl?: string;
     bannerUrl?: string;
-    status?: number;
+    status?: ChannelStatus;
     tags?: string[];
     defaultCurrency?: string;
 };

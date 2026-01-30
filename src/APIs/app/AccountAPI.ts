@@ -13,6 +13,7 @@ import {
     NotificationPreference,
     UserPreference
 } from "../../types";
+import { NotificationType } from "@/enums/NotificationEnums";
 
 const API_PATH = '/api/account';
 
@@ -105,7 +106,7 @@ export class AccountAPI extends HTTPApi {
 
   public async bulkUpdateNotificationPreferences(
     preferences: Array<{
-      notificationTypeId: number;
+      notificationTypeId: NotificationType;
       pushEnabled?: boolean;
       inAppEnabled?: boolean;
     }>

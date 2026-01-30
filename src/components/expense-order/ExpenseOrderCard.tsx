@@ -19,7 +19,7 @@ import {
 import JCard from '@/components/common/Card';
 import ExpenseOrderStatusChip from './ExpenseOrderStatusChip';
 import { ExpenseOrder } from '@/types/index';
-import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
+import { EXPENSE_ORDER_STATUS, type ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
 import { getExpenseTypeLabel } from '@/enums/ExpenseTypeEnums';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -66,12 +66,12 @@ const ExpenseOrderCard: React.FC<ExpenseOrderCardProps> = ({
     }).format(amount);
   };
 
-  const canEdit = expenseOrder.status === ExpenseOrderStatus.DRAFT;
-  const canSubmit = expenseOrder.status === ExpenseOrderStatus.DRAFT;
-  const canCancel = [ExpenseOrderStatus.DRAFT, ExpenseOrderStatus.SUBMITTED].includes(expenseOrder.status);
-  const canApprove = [ExpenseOrderStatus.SUBMITTED, ExpenseOrderStatus.UNDER_REVIEW].includes(expenseOrder.status);
-  const canReject = [ExpenseOrderStatus.SUBMITTED, ExpenseOrderStatus.UNDER_REVIEW].includes(expenseOrder.status);
-  const canProcessPayment = expenseOrder.status === ExpenseOrderStatus.APPROVED;
+  const canEdit = expenseOrder.status === EXPENSE_ORDER_STATUS.DRAFT;
+  const canSubmit = expenseOrder.status === EXPENSE_ORDER_STATUS.DRAFT;
+  const canCancel = ([EXPENSE_ORDER_STATUS.DRAFT, EXPENSE_ORDER_STATUS.SUBMITTED] as ExpenseOrderStatus[]).includes(expenseOrder.status);
+  const canApprove = ([EXPENSE_ORDER_STATUS.SUBMITTED, EXPENSE_ORDER_STATUS.UNDER_REVIEW] as ExpenseOrderStatus[]).includes(expenseOrder.status);
+  const canReject = ([EXPENSE_ORDER_STATUS.SUBMITTED, EXPENSE_ORDER_STATUS.UNDER_REVIEW] as ExpenseOrderStatus[]).includes(expenseOrder.status);
+  const canProcessPayment = expenseOrder.status === EXPENSE_ORDER_STATUS.APPROVED;
 
   const getActionMenuItems = () => {
     const items = [];

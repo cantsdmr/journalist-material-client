@@ -16,6 +16,7 @@ import { Notification } from '@/types/index';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useNotificationCenter } from '@/contexts/NotificationCenterContext';
+import { NOTIFICATION_CATEGORY } from '@/enums/NotificationEnums';
 
 interface NotificationItemProps {
   notification: Notification;
@@ -36,9 +37,10 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
   const getNotificationIcon = () => {
     // You can customize these based on your notification types
     switch (notification.categoryId) {
-      case 1: // Subscription-related
+      case NOTIFICATION_CATEGORY.SUBSCRIPTION:
         return <SubscriptionsIcon />;
-      case 2: // Payment-related
+      case NOTIFICATION_CATEGORY.PAYMENT:
+      case NOTIFICATION_CATEGORY.PAYOUT:
         return <PaymentIcon />;
       default:
         return <InfoIcon />;
@@ -50,10 +52,15 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification }) => 
    */
   const getNotificationColor = () => {
     switch (notification.categoryId) {
-      case 1:
+      case NOTIFICATION_CATEGORY.SUBSCRIPTION:
         return theme.palette.primary.main;
-      case 2:
+      case NOTIFICATION_CATEGORY.PAYMENT:
+      case NOTIFICATION_CATEGORY.PAYOUT:
         return theme.palette.success.main;
+      case NOTIFICATION_CATEGORY.CHANNEL:
+        return theme.palette.secondary.main;
+      case NOTIFICATION_CATEGORY.SYSTEM:
+        return theme.palette.warning.main;
       default:
         return theme.palette.info.main;
     }

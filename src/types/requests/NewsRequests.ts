@@ -1,17 +1,17 @@
-import { NEWS_STATUS } from "@/enums/NewsEnums";
+import { NewsStatus, SocialPlatformType, NewsMediaType, NewsMediaFormat } from "@/enums/NewsEnums";
 
 export type CreateNewsData = {
     title: string;
     content: string;
     channelId: string;
     tags?: string[];
-    status?: keyof typeof NEWS_STATUS;
+    status?: NewsStatus;
     isPremium?: boolean;
     requiredTierId?: string;
-    socialLinks?: Record<number, string>;
+    socialLinks?: Record<SocialPlatformType, string>;
     media?: {
-        mediaTypeId: number;
-        mediaFormatId: number;
+        mediaTypeId: NewsMediaType;
+        mediaFormatId: NewsMediaFormat;
         url: string;
     }[];
 };
@@ -20,7 +20,7 @@ export type EditNewsData = {
     title?: string;
     content?: string;
     tags?: string[];
-    status?: keyof typeof NEWS_STATUS;
+    status?: NewsStatus;
     isPremium?: boolean;
     requiredTierId?: string;
 }; 

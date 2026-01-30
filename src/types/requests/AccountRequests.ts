@@ -1,9 +1,10 @@
 import { PaymentProviderCodeType } from '../entities/Account';
+import { UserRole } from "@/enums/UserEnums";
 
 export type UpdateProfileData = {
   displayName?: string;
   photoUrl?: string;
-  roleId?: number;
+  roleId?: UserRole;
 };
 
 export type AddPaymentMethodData = {

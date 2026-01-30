@@ -9,21 +9,21 @@ export type RegisterUserData = {
     externalId: string;
     displayName: string;
     photoUrl?: string;
-    roleId: number;
-    statusId?: number;
+    roleId: string;
+    statusId?: string;
 };
 
 export type UpdateUserData = {
     displayName?: string;
     email?: string;
     photoUrl?: string;
-    roleId?: number;
-    statusId?: number;
+    roleId?: string;
+    statusId?: string;
 };
 
 export type UpdateUserCustomClaimsData = {
-    system_role: number;
-    system_status: number;
+    system_role: string;
+    system_status: string;
 };
 
 export type SuspendUserData = {
@@ -79,7 +79,7 @@ export class AdminUserAPI extends HTTPApi {
         await this._remove<void>(`${ADMIN_API_PATH}/users/${id}`);
     }
 
-    public async getUsersByRole(roleId: number, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<User>> {
+    public async getUsersByRole(roleId: string, pagination: PaginationObject = DEFAULT_PAGINATION): Promise<PaginatedResponse<User>> {
         return this._list<User>(`${ADMIN_API_PATH}/users/role/${roleId}`, pagination);
     }
 }

@@ -1,33 +1,45 @@
+// Expense Type Enum
 export const EXPENSE_TYPE = {
-  TRAVEL: 1,
-  EQUIPMENT: 2,
-  ACCOMMODATION: 3,
-  FOOD: 4,
-  COMMUNICATION: 5,
-  LABOR: 6,
-  OTHER: 7
+  TRAVEL: "TRAVEL",
+  EQUIPMENT: "EQUIPMENT",
+  ACCOMMODATION: "ACCOMMODATION",
+  FOOD: "FOOD",
+  COMMUNICATION: "COMMUNICATION",
+  LABOR: "LABOR",
+  OTHER: "OTHER"
 } as const;
 
-export const EXPENSE_TYPE_LABELS: Record<keyof typeof EXPENSE_TYPE, string> = {
-  TRAVEL: 'Travel',
-  EQUIPMENT: 'Equipment',
-  ACCOMMODATION: 'Accommodation',
-  FOOD: 'Food',
-  COMMUNICATION: 'Communication',
-  LABOR: 'Labor',
-  OTHER: 'Other'
-} as const;
+export type ExpenseType = typeof EXPENSE_TYPE[keyof typeof EXPENSE_TYPE];
 
-export type ExpenseTypeValue = typeof EXPENSE_TYPE[keyof typeof EXPENSE_TYPE];
+// Helper Functions
+export function getExpenseTypeLabel(type: ExpenseType): string {
+  switch (type) {
+  case EXPENSE_TYPE.TRAVEL:
+    return "Travel";
+  case EXPENSE_TYPE.EQUIPMENT:
+    return "Equipment";
+  case EXPENSE_TYPE.ACCOMMODATION:
+    return "Accommodation";
+  case EXPENSE_TYPE.FOOD:
+    return "Food";
+  case EXPENSE_TYPE.COMMUNICATION:
+    return "Communication";
+  case EXPENSE_TYPE.LABOR:
+    return "Labor";
+  case EXPENSE_TYPE.OTHER:
+    return "Other";
+  default:
+    return type;
+  }
+}
 
-export const getExpenseTypeLabel = (typeId: number): string => {
-  const entry = Object.entries(EXPENSE_TYPE).find(([_, id]) => id === typeId);
-  return entry ? EXPENSE_TYPE_LABELS[entry[0] as keyof typeof EXPENSE_TYPE] : 'Unknown';
-};
-
-export const getExpenseTypeOptions = () => {
-  return Object.entries(EXPENSE_TYPE).map(([key, value]) => ({
-    id: value,
-    name: EXPENSE_TYPE_LABELS[key as keyof typeof EXPENSE_TYPE]
-  }));
-};
+// Dropdown Options
+export const ALL_EXPENSE_TYPES = [
+  { value: EXPENSE_TYPE.TRAVEL, label: "Travel" },
+  { value: EXPENSE_TYPE.EQUIPMENT, label: "Equipment" },
+  { value: EXPENSE_TYPE.ACCOMMODATION, label: "Accommodation" },
+  { value: EXPENSE_TYPE.FOOD, label: "Food" },
+  { value: EXPENSE_TYPE.COMMUNICATION, label: "Communication" },
+  { value: EXPENSE_TYPE.LABOR, label: "Labor" },
+  { value: EXPENSE_TYPE.OTHER, label: "Other" }
+] as const;

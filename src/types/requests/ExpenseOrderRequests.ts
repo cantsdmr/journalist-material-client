@@ -1,6 +1,8 @@
+import { ExpenseType } from "@/enums/ExpenseTypeEnums";
+
 export type CreateExpenseOrderData = {
   channelId: string;
-  typeId: number;
+  typeId: ExpenseType;
   title: string;
   description: string;
   amount: number;
@@ -14,7 +16,7 @@ export type UpdateExpenseOrderData = {
   description?: string;
   amount?: number;
   currency?: string;
-  typeId?: number;
+  typeId?: ExpenseType;
   receiptUrl?: string;
   notes?: string;
 };

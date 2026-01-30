@@ -1,5 +1,7 @@
+import { PlatformFeeEntityType } from "@/enums/PlatformFeeEnums";
+
 export type CreateFeeConfigData = {
-  entityTypeId: number;
+  entityTypeId: PlatformFeeEntityType;
   entityId?: string;
   feePercentage: number;
   effectiveFrom: string;

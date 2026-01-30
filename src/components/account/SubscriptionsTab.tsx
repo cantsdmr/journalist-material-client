@@ -33,7 +33,7 @@ import {
 } from '@mui/icons-material';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Subscription } from '@/types/index';
-import { getSubscriptionStatusColor, getSubscriptionStatusLabel, canCancelSubscription as canCancelSubscriptionHelper, SUBSCRIPTION_STATUS } from '@/enums/SubscriptionEnums';
+import { getSubscriptionStatusColor, getSubscriptionStatusLabel, canCancelSubscription as canCancelSubscriptionHelper, SUBSCRIPTION_STATUS, type SubscriptionStatus } from '@/enums/SubscriptionEnums';
 import { useApiCall } from '@/hooks/useApiCall';
 import { PATHS } from '@/constants/paths';
 
@@ -105,11 +105,11 @@ const SubscriptionsTab: React.FC = () => {
     setSelectedSubscription(null);
   };
 
-  const getStatusColor = (statusId: number) => {
+  const getStatusColor = (statusId: SubscriptionStatus) => {
     return getSubscriptionStatusColor(statusId);
   };
 
-  const getStatusLabel = (statusId: number) => {
+  const getStatusLabel = (statusId: SubscriptionStatus) => {
     return getSubscriptionStatusLabel(statusId);
   };
 

@@ -1,3 +1,5 @@
+import { PollMediaType, PollMediaFormat } from "@/enums/PollEnums";
+
 export type CreatePollData = {
     title: string;
     description?: string;
@@ -7,8 +9,8 @@ export type CreatePollData = {
         description?: string;
     }>;
     media?: Array<{
-        mediaTypeId: number;
-        mediaFormatId: number;
+        mediaTypeId: PollMediaType;
+        mediaFormatId: PollMediaFormat;
         url: string;
         caption?: string;
     }>;
@@ -22,8 +24,8 @@ export type UpdatePollData = {
     title?: string;
     description?: string;
     media?: Array<{
-        mediaTypeId: number;
-        mediaFormatId: number;
+        mediaTypeId: PollMediaType;
+        mediaFormatId: PollMediaFormat;
         url: string;
         caption?: string;
     }>;
@@ -49,8 +51,8 @@ export type StudioCreatePollData = {
     channelId: string;
     options: string[];
     media?: Array<{
-        mediaTypeId: number;
-        mediaFormatId: number;
+        mediaTypeId: PollMediaType;
+        mediaFormatId: PollMediaFormat;
         url: string;
         caption?: string;
     }>;

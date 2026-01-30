@@ -14,23 +14,23 @@ import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
-import { getExpenseTypeOptions } from '@/enums/ExpenseTypeEnums';
+import { ALL_EXPENSE_TYPES } from '@/enums/ExpenseTypeEnums';
 
 const EditExpenseOrderStudio: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { api } = useApiContext();
   const { profile } = useProfile();
-  
+
   const [expenseOrder, setExpenseOrder] = useState<ExpenseOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const { execute, loading: saveLoading } = useApiCall();
 
   // Get channels from profile context
   const channels = profile?.staffChannels?.map(staffChannel => staffChannel.channel) || [];
-  
+
   // Get expense types from static enum
-  const expenseTypes = getExpenseTypeOptions();
+  const expenseTypes = ALL_EXPENSE_TYPES;
 
   useEffect(() => {
     const fetchExpenseOrder = async () => {

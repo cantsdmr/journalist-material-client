@@ -1,9 +1,11 @@
+import { SubscriptionStatus } from "@/enums/SubscriptionEnums";
+
 export type Subscription = {
   id: string;
   userId: string;
   channelId: string;
   tierId: string;
-  statusId: number;
+  statusId: SubscriptionStatus;
   subscribedAt: string;
   expiresAt?: string;
   renewalDate?: string;
@@ -49,7 +51,7 @@ export type AdminSubscription = {
   userId: string;
   channelId: string;
   tierId: string;
-  statusId: number;
+  statusId: SubscriptionStatus;
   subscribedAt: string;
   expiresAt?: string;
   renewalDate?: string;
@@ -116,7 +118,7 @@ export type SubscriptionBillingCycle = {
   periodEnd: Date;
   amount: number;
   currency: string;
-  statusId: number;
+  statusId: SubscriptionStatus;
   chargedAt?: Date;
   transactionId?: string;
   providerBillingId?: string;

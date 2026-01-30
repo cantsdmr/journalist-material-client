@@ -1,6 +1,8 @@
 import { PaymentProvider } from "./Account";
 import { User } from "./User";
 import { USER_ROLE } from "@/enums/UserEnums";
+import { ChannelStatus } from "@/enums/ChannelEnums";
+import { SubscriptionStatus } from "@/enums/SubscriptionEnums";
 
 export type Channel = {
     id: string;
@@ -11,7 +13,7 @@ export type Channel = {
     updatedAt: Date;
     logoUrl?: string;
     bannerUrl?: string;
-    status: number;
+    status: ChannelStatus;
     defaultCurrency: string;
     tags?: string[];
     tiers?: ChannelTier[];
@@ -82,7 +84,7 @@ export type ChannelSubscriber = {
 export type ChannelSubscription = {
     id: string;
     channelId: string;
-    status: number;
+    status: SubscriptionStatus;
     subscribedAt: string;
     expiresAt: string;
     tierId: string;

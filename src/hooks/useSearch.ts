@@ -1,16 +1,16 @@
 import { useState, useCallback } from 'react';
-import { StringToSearchType, StringToSearchSort, SearchTypeString, SearchSortString } from '@/enums/SearchEnums';
+import { SearchType, SearchSort } from '@/enums/SearchEnums';
 import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse, StructuredSearchSuggestionsResponse, StructuredSearchSuggestion } from '@/APIs/app/SearchAPI';
 import { PaginatedResponse } from '@/utils/http';
 import { useApiCall } from './useApiCall';
 import { useApiContext } from '@/contexts/ApiContext';
 
 export interface SearchFilters {
-  type?: SearchTypeString;
+  type?: SearchType;
   tags?: string[];
   dateFrom?: Date;
   dateTo?: Date;
-  sortBy?: SearchSortString;
+  sortBy?: SearchSort;
   onlyPremium?: boolean;
   channelId?: string;
 }
@@ -47,26 +47,12 @@ export const useSearch = (): UseSearchReturn => {
     setError(null);
 
     try {
-      // Convert frontend string filters to backend number filters
+      // Pass filters directly - backend now accepts string enum keys
       const apiFilters: APISearchFilters = {};
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          if (key === 'type' && typeof value === 'string') {
-            // Convert string type to number for API
-            const numericType = StringToSearchType[value];
-            if (numericType !== undefined) {
-              apiFilters.type = numericType;
-            }
-          } else if (key === 'sortBy' && typeof value === 'string') {
-            // Convert string sortBy to number for API
-            const numericSort = StringToSearchSort[value];
-            if (numericSort !== undefined) {
-              apiFilters.sortBy = numericSort;
-            }
-          } else {
-            (apiFilters as any)[key] = value;
-          }
+          (apiFilters as any)[key] = value;
         }
       });
 

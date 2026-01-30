@@ -41,7 +41,7 @@ import type { SearchFilters } from '@/hooks/useSearch';
 import type { SearchResult } from '@/APIs/app/SearchAPI';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
-import { StringToSearchType, StringToSearchSort } from '@/enums/SearchEnums';
+import { SEARCH_TYPE, SEARCH_SORT, SearchType, SearchSort, ALL_SEARCH_TYPES, ALL_SEARCH_SORTS } from '@/enums/SearchEnums';
 
 
 // Styled components
@@ -72,8 +72,8 @@ const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({
-    type: 'all',
-    sortBy: 'relevance'
+    type: SEARCH_TYPE.ALL,
+    sortBy: SEARCH_SORT.RELEVANCE
   });
   const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLButtonElement | null>(null);
   const { api } = useApiContext();
@@ -90,7 +90,7 @@ const SearchPage: React.FC = () => {
     if (query) {
       setCurrentQuery(query);
       const initialFilters = { ...filters };
-      if (type && type !== 'all') {
+      if (type && type !== SEARCH_TYPE.ALL) {
         initialFilters.type = type;
         setFilters(initialFilters);
       }
@@ -116,24 +116,12 @@ const SearchPage: React.FC = () => {
     setError(null);
 
     try {
+      // Pass filters directly - backend now accepts string enum keys
       const apiFilters: any = {};
-      
-      // Convert frontend string filters to backend number filters
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
-          if (key === 'type' && typeof value === 'string') {
-            const numericType = StringToSearchType[value];
-            if (numericType !== undefined) {
-              apiFilters.type = numericType;
-            }
-          } else if (key === 'sortBy' && typeof value === 'string') {
-            const numericSort = StringToSearchSort[value];
-            if (numericSort !== undefined) {
-              apiFilters.sortBy = numericSort;
-            }
-          } else {
-            apiFilters[key] = value;
-          }
+          apiFilters[key] = value;
         }
       });
 
@@ -435,23 +423,23 @@ const SearchPage: React.FC = () => {
             </Typography>
             
             {/* Active Filters */}
-            {(filters.type !== 'all' || filters.sortBy !== 'relevance') && (
+            {(filters.type !== SEARCH_TYPE.ALL || filters.sortBy !== SEARCH_SORT.RELEVANCE) && (
               <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   Active filters:
                 </Typography>
-                {filters.type !== 'all' && (
+                {filters.type !== SEARCH_TYPE.ALL && (
                   <Chip
                     label={`Type: ${filters.type}`}
                     size="small"
-                    onDelete={() => handleFilterChange({ type: 'all' })}
+                    onDelete={() => handleFilterChange({ type: SEARCH_TYPE.ALL })}
                   />
                 )}
-                {filters.sortBy !== 'relevance' && (
+                {filters.sortBy !== SEARCH_SORT.RELEVANCE && (
                   <Chip
                     label={`Sort: ${filters.sortBy}`}
                     size="small"
-                    onDelete={() => handleFilterChange({ sortBy: 'relevance' })}
+                    onDelete={() => handleFilterChange({ sortBy: SEARCH_SORT.RELEVANCE })}
                   />
                 )}
               </Stack>
@@ -498,16 +486,16 @@ const SearchPage: React.FC = () => {
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Content Type</InputLabel>
             <Select
-              value={filters.type || 'all'}
+              value={filters.type || SEARCH_TYPE.ALL}
               label="Content Type"
-              onChange={(e) => handleFilterChange({ type: e.target.value as any })}
+              onChange={(e) => handleFilterChange({ type: e.target.value as SearchType })}
             >
-              <MenuItem value="all">All Content</MenuItem>
-              <MenuItem value="news">Articles</MenuItem>
-              <MenuItem value="channels">Channels</MenuItem>
-              <MenuItem value="users">Journalists</MenuItem>
-              <MenuItem value="polls">Polls</MenuItem>
-              <MenuItem value="tags">Tags</MenuItem>
+              <MenuItem value={SEARCH_TYPE.ALL}>All Content</MenuItem>
+              <MenuItem value={SEARCH_TYPE.NEWS}>Articles</MenuItem>
+              <MenuItem value={SEARCH_TYPE.CHANNELS}>Channels</MenuItem>
+              <MenuItem value={SEARCH_TYPE.USERS}>Journalists</MenuItem>
+              <MenuItem value={SEARCH_TYPE.POLLS}>Polls</MenuItem>
+              <MenuItem value={SEARCH_TYPE.TAGS}>Tags</MenuItem>
             </Select>
           </FormControl>
 
@@ -515,13 +503,13 @@ const SearchPage: React.FC = () => {
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel>Sort By</InputLabel>
             <Select
-              value={filters.sortBy || 'relevance'}
+              value={filters.sortBy || SEARCH_SORT.RELEVANCE}
               label="Sort By"
-              onChange={(e) => handleFilterChange({ sortBy: e.target.value as any })}
+              onChange={(e) => handleFilterChange({ sortBy: e.target.value as SearchSort })}
             >
-              <MenuItem value="relevance">Relevance</MenuItem>
-              <MenuItem value="date">Date</MenuItem>
-              <MenuItem value="popularity">Popularity</MenuItem>
+              <MenuItem value={SEARCH_SORT.RELEVANCE}>Relevance</MenuItem>
+              <MenuItem value={SEARCH_SORT.DATE}>Date</MenuItem>
+              <MenuItem value={SEARCH_SORT.POPULARITY}>Popularity</MenuItem>
             </Select>
           </FormControl>
 

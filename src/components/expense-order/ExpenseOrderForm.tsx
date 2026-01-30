@@ -18,13 +18,14 @@ import {
   AttachFile as AttachFileIcon
 } from '@mui/icons-material';
 import JCard from '@/components/common/Card';
-import { ExpenseOrder, CreateExpenseOrderData, UpdateExpenseOrderData, ExpenseType, Channel } from '@/types/index';
+import { ExpenseOrder, CreateExpenseOrderData, UpdateExpenseOrderData, Channel } from '@/types/index';
 import { ExpenseOrderStatus } from '@/enums/ExpenseOrderEnums';
+import { ExpenseType } from '@/enums/ExpenseTypeEnums';
 
 interface ExpenseOrderFormProps {
   expenseOrder?: ExpenseOrder;
   channels: Channel[];
-  expenseTypes: ExpenseType[];
+  expenseTypes: readonly { readonly value: string; readonly label: string; }[];
   onSave: (data: CreateExpenseOrderData | UpdateExpenseOrderData) => Promise<void>;
   onSubmit?: (expenseOrder: ExpenseOrder) => Promise<void>;
   loading?: boolean;
@@ -42,7 +43,7 @@ const ExpenseOrderForm: React.FC<ExpenseOrderFormProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     channelId: expenseOrder?.channel.id || '',
-    typeId: expenseOrder?.type.id || 0,
+    typeId: expenseOrder?.type.id || '',
     title: expenseOrder?.title || '',
     description: expenseOrder?.description || '',
     amount: expenseOrder?.amount || 0,
@@ -85,7 +86,7 @@ const ExpenseOrderForm: React.FC<ExpenseOrderFormProps> = ({
           description: formData.description,
           amount: formData.amount,
           currency: formData.currency,
-          typeId: Number(formData.typeId),
+          typeId: formData.typeId as ExpenseType,
           receiptUrl: formData.receiptUrl,
           notes: formData.notes
         };
@@ -93,7 +94,7 @@ const ExpenseOrderForm: React.FC<ExpenseOrderFormProps> = ({
       } else {
         const createData: CreateExpenseOrderData = {
           channelId: formData.channelId,
-          typeId: Number(formData.typeId),
+          typeId: formData.typeId as ExpenseType,
           title: formData.title,
           description: formData.description,
           amount: formData.amount,

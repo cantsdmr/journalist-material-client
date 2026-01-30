@@ -1,12 +1,14 @@
+import { TransactionType, TransactionStatus } from "@/enums/TransactionEnums";
+
 export type ChannelTransaction = {
   id: string;
   channelId: string;
   userId: string;
   subscriptionId?: string;
-  typeId: number;
+  typeId: TransactionType;
   amount: number;
   currency: string;
-  statusId: number;
+  statusId: TransactionStatus;
   fundId?: string;
   channelWalletId: string;
   externalTransactionId?: string;
