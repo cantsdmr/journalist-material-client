@@ -10,8 +10,19 @@ Design system:
 - Use React Skeleton
 - Create common components under /components
 - Design the pages using mobile first approach
-- Use numbered enums
 - Use apiContext
+
+Enum Pattern:
+- CRITICAL: Frontend uses string enum keys exclusively - NEVER use numeric enum values
+- All enums follow the pattern: export const ENUM_NAME = { KEY: "KEY" } as const (e.g., export const NEWS_STATUS = { DRAFT: "DRAFT", PUBLISHED: "PUBLISHED" } as const)
+- Export type using typeof for type safety: export type EnumType = typeof ENUM_NAME[keyof typeof ENUM_NAME]
+- Always create helper functions: getEnumLabel(value), getEnumColor(value) for UI display
+- Always create dropdown options: export const ALL_ENUM_VALUES = [{ value, label }, ...] as const
+- Backend API sends/receives string enum keys (e.g., "PUBLISHED" not 3) - frontend passes these directly without conversion
+- Entity types use string enum types for all enum fields (e.g., status: NewsStatus, roleId: UserRole)
+- API request types use string enum types for validation (e.g., CreateNewsData.status: NewsStatus)
+- Never compare with numbers - always use enum constants (e.g., status === NEWS_STATUS.PUBLISHED, NOT status === 3)
+- Enum files are located in /src/enums/ folder (NewsEnums.ts, UserEnums.ts, PollEnums.ts, etc.)
 
 Type System:
 - All entity types are defined in /src/types/entities/ folder

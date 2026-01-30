@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, Box, alpha, Grid, IconButton, Typography, Chip, useTheme } from '@mui/material';
+import { Stack, Box, alpha, Grid, IconButton, Typography, Chip, useTheme, CircularProgress } from '@mui/material';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { Poll } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
@@ -10,6 +10,9 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ShareIcon from '@mui/icons-material/Share';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import { useNotification } from '@/contexts/NotificationContext';
 
 interface PollsListProps {
   filters?: any;
@@ -65,8 +68,12 @@ const PollsList: React.FC<PollsListProps> = ({
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [bookmarkStates, setBookmarkStates] = useState<Record<string, boolean>>({});
+  const [bookmarkLoading, setBookmarkLoading] = useState<Record<string, boolean>>({});
   const { api } = useApiContext();
   const { execute } = useApiCall();
+  const { execute: executeBookmark } = useApiCall();
+  const { showNotification } = useNotification();
   const theme = useTheme();
 
   const fetchPolls = async (_page: number = page) => {
@@ -86,9 +93,48 @@ const PollsList: React.FC<PollsListProps> = ({
         }
         setPage(response.metadata.currentPage);
         setHasMore(response.metadata.hasNext === true);
+
+        // Initialize bookmark states from poll data
+        const newBookmarkStates: Record<string, boolean> = {};
+        response.items.forEach(poll => {
+          newBookmarkStates[String(poll.id)] = poll.isBookmarked || false;
+        });
+        setBookmarkStates(prev => ({ ...prev, ...newBookmarkStates }));
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle bookmark toggle
+  const handleBookmarkToggle = async (pollId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (bookmarkLoading[pollId]) return;
+
+    const previousState = bookmarkStates[pollId] || false;
+    setBookmarkStates(prev => ({ ...prev, [pollId]: !previousState }));
+    setBookmarkLoading(prev => ({ ...prev, [pollId]: true }));
+
+    try {
+      if (previousState) {
+        await executeBookmark(
+          () => api.app.bookmark.unbookmarkPoll(pollId),
+          { showErrorToast: true }
+        );
+        showNotification('Bookmark removed', 'success');
+      } else {
+        await executeBookmark(
+          () => api.app.bookmark.bookmarkPoll(pollId),
+          { showErrorToast: true }
+        );
+        showNotification('Poll bookmarked', 'success');
+      }
+    } catch (error) {
+      setBookmarkStates(prev => ({ ...prev, [pollId]: previousState }));
+      showNotification('Failed to update bookmark', 'error');
+    } finally {
+      setBookmarkLoading(prev => ({ ...prev, [pollId]: false }));
     }
   };
 
@@ -273,6 +319,46 @@ const PollsList: React.FC<PollsListProps> = ({
                       >
                         {totalVotes > 999 ? `${(totalVotes / 1000).toFixed(1)}K` : totalVotes}
                       </Typography>
+                    </Box>
+
+                    {/* Bookmark Button */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <IconButton
+                        className="action-button"
+                        size="medium"
+                        onClick={(e) => handleBookmarkToggle(String(poll.id), e)}
+                        disabled={bookmarkLoading[String(poll.id)]}
+                        sx={{
+                          bgcolor: theme.palette.mode === 'dark'
+                            ? alpha('#fff', 0.2)
+                            : alpha('#000', 0.6),
+                          backdropFilter: 'blur(10px)',
+                          color: 'white',
+                          boxShadow: theme.palette.mode === 'dark'
+                            ? '0 2px 8px rgba(0,0,0,0.3)'
+                            : '0 2px 8px rgba(0,0,0,0.5)',
+                          '&:hover': {
+                            bgcolor: alpha(theme.palette.primary.main, 0.8),
+                            transform: 'scale(1.1)'
+                          },
+                          '&:disabled': {
+                            bgcolor: theme.palette.mode === 'dark'
+                              ? alpha('#fff', 0.1)
+                              : alpha('#000', 0.4)
+                          },
+                          transition: 'all 0.2s ease',
+                          width: 48,
+                          height: 48
+                        }}
+                      >
+                        {bookmarkLoading[String(poll.id)] ? (
+                          <CircularProgress size={20} sx={{ color: 'white' }} />
+                        ) : bookmarkStates[String(poll.id)] ? (
+                          <BookmarkIcon sx={{ fontSize: '1.5rem', color: theme.palette.primary.light }} />
+                        ) : (
+                          <BookmarkBorderIcon sx={{ fontSize: '1.5rem' }} />
+                        )}
+                      </IconButton>
                     </Box>
 
                     {/* Share Button */}

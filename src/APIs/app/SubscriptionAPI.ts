@@ -155,9 +155,9 @@ export class SubscriptionAPI extends HTTPApi {
   /**
    * Get subscription status by ID (for polling)
    */
-  public async getSubscriptionStatus(subscriptionId: string): Promise<string> {
-    const response = await this._get<{ status: string; subscription: AdminSubscription }>(`${API_PATH}/${subscriptionId}/status`);
-    return response.status;
+  public async getSubscriptionStatus(subscriptionId: string): Promise<AdminSubscription> {
+    const response = await this._get<AdminSubscription>(`${API_PATH}/${subscriptionId}/status`);
+    return response;
   }
 
   // ==================== SEARCH AND FILTERING ====================
