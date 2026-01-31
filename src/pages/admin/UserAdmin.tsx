@@ -36,7 +36,7 @@ import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { User } from '@/types/entities/User';
 import { PaginatedResponse } from '@/utils/http';
-import { USER_ROLE, USER_STATUS } from '@/enums/UserEnums';
+import { USER_ROLE, USER_STATUS, UserRole, UserStatus } from '@/enums/UserEnums';
 import { UpdateUserCustomClaimsData, RegisterUserData } from '@/APIs/admin/AdminUserAPI';
 
 const UserAdmin: React.FC = () => {
@@ -234,7 +234,7 @@ const UserAdmin: React.FC = () => {
     setCustomClaimsDialogOpen(true);
   };
 
-  const getRoleColor = (roleId: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+  const getRoleColor = (roleId: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
     switch (roleId) {
       case USER_ROLE.SUPER_ADMIN: return 'error';
       case USER_ROLE.ADMIN: return 'error';
@@ -249,12 +249,12 @@ const UserAdmin: React.FC = () => {
     }
   };
 
-  const getRoleName = (roleId: number): string => {
+  const getRoleName = (roleId: string): string => {
     const roleEntry = Object.entries(USER_ROLE).find(([, id]) => id === roleId);
     return roleEntry ? roleEntry[0].replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown';
   };
 
-  const getStatusColor = (statusId: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+  const getStatusColor = (statusId: string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
     switch (statusId) {
       case USER_STATUS.ACTIVE: return 'success';
       case USER_STATUS.INACTIVE: return 'default';
@@ -268,7 +268,7 @@ const UserAdmin: React.FC = () => {
     }
   };
 
-  const getStatusName = (statusId: number): string => {
+  const getStatusName = (statusId: string): string => {
     const statusEntry = Object.entries(USER_STATUS).find(([, id]) => id === statusId);
     return statusEntry ? statusEntry[0].replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown';
   };
@@ -562,7 +562,7 @@ const UserAdmin: React.FC = () => {
                         <Select
                           value={selectedUser.roleId}
                           label="Role"
-                          onChange={(e) => setSelectedUser({ ...selectedUser, roleId: e.target.value as number })}
+                          onChange={(e) => setSelectedUser({ ...selectedUser, roleId: e.target.value as UserRole })}
                         >
                           {roleOptions.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
@@ -578,7 +578,7 @@ const UserAdmin: React.FC = () => {
                         <Select
                           value={selectedUser.statusId}
                           label="Status"
-                          onChange={(e) => setSelectedUser({ ...selectedUser, statusId: e.target.value as number })}
+                          onChange={(e) => setSelectedUser({ ...selectedUser, statusId: e.target.value as UserStatus })}
                         >
                           {statusOptions.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
@@ -711,7 +711,7 @@ const UserAdmin: React.FC = () => {
               <Select
                 value={newUser.roleId}
                 label="Role"
-                onChange={(e) => setNewUser({ ...newUser, roleId: e.target.value as number })}
+                onChange={(e) => setNewUser({ ...newUser, roleId: e.target.value as UserRole })}
               >
                 {roleOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -725,7 +725,7 @@ const UserAdmin: React.FC = () => {
               <Select
                 value={newUser.statusId}
                 label="Status"
-                onChange={(e) => setNewUser({ ...newUser, statusId: e.target.value as number })}
+                onChange={(e) => setNewUser({ ...newUser, statusId: e.target.value as UserStatus })}
               >
                 {statusOptions.map((option) => (
                   <MenuItem key={option.value} value={option.value}>
@@ -768,7 +768,7 @@ const UserAdmin: React.FC = () => {
                 <Select
                   value={customClaims.system_role}
                   label="System Role"
-                  onChange={(e) => setCustomClaims({ ...customClaims, system_role: e.target.value as number })}
+                  onChange={(e) => setCustomClaims({ ...customClaims, system_role: e.target.value as string })}
                 >
                   {roleOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
@@ -783,7 +783,7 @@ const UserAdmin: React.FC = () => {
                 <Select
                   value={customClaims.system_status}
                   label="System Status"
-                  onChange={(e) => setCustomClaims({ ...customClaims, system_status: e.target.value as number })}
+                  onChange={(e) => setCustomClaims({ ...customClaims, system_status: e.target.value as string })}
                 >
                   {statusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>

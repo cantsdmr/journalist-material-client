@@ -1,30 +1,9 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, CursorPaginatedResponse } from "@/utils/http";
-import { News, Poll } from "../../types";
+import { News, Poll, Bookmark, BookmarkStatus, MixedBookmarkItem } from "@/types/index";
+import { BookmarkableType } from "@/enums/BookmarkEnums";
 
 const API_PATH = '/api/bookmarks';
-
-interface BookmarkResponse {
-    id: string;
-    userId: string;
-    bookmarkableType: number; // 1=NEWS, 2=POLL
-    bookmarkableId: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface BookmarkStatusResponse {
-    isBookmarked: boolean;
-    entityId: string;
-    entityType: number; // 1=NEWS, 2=POLL
-}
-
-interface MixedBookmarkItem {
-    id: string;
-    bookmarkedAt: string;
-    type: number; // 1=NEWS, 2=POLL
-    content: News | Poll;
-}
 
 interface CursorPaginationParams {
     limit?: number;
@@ -42,8 +21,8 @@ export class BookmarkAPI extends HTTPApi {
     /**
      * Bookmark a news article
      */
-    public async bookmarkNews(newsId: string): Promise<BookmarkResponse> {
-        return this._post<BookmarkResponse>(`${API_PATH}/news/${newsId}`, {});
+    public async bookmarkNews(newsId: string): Promise<Bookmark> {
+        return this._post<Bookmark>(`${API_PATH}/news/${newsId}`, {});
     }
 
     /**
@@ -56,8 +35,8 @@ export class BookmarkAPI extends HTTPApi {
     /**
      * Check if a news article is bookmarked
      */
-    public async checkNewsBookmarkStatus(newsId: string): Promise<BookmarkStatusResponse> {
-        return this._get<BookmarkStatusResponse>(`${API_PATH}/news/${newsId}/status`);
+    public async checkNewsBookmarkStatus(newsId: string): Promise<BookmarkStatus> {
+        return this._get<BookmarkStatus>(`${API_PATH}/news/${newsId}/status`);
     }
 
     /**
@@ -74,8 +53,8 @@ export class BookmarkAPI extends HTTPApi {
     /**
      * Bookmark a poll
      */
-    public async bookmarkPoll(pollId: string): Promise<BookmarkResponse> {
-        return this._post<BookmarkResponse>(`${API_PATH}/polls/${pollId}`, {});
+    public async bookmarkPoll(pollId: string): Promise<Bookmark> {
+        return this._post<Bookmark>(`${API_PATH}/polls/${pollId}`, {});
     }
 
     /**
@@ -88,8 +67,8 @@ export class BookmarkAPI extends HTTPApi {
     /**
      * Check if a poll is bookmarked
      */
-    public async checkPollBookmarkStatus(pollId: string): Promise<BookmarkStatusResponse> {
-        return this._get<BookmarkStatusResponse>(`${API_PATH}/polls/${pollId}/status`);
+    public async checkPollBookmarkStatus(pollId: string): Promise<BookmarkStatus> {
+        return this._get<BookmarkStatus>(`${API_PATH}/polls/${pollId}/status`);
     }
 
     /**
@@ -105,16 +84,14 @@ export class BookmarkAPI extends HTTPApi {
 
     /**
      * Get all bookmarks (mixed news and polls) with optional type filter and cursor pagination
-     * @param type - Numeric type (0=all, 1=news, 2=poll)
+     * @param type - BookmarkableType (null=all, "NEWS", "POLL")
      */
     public async getBookmarks(
-        type: number = 0,
+        type: BookmarkableType | null,
         params: CursorPaginationParams = {}
     ): Promise<CursorPaginatedResponse<MixedBookmarkItem>> {
         const queryParams: any = { ...params };
-        if (type !== 0) {
-            queryParams.type = type;
-        }
+        queryParams.type = type;
         return this._listWithCursor<MixedBookmarkItem>(API_PATH, queryParams);
     }
 }

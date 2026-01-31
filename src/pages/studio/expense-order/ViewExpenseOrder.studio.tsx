@@ -135,7 +135,8 @@ const ViewExpenseOrderStudio: React.FC = () => {
 
   const canEdit = expenseOrder.status === ExpenseOrderStatus.DRAFT;
   const canSubmit = expenseOrder.status === ExpenseOrderStatus.DRAFT;
-  const canCancel = [ExpenseOrderStatus.DRAFT, ExpenseOrderStatus.SUBMITTED].includes(expenseOrder.status);
+  const cancellableStatuses: ExpenseOrderStatus[] = [ExpenseOrderStatus.DRAFT, ExpenseOrderStatus.SUBMITTED];
+  const canCancel = cancellableStatuses.includes(expenseOrder.status);
 
   return (
     <Box sx={{ p: 3 }}>

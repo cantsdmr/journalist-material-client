@@ -1,21 +1,23 @@
-export type Fund = {
+import { FundableType, FundStatus, ContributionType, ContributionStatus } from "@/enums/FundingEnums";
+
+export interface Fund {
   id: string;
   channelId: string;
   channelWalletId: string;
   fundableId: string;
-  fundableType: number;
+  fundableType: FundableType; // "NEWS" or "POLL"
   currentAmount: number;
   goalAmount?: number;
   currency: string;
   expiresAt?: string;
   isActive: boolean;
   goalReached: boolean;
-  statusId: number;
+  status: FundStatus; // "ACTIVE", "COMPLETED", "EXPIRED", "CANCELLED"
   createdAt: string;
   updatedAt: string;
-};
+}
 
-export type FundContribution = {
+export interface FundContribution {
   id: string;
   fundId: string;
   userId: string;
@@ -25,8 +27,8 @@ export type FundContribution = {
   transactionId?: string;
   comment?: string;
   isAnonymous: boolean;
-  statusId: number;
-  typeId: number;
+  status: ContributionStatus; // "PENDING", "COMPLETED", "FAILED", "REFUNDED"
+  type: ContributionType; // "ONE_TIME", "RECURRING"
   createdAt: string;
   updatedAt: string;
   user?: {
@@ -34,25 +36,17 @@ export type FundContribution = {
     handle: string;
     name: string;
   };
-};
+}
 
-export type FundSummary = {
+export interface FundSummary {
   fund: Fund;
   contributions: FundContribution[];
   totalContributors: number;
   recentContributions: FundContribution[];
   topContributors: FundContribution[];
-};
+}
 
-export type Payout = {
-  transactionId: string;
-  amount: number;
-  currency: string;
-  recipientId: string;
-  status: string;
-};
-
-export type ChannelFundingStats = {
+export interface ChannelFundingStats {
   totalRaised: number;
   totalContributions: number;
   activeFunds: number;
@@ -60,7 +54,7 @@ export type ChannelFundingStats = {
   topFundedContent: Array<{
     id: string;
     title: string;
-    type: 'news' | 'poll';
+    type: FundableType;
     amount: number;
     currency: string;
   }>;
@@ -68,4 +62,4 @@ export type ChannelFundingStats = {
     amount: number;
     contributions: number;
   }>;
-};
+}

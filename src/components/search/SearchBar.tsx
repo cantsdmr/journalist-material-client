@@ -20,7 +20,7 @@ import { styled } from '@mui/material/styles';
 import { debounce } from 'lodash';
 import { useSearch } from '@/hooks/useSearch';
 import { SearchSuggestion, SearchFilters } from '@/enums/SearchEnums';
-import { StructuredSearchSuggestion } from '@/APIs/app/SearchAPI';
+import { StructuredSearchSuggestion } from '@/types/index';
 import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 

@@ -1,4 +1,4 @@
-import { 
+import {
   Instagram as InstagramIcon,
   Twitter as TwitterIcon,
   YouTube as YouTubeIcon,
@@ -7,48 +7,64 @@ import {
   Link as LinkIcon,
   MusicVideo as TikTokIcon
 } from '@mui/icons-material';
-import { SOCIAL_PLATFORM_TYPE } from '../enums/NewsEnums';
+import { SocialPlatformType } from '../enums/NewsEnums';
 
-export const getSocialIcon = (platform: number) => {
+export const getSocialIcon = (platform: SocialPlatformType | string) => {
   switch (platform) {
-    case SOCIAL_PLATFORM_TYPE.INSTAGRAM:
+    case 'INSTAGRAM':
       return InstagramIcon;
-    case SOCIAL_PLATFORM_TYPE.TWITTER:
+    case 'TWITTER':
       return TwitterIcon;
-    case SOCIAL_PLATFORM_TYPE.YOUTUBE:
+    case 'YOUTUBE':
       return YouTubeIcon;
-    case SOCIAL_PLATFORM_TYPE.TIKTOK:
+    case 'TIKTOK':
       return TikTokIcon;
-    case SOCIAL_PLATFORM_TYPE.FACEBOOK:
+    case 'FACEBOOK':
       return FacebookIcon;
-    case SOCIAL_PLATFORM_TYPE.LINKEDIN:
+    case 'LINKEDIN':
       return LinkedInIcon;
-    case SOCIAL_PLATFORM_TYPE.OTHER:
+    case 'OTHER':
     default:
       return LinkIcon;
   }
 };
 
-export const getPlatformColor = (platform: number): string => {
+export const getPlatformColor = (platform: SocialPlatformType | string): string => {
   switch (platform) {
-    case SOCIAL_PLATFORM_TYPE.INSTAGRAM:
+    case 'INSTAGRAM':
       return '#E4405F';
-    case SOCIAL_PLATFORM_TYPE.TWITTER:
+    case 'TWITTER':
       return '#1DA1F2';
-    case SOCIAL_PLATFORM_TYPE.YOUTUBE:
+    case 'YOUTUBE':
       return '#FF0000';
-    case SOCIAL_PLATFORM_TYPE.TIKTOK:
+    case 'TIKTOK':
       return '#000000';
-    case SOCIAL_PLATFORM_TYPE.FACEBOOK:
+    case 'FACEBOOK':
       return '#1877F2';
-    case SOCIAL_PLATFORM_TYPE.LINKEDIN:
+    case 'LINKEDIN':
       return '#0A66C2';
     default:
       return '#757575';
   }
 };
 
-export const getPlatformName = (platform: number): string => {
-  return Object.entries(SOCIAL_PLATFORM_TYPE)
-    .find(([, value]) => value === platform)?.[0] || 'Other';
-}; 
+export const getPlatformName = (platform: SocialPlatformType | string): string => {
+  switch (platform) {
+    case 'INSTAGRAM':
+      return 'Instagram';
+    case 'TWITTER':
+      return 'Twitter';
+    case 'YOUTUBE':
+      return 'YouTube';
+    case 'TIKTOK':
+      return 'TikTok';
+    case 'FACEBOOK':
+      return 'Facebook';
+    case 'LINKEDIN':
+      return 'LinkedIn';
+    case 'OTHER':
+      return 'Other';
+    default:
+      return 'Other';
+  }
+};

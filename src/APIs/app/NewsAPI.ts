@@ -7,7 +7,7 @@ import {
     NewsFilters, 
     NewsStatsResponse, 
     NewsTagResponse 
-} from "../../types";
+} from "@/types/index";
 
 const API_PATH = '/api/news';
 

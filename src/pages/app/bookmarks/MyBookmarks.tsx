@@ -14,14 +14,14 @@ import NewsEntry from '@/components/news/NewsEntry';
 import PollCard from '@/components/poll/PollCard';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { News, Poll } from '@/types/index';
-import { BOOKMARKABLE_TYPE } from '@/enums/BookmarkEnums';
+import { BOOKMARKABLE_TYPE, type BookmarkableType } from '@/enums/BookmarkEnums';
 
 type TabValue = 0 | 1 | 2; // 0 = all, 1 = news, 2 = poll
 
 interface BookmarkedItem {
   id: string;
   bookmarkedAt: string;
-  type: number; // 1 = news, 2 = poll
+  type: BookmarkableType; // Backend returns string enum keys (e.g., "NEWS", "POLL")
   content: News | Poll;
 }
 
@@ -32,7 +32,7 @@ const MyBookmarks: React.FC = () => {
   // Cursor pagination for 'all' bookmarks
   const allBookmarks = useCursorPagination<BookmarkedItem>({
     fetcher: async (_, cursor, limit) => {
-      return api.app.bookmark.getBookmarks(0, { // 0 = all
+      return api.app.bookmark.getBookmarks(null, { // 0 = all
         after: cursor,
         limit: limit || 20
       });

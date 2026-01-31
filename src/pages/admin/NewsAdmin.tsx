@@ -28,7 +28,7 @@ import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
 import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { News } from '@/types/entities/News';
-import { NEWS_STATUS } from '@/enums/NewsEnums';
+import { NEWS_STATUS, NewsStatus, getNewsStatusColor } from '@/enums/NewsEnums';
 import { PaginatedResponse } from '@/utils/http';
 import { PATHS } from '@/constants/paths';
 
@@ -106,9 +106,9 @@ const NewsAdmin: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (newsItem: News, newStatus: number) => {
+  const handleStatusChange = async (newsItem: News, newStatus: NewsStatus) => {
     try {
-      await execute(() => api.app.news.update(newsItem.id, { status: newStatus.toString() as any }));
+      await execute(() => api.app.news.update(newsItem.id, { status: newStatus as any }));
       fetchNews();
     } catch (err) {
       setError('Failed to update news status');
@@ -134,15 +134,8 @@ const NewsAdmin: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: number): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
-    switch (status) {
-      case NEWS_STATUS.PUBLISHED: return 'success';
-      case NEWS_STATUS.DRAFT: return 'default';
-      case NEWS_STATUS.PENDING_REVIEW: return 'warning';
-      case NEWS_STATUS.REJECTED: return 'error';
-      case NEWS_STATUS.ARCHIVED: return 'secondary';
-      default: return 'default';
-    }
+  const getStatusColor = (status: NewsStatus | string): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+    return getNewsStatusColor(status as NewsStatus);
   };
 
   const columns: Column[] = [
@@ -365,7 +358,7 @@ const NewsAdmin: React.FC = () => {
                 <Select
                   value={selectedNews.status}
                   label="Status"
-                  onChange={(e) => setSelectedNews({ ...selectedNews, status: parseInt(e.target.value.toString()) })}
+                  onChange={(e) => setSelectedNews({ ...selectedNews, status: e.target.value as NewsStatus })}
                 >
                   {statusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>

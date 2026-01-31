@@ -19,7 +19,7 @@ import {
   alpha
 } from '@mui/material';
 import { Poll } from '@/types/index';
-import { NEWS_STATUS } from '@/enums/NewsEnums';
+import { NEWS_STATUS, NewsStatus } from '@/enums/NewsEnums';
 import { useProfile } from '@/contexts/ProfileContext';
 import JEditor from '@/components/editor/JEditor';
 import { OutputData } from '@editorjs/editorjs';
@@ -40,10 +40,17 @@ const PollConversionModal: React.FC<PollConversionModalProps> = ({
   loading = false
 }) => {
   const { profile } = useProfile();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    channelId: string;
+    status: NewsStatus;
+    isPremium: boolean;
+    requiredTierId: string | null;
+    content: string;
+  }>({
     title: '',
     channelId: '',
-    status: NEWS_STATUS.PUBLISHED as number,
+    status: NEWS_STATUS.PUBLISHED,
     isPremium: false,
     requiredTierId: null,
     content: ''
@@ -80,7 +87,7 @@ const PollConversionModal: React.FC<PollConversionModalProps> = ({
     setFormData({
       title: '',
       channelId: '',
-      status: NEWS_STATUS.PUBLISHED as number,
+      status: NEWS_STATUS.PUBLISHED,
       isPremium: false,
       requiredTierId: null,
       content: ''
@@ -223,7 +230,7 @@ const PollConversionModal: React.FC<PollConversionModalProps> = ({
                 <Select
                   value={formData.status}
                   label="Status"
-                  onChange={(e) => setFormData(prev => ({ ...prev, status: Number(e.target.value) }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as NewsStatus }))}
                 >
                   <MenuItem value={NEWS_STATUS.DRAFT}>Draft</MenuItem>
                   <MenuItem value={NEWS_STATUS.PUBLISHED}>Published</MenuItem>

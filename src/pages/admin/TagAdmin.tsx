@@ -41,7 +41,8 @@ import { Tag } from '@/types/entities/Tag';
 import { PaginatedResponse } from '@/utils/http';
 import {
   TAG_STATUS,
-  TAG_TYPE,
+  TagType,
+  TagStatus,
   getTagStatusLabel,
   getTagStatusColor,
   getTagTypeLabel,
@@ -478,7 +479,7 @@ const TagAdmin: React.FC = () => {
                         <Select
                           value={selectedTag.typeId}
                           label="Type"
-                          onChange={(e) => setSelectedTag({ ...selectedTag, typeId: e.target.value as number })}
+                          onChange={(e) => setSelectedTag({ ...selectedTag, typeId: e.target.value as TagType })}
                         >
                           {typeOptions.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
@@ -494,7 +495,7 @@ const TagAdmin: React.FC = () => {
                         <Select
                           value={selectedTag.statusId}
                           label="Status"
-                          onChange={(e) => setSelectedTag({ ...selectedTag, statusId: e.target.value as number })}
+                          onChange={(e) => setSelectedTag({ ...selectedTag, statusId: e.target.value as TagStatus })}
                         >
                           {statusOptions.map((option) => (
                             <MenuItem key={option.value} value={option.value}>

@@ -20,7 +20,7 @@ import { PayoutDashboard, ExpenseOrderForm } from '@/components/expense-order';
 // import { Channel } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useProfile } from '@/contexts/ProfileContext';
-import { getExpenseTypeOptions } from '@/enums/ExpenseTypeEnums';
+import { ALL_EXPENSE_TYPES } from '@/enums/ExpenseTypeEnums';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -56,7 +56,7 @@ const PayoutsStudio: React.FC = () => {
   const channels = profile?.staffChannels?.map(staffChannel => staffChannel.channel) || [];
   
   // Get expense types from static enum
-  const expenseTypes = getExpenseTypeOptions();
+  const expenseTypes = ALL_EXPENSE_TYPES;
 
   useEffect(() => {
     // Set first channel as default when channels are loaded

@@ -37,7 +37,7 @@ import AdminTable, { Column } from '@/components/admin/AdminTable';
 import { Channel } from '@/types/entities/Channel';
 import { PaginatedResponse } from '@/utils/http';
 import { PATHS } from '@/constants/paths';
-import { CHANNEL_STATUS, getChannelStatusLabel, getChannelStatusColor, ALL_CHANNEL_STATUSES, ChannelStatus } from '@/enums/ChannelEnums';
+import { getChannelStatusLabel, getChannelStatusColor, ChannelStatus, ALL_CHANNEL_STATUSES } from '@/enums/ChannelEnums';
 
 const ChannelAdmin: React.FC = () => {
   const { api } = useApiContext();

@@ -22,7 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { PATHS } from '@/constants/paths';
 import { EmptyState } from '@/components/common/EmptyState';
 import MediaUpload from '@/components/common/MediaUpload';
-import { POLL_MEDIA_TYPE } from '@/enums/PollEnums';
+import { POLL_MEDIA_TYPE, type PollMediaType, type PollMediaFormat } from '@/enums/PollEnums';
 
 interface PollOption {
   text: string;
@@ -32,8 +32,8 @@ interface PollMedia {
   id: string;
   pollId: string;
   url: string;
-  type: number;
-  format: number;
+  type: PollMediaType;
+  format: PollMediaFormat;
   caption?: string;
 }
 

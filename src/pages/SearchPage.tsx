@@ -37,11 +37,10 @@ import { styled } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PATHS } from '@/constants/paths';
-import type { SearchFilters } from '@/hooks/useSearch';
-import type { SearchResult } from '@/APIs/app/SearchAPI';
+import type { SearchFilters, SearchResult } from '@/types/index';
 import { useApiContext } from '@/contexts/ApiContext';
 import { useApiCall } from '@/hooks/useApiCall';
-import { SEARCH_TYPE, SEARCH_SORT, SearchType, SearchSort, ALL_SEARCH_TYPES, ALL_SEARCH_SORTS } from '@/enums/SearchEnums';
+import { SEARCH_TYPE, SEARCH_SORT, SearchType, SearchSort } from '@/enums/SearchEnums';
 
 
 // Styled components

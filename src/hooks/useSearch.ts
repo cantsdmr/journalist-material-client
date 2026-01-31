@@ -1,19 +1,8 @@
 import { useState, useCallback } from 'react';
-import { SearchType, SearchSort } from '@/enums/SearchEnums';
-import { SearchFilters as APISearchFilters, SearchResult, SearchSuggestionsResponse, StructuredSearchSuggestionsResponse, StructuredSearchSuggestion } from '@/APIs/app/SearchAPI';
+import { SearchFilters, SearchResult, SearchSuggestionsResponse, StructuredSearchSuggestionsResponse, StructuredSearchSuggestion } from '@/types/index';
 import { PaginatedResponse } from '@/utils/http';
 import { useApiCall } from './useApiCall';
 import { useApiContext } from '@/contexts/ApiContext';
-
-export interface SearchFilters {
-  type?: SearchType;
-  tags?: string[];
-  dateFrom?: Date;
-  dateTo?: Date;
-  sortBy?: SearchSort;
-  onlyPremium?: boolean;
-  channelId?: string;
-}
 
 export interface UseSearchReturn {
   searchResults: PaginatedResponse<SearchResult> | null;
@@ -48,7 +37,7 @@ export const useSearch = (): UseSearchReturn => {
 
     try {
       // Pass filters directly - backend now accepts string enum keys
-      const apiFilters: APISearchFilters = {};
+      const apiFilters: SearchFilters = {};
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {

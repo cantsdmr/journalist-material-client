@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { CreateChannelData, EditChannelData } from '@/types/index';
 import ImageUpload from '@/components/common/ImageUpload';
-import { CHANNEL_STATUS } from '@/enums/ChannelEnums';
+import { CHANNEL_STATUS, type ChannelStatus } from '@/enums/ChannelEnums';
 import { POPULAR_CURRENCIES, getAllSupportedCurrencies } from '@/constants/currencies';
 
 interface ChannelFormProps {
@@ -225,10 +225,9 @@ const ChannelForm: React.FC<ChannelFormProps> = ({
                 <Select
                   value={formData.status}
                   onChange={(e) => {
-                    const value = Number(e.target.value);
                     setFormData(prev => ({
                       ...prev,
-                      status: value,
+                      status: e.target.value as ChannelStatus,
                     }));
                   }}
                 >

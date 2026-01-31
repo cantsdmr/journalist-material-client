@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Box, Typography, Button, Card, CardContent, Grid, Stepper, Step, StepLabel } from '@mui/material';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
-import { USER_ROLE } from '@/enums/UserEnums';
+import { USER_ROLE, UserRole } from '@/enums/UserEnums';
 import { PATHS } from '@/constants/paths';
 import { useApiCall } from '@/hooks/useApiCall';
 
@@ -73,7 +73,7 @@ const PostSignUpFlow: React.FC = () => {
     'Health', 'Environment', 'Entertainment', 'Education', 'Travel', 'Food'
   ];
 
-  const handleRoleSelect = (selectedRole: string, userRole: number) => {
+  const handleRoleSelect = (selectedRole: string, userRole: UserRole) => {
     setProfile(prev => ({ ...prev, primaryRole: selectedRole }));
     // Update user role in backend
     updateUserRole(userRole);
@@ -86,7 +86,7 @@ const PostSignUpFlow: React.FC = () => {
     }
   };
 
-  const updateUserRole = async (roleId: number) => {
+  const updateUserRole = async (roleId: UserRole) => {
     setLoading(true);
     console.log('PostSignUpFlow: Updating user role to:', roleId);
     

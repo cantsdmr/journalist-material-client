@@ -18,6 +18,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { useApiContext } from '@/contexts/ApiContext';
 import { Poll, VotingEligibilityResponse } from '@/types/index';
+import { POLL_MEDIA_FORMAT } from '@/enums/PollEnums';
 import PollDetail from '@/components/poll/PollDetail';
 import { Link as RouterLink } from 'react-router-dom';
 import CampaignIcon from '@mui/icons-material/Campaign';
@@ -353,13 +354,13 @@ const ViewPoll: React.FC = () => {
                 }}
               >
                 <Box
-                  component={poll.media[0].format === 2 ? 'video' : 'img'}
+                  component={poll.media[0].format === POLL_MEDIA_FORMAT.VIDEO ? 'video' : 'img'}
                   src={poll.media[0].url}
                   alt={poll.media[0].caption || poll.title}
-                  controls={poll.media[0].format === 2}
-                  autoPlay={poll.media[0].format === 2}
-                  loop={poll.media[0].format === 2}
-                  muted={poll.media[0].format === 2}
+                  controls={poll.media[0].format === POLL_MEDIA_FORMAT.VIDEO}
+                  autoPlay={poll.media[0].format === POLL_MEDIA_FORMAT.VIDEO}
+                  loop={poll.media[0].format === POLL_MEDIA_FORMAT.VIDEO}
+                  muted={poll.media[0].format === POLL_MEDIA_FORMAT.VIDEO}
                   sx={{
                     position: 'absolute',
                     top: 0,

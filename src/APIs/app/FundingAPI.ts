@@ -1,43 +1,9 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from "@/utils/http";
+import { Fund, FundContribution, FundSummary, ChannelFundingStats } from "../../types";
 
-export interface FundData {
-  id: string;
-  channelId: string;
-  channelWalletId: string;
-  fundableId: string;
-  fundableType: number; // 1 = NEWS, 2 = POLL
-  currentAmount: number;
-  goalAmount?: number;
-  currency: string;
-  expiresAt?: string;
-  isActive: boolean;
-  goalReached: boolean;
-  statusId: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface FundContribution {
-  id: string;
-  fundId: string;
-  userId: string;
-  channelSubscriptionId?: string;
-  amount: number;
-  currency: string;
-  transactionId?: string;
-  comment?: string;
-  isAnonymous: boolean;
-  statusId: number;
-  typeId: number; // 1 = ONE_TIME, 2 = RECURRING
-  createdAt: string;
-  updatedAt: string;
-  user?: {
-    id: string;
-    handle: string;
-    name: string;
-  };
-}
+// Re-export entity types for backward compatibility
+export type { Fund as FundData, FundContribution, FundSummary, ChannelFundingStats };
 
 export interface CreateContributionRequest {
   amount: number;
@@ -45,14 +11,6 @@ export interface CreateContributionRequest {
   paymentMethodId: string;
   comment?: string;
   isAnonymous?: boolean;
-}
-
-export interface FundSummary {
-  fund: FundData;
-  contributions: FundContribution[];
-  totalContributors: number;
-  recentContributions: FundContribution[];
-  topContributors: FundContribution[];
 }
 
 const API_PATH = '/api/funding';
@@ -65,9 +23,9 @@ export class FundingAPI extends HTTPApi {
     /**
      * Get fund data for specific content (news or poll)
      */
-    public async getFund(contentType: 'news' | 'poll', contentId: string): Promise<FundData | null> {
+    public async getFund(contentType: 'news' | 'poll', contentId: string): Promise<Fund | null> {
         try {
-            return this._get<FundData>(`${API_PATH}/${contentType}/${contentId}`);
+            return this._get<Fund>(`${API_PATH}/${contentType}/${contentId}`);
         } catch (error: any) {
             if (error.response?.status === 404) {
                 return null; // Fund doesn't exist yet
@@ -165,8 +123,8 @@ export class FundingAPI extends HTTPApi {
         goalAmount?: number;
         currency?: string;
         expiresAt?: string;
-    }): Promise<FundData> {
-        return this._post<FundData>(`${API_PATH}/${contentType}/${contentId}/fund`, data);
+    }): Promise<Fund> {
+        return this._post<Fund>(`${API_PATH}/${contentType}/${contentId}/fund`, data);
     }
 
     /**
@@ -181,8 +139,8 @@ export class FundingAPI extends HTTPApi {
             expiresAt: string;
             isActive: boolean;
         }>
-    ): Promise<FundData> {
-        return this._put<FundData>(`${API_PATH}/${contentType}/${contentId}/fund`, data);
+    ): Promise<Fund> {
+        return this._put<Fund>(`${API_PATH}/${contentType}/${contentId}/fund`, data);
     }
 
     /**
@@ -192,24 +150,8 @@ export class FundingAPI extends HTTPApi {
         startDate?: string;
         endDate?: string;
         contentType?: 'news' | 'poll';
-    }): Promise<{
-        totalRaised: number;
-        totalContributions: number;
-        activeFunds: number;
-        completedFunds: number;
-        topFundedContent: Array<{
-            id: string;
-            title: string;
-            type: 'news' | 'poll';
-            amount: number;
-            currency: string;
-        }>;
-        currencyBreakdown: Record<string, {
-            amount: number;
-            contributions: number;
-        }>;
-    }> {
-        return this._get<any>(`${API_PATH}/channels/${channelId}/stats`, { params });
+    }): Promise<ChannelFundingStats> {
+        return this._get<ChannelFundingStats>(`${API_PATH}/channels/${channelId}/stats`, { params });
     }
 
     /**

@@ -67,10 +67,10 @@ const ExpenseOrderAdmin: React.FC = () => {
 
     try {
       // Use the new admin endpoint to get all expense orders with filters
-      const filters: { status?: number; channelId?: string; journalistId?: string } = {};
+      const filters: { status?: ExpenseOrderStatus; channelId?: string; journalistId?: string } = {};
 
       if (statusFilter) {
-        filters.status = parseInt(statusFilter);
+        filters.status = statusFilter as ExpenseOrderStatus;
       }
       if (channelFilter) {
         filters.channelId = channelFilter;

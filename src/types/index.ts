@@ -9,6 +9,8 @@ export * from './entities/ExpenseOrder';
 export * from './entities/Subscription';
 export * from './entities/Funding';
 export * from './entities/Notification';
+export * from './entities/Bookmark';
+export * from './entities/Payout';
 
 // Requests
 export * from './requests/NewsRequests';
@@ -26,10 +28,12 @@ export * from './requests/NotificationRequests';
 export * from './responses/NewsResponses';
 export * from './responses/TagResponses';
 export * from './responses/NotificationResponses';
+export * from './responses/SearchResponses';
 
 // Filters
 export * from './filters/NewsFilters';
 export * from './filters/PollFilters';
 export * from './filters/ChannelFilters';
 export * from './filters/TagFilters';
-export * from './filters/SubscriptionFilters'; 
+export * from './filters/SubscriptionFilters';
+export * from './filters/SearchFilters'; 

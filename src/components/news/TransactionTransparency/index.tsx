@@ -182,8 +182,9 @@ const TransactionTransparency: React.FC<TransactionTransparencyProps> = ({
     if (!transactionSummary) return null;
 
     const paidExpenses = expenseOrders.filter(expense => expense.status === ExpenseOrderStatus.PAID);
-    const pendingExpenses = expenseOrders.filter(expense => 
-      [ExpenseOrderStatus.SUBMITTED, ExpenseOrderStatus.UNDER_REVIEW, ExpenseOrderStatus.APPROVED].includes(expense.status)
+    const pendingStatuses: ExpenseOrderStatus[] = [ExpenseOrderStatus.SUBMITTED, ExpenseOrderStatus.UNDER_REVIEW, ExpenseOrderStatus.APPROVED];
+    const pendingExpenses = expenseOrders.filter(expense =>
+      pendingStatuses.includes(expense.status)
     );
 
     return (

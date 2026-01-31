@@ -163,8 +163,8 @@ const ExpenseOrderForm: React.FC<ExpenseOrderFormProps> = ({
               onChange={(e) => handleInputChange('typeId', e.target.value)}
             >
               {expenseTypes.map((type) => (
-                <MenuItem key={type.id} value={type.id}>
-                  {type.name}
+                <MenuItem key={type.value} value={type.value}>
+                  {type.label}
                 </MenuItem>
               ))}
             </Select>

@@ -1,64 +1,11 @@
 import { AxiosJournalist } from "@/utils/axios";
 import { HTTPApi, PaginationObject, DEFAULT_PAGINATION, PaginatedResponse } from "@/utils/http";
-import { SearchType, SearchSort } from "@/enums/SearchEnums";
-
-export interface SearchFilters {
-  type?: SearchType;
-  tags?: string[];
-  dateFrom?: Date;
-  dateTo?: Date;
-  sortBy?: SearchSort;
-  onlyPremium?: boolean;
-  channelId?: string;
-}
-
-export interface SearchResult {
-  type: 'news' | 'channel' | 'user' | 'poll' | 'tag';
-  id: string;
-  title: string;
-  description?: string;
-  handle?: string;
-  slug?: string;
-  relevanceScore: number;
-  publishedAt?: string;
-  startDate?: string;
-  endDate?: string;
-  voteCount?: number;
-  usageCount?: number;
-  typeId?: string;
-  statusId?: string;
-  tags?: string[];
-  channel?: {
-    id: string;
-    name: string;
-    handle: string;
-  };
-}
-
-export interface SearchSuggestionsResponse {
-  query: string;
-  suggestions: string[];
-}
-
-export interface StructuredSearchSuggestion {
-  id: string;
-  text: string;
-  type: 'news' | 'channel' | 'user' | 'poll' | 'tag';
-  relevanceScore?: number;
-  metadata?: {
-    channelName?: string;
-    handle?: string;
-    articleCount?: number;
-    publishedAt?: string;
-    voteCount?: number;
-    usageCount?: number;
-  };
-}
-
-export interface StructuredSearchSuggestionsResponse {
-  query: string;
-  suggestions: StructuredSearchSuggestion[];
-}
+import {
+    SearchFilters,
+    SearchResult,
+    SearchSuggestionsResponse,
+    StructuredSearchSuggestionsResponse
+} from "../../types";
 
 const API_PATH = '/api/search';
 
